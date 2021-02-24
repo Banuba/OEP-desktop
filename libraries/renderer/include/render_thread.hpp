@@ -5,45 +5,27 @@
 #include <GLFW/glfw3.h>
 
 #include <thread>
-#include <async++.h>
 
 #include "renderer.hpp"
 
-namespace render {
-
-class render_thread
+namespace bnb::render
 {
-public:
-    render_thread(GLFWwindow* window, int32_t width, int32_t height);
-
-    ~render_thread();
-
-    void surface_changed(int32_t width, int32_t height);
-
-    void update_data(bnb::full_image_t image);
-    void update_data(bnb::data_t data);
-    void update_context();
-
-    template<typename F>
-    auto schedule(const F& f)
+    class render_thread
     {
-        return async::spawn(m_scheduler, f);
-    }
+    public:
+        render_thread(GLFWwindow* window, int32_t width, int32_t height);
 
-private:
-    void thread_func();
+        ~render_thread();
 
-    std::unique_ptr<bnb::renderer> m_renderer { nullptr };
-    GLFWwindow* m_window;
-    std::thread m_thread;
-    std::atomic<bool> m_cancellation_flag;
-    async::fifo_scheduler m_scheduler;
+        void surface_changed(int32_t width, int32_t height);
+        void update_data(full_image_t image);
 
-    int32_t m_cur_width;
-    int32_t m_cur_height;
+    private:
+        void thread_func(int32_t width, int32_t height);
 
-    bnb::color_plane m_cur_y_plane = nullptr;
-    bnb::color_plane m_cur_uv_plane = nullptr;
-};
-
-} //render
+        std::unique_ptr<renderer> m_renderer { nullptr };
+        GLFWwindow* m_window;
+        std::thread m_thread;
+        std::atomic<bool> m_cancellation_flag;
+    };
+} // bnb::render

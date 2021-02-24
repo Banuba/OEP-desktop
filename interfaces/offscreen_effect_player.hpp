@@ -5,10 +5,10 @@
 #include "pixel_buffer.hpp"
 
 using pb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;
-using pb_wptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;
+
 namespace bnb {
 
-    using oep_pb_ready_cb = std::function<void(std::optional<pb_wptr>)>;
+    using oep_pb_ready_cb = std::function<void(std::optional<pb_sptr>)>;
 
 namespace interfaces
 {
@@ -31,10 +31,21 @@ namespace interfaces
          * @param callback calling when frame will be processed, containing pointer of pixel_buffer for get bytes
          * @param target_orient 
          * 
-         * Example process_image_async(image_sptr, [](pb_wptr pb_sptr){})
+         * Example process_image_async(image_sptr, [](pb_sptr sptr){})
          */
         virtual void process_image_async(std::shared_ptr<full_image_t> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
+
+        /**
+         * Notify about rendering surface being resized.
+         * Must be called from the render thread.
+         * 
+         * @param width New width for the rendering surface
+         * @param height New height for the rendering surface
+         * 
+         * Example surface_changed(1280, 720)
+         */
+        virtual void surface_changed(int32_t width, int32_t height) = 0;
 
         /**
          * Load and activate effect async. May be called from any thread

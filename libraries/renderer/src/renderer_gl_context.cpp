@@ -1,7 +1,7 @@
 #include "renderer_gl_context.hpp"
 
-using namespace bnb;
-
+namespace bnb::render
+{
 renderer_gl_context::renderer_gl_context()
     : m_frame_surface(camera_orientation::deg_0, false)
     , texture_uniform_location {0, 0}
@@ -14,3 +14,4 @@ renderer_gl_context::~renderer_gl_context()
     }
     std::fill_n(textures, textures_amount, 0);
 }
+} // bnb::render

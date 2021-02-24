@@ -15,7 +15,6 @@ target_include_directories(renderer PUBLIC
 target_include_directories(renderer SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 
 target_link_libraries(renderer
-    Async++
     bnb_effect_player
     glad
     glfw

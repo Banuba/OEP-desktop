@@ -20,6 +20,16 @@ namespace bnb::interfaces
         virtual void init() = 0;
 
         /**
+         * Notify about rendering surface being resized.
+         * 
+         * @param width New width for the rendering surface
+         * @param height New height for the rendering surface
+         * 
+         * Example surface_changed(1280, 720)
+         */
+        virtual void surface_changed(int32_t width, int32_t height) = 0;
+
+        /**
          * Activate context for current thread
          * 
          * Example activate_context()

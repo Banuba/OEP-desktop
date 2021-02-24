@@ -1,6 +1,6 @@
 #include "frame_surface_handler.hpp"
 
-const float bnb::frame_surface_handler::vertices[2][frame_surface_handler::v_size][5 * 4] =
+const float bnb::render::frame_surface_handler::vertices[2][frame_surface_handler::v_size][5 * 4] =
 {{ /* verical flip 0 */
 {
         // positions        // texture coords

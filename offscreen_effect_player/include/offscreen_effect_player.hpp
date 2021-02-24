@@ -30,8 +30,12 @@ namespace bnb
             iort_sptr ort);
 
     public:
+        ~offscreen_effect_player();
+
         void process_image_async(std::shared_ptr<full_image_t> image, oep_pb_ready_cb callback,
                                  std::optional<interfaces::orient_format> target_orient) override;
+
+        void surface_changed(int32_t width, int32_t height) override;
 
         void load_effect(const std::string& effect_path) override;
         void unload_effect() override;
@@ -54,8 +58,9 @@ namespace bnb
         iort_sptr m_ort;
 
         thread_pool m_scheduler;
+        std::thread::id render_thread_id;
 
-        pb_sptr current_frame;
-        uint16_t incoming_frame_queue_task_count = 0;
+        pb_sptr m_current_frame;
+        std::atomic<uint16_t> m_incoming_frame_queue_task_count = 0;
     };
 } // bnb

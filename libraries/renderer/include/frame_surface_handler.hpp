@@ -8,12 +8,12 @@
 
 #define BNB_GLSL_VERSION "#version 330 core \n"
 
-namespace bnb {
-
+namespace bnb::render
+{
     class frame_surface_handler
     {
     private:
-        static const auto v_size = static_cast<uint32_t>(bnb::camera_orientation::deg_270) + 1;
+        static const auto v_size = static_cast<uint32_t>(camera_orientation::deg_270) + 1;
 
     public:
         /**
@@ -23,7 +23,7 @@ namespace bnb {
         */
         static const float vertices[2][v_size][5 * 4];
 
-        explicit frame_surface_handler(bnb::camera_orientation orientation, bool is_y_flip)
+        explicit frame_surface_handler(camera_orientation orientation, bool is_y_flip)
             : m_orientation(static_cast<uint32_t>(orientation))
             , m_y_flip(static_cast<uint32_t>(is_y_flip))
         {
@@ -84,7 +84,7 @@ namespace bnb {
         frame_surface_handler& operator=(const frame_surface_handler&) = delete;
         frame_surface_handler& operator=(frame_surface_handler&&) = delete;
 
-        void set_orientation(bnb::camera_orientation orientation)
+        void set_orientation(camera_orientation orientation)
         {
             if (m_orientation != static_cast<uint32_t>(orientation)) {
                 m_orientation = static_cast<uint32_t>(orientation);
@@ -112,4 +112,4 @@ private:
         unsigned int m_vbo = 0;
         unsigned int m_ebo = 0;
     };
-}
+} // bnb::render
