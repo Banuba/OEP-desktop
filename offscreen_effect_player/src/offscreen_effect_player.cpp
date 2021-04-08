@@ -5,16 +5,15 @@
 
 namespace bnb
 {
-    ioep_sptr offscreen_effect_player::create(
+    ioep_sptr interfaces::offscreen_effect_player::create(
         const std::vector<std::string>& path_to_resources, const std::string& client_token,
         int32_t width, int32_t height, bool manual_audio, std::optional<iort_sptr> ort = std::nullopt)
     {
         if (!ort.has_value()) {
-            ort = std::make_shared<offscreen_render_target>(width, height);
+            ort = std::make_shared<bnb::offscreen_render_target>(width, height);
         }
-
         // we use "new" instead of "make_shared" because the constructor in "offscreen_effect_player" is private
-        return oep_sptr(new offscreen_effect_player(
+        return oep_sptr(new bnb::offscreen_effect_player(
                 path_to_resources, client_token, width, height, manual_audio, *ort));
     }
 

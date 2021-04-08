@@ -25,7 +25,7 @@ int main()
     // token, dimension of processing frame (for best performance it is better to coincide
     // with camera frame dimensions), manual sound (useful fro some cases when sound 
     // should start and specified moment
-    auto oep = bnb::offscreen_effect_player::create({ BNB_RESOURCES_FOLDER }, BNB_CLIENT_TOKEN,
+    auto oep = bnb::interfaces::offscreen_effect_player::create({ BNB_RESOURCES_FOLDER }, BNB_CLIENT_TOKEN,
                                                width, height, false, ort);
     oep->load_effect("effects/Afro");
 
@@ -39,7 +39,7 @@ int main()
         auto image_ptr = std::make_shared<bnb::full_image_t>(std::move(image));
 
         // Callback for received pixel buffer from the offscreen effect player
-        auto get_pixel_buffer_callback = [image_ptr, render_t](std::optional<pb_sptr> pb) {
+        auto get_pixel_buffer_callback = [image_ptr, render_t](std::optional<ipb_sptr> pb) {
             if (pb.has_value()) {
                 // Callback for update data in render thread
                 auto render_callback = [render_t](std::optional<bnb::full_image_t> image) {

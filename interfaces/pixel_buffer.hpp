@@ -58,3 +58,4 @@ namespace bnb::interfaces
     };
 } // bnb::interfaces
 
+using ipb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;

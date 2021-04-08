@@ -5,8 +5,8 @@ include(ExternalProject)
 
 ExternalProject_Add(
   libyuv
-  GIT_REPOSITORY https://github.com/lemenkov/libyuv.git
-  GIT_TAG 19d71f6b351fe992ae34b114eebd872c383a6bdb
+  GIT_REPOSITORY https://chromium.googlesource.com/libyuv/libyuv
+  GIT_TAG 312c02a5aad4adda67cb2e0cc93a497d12845522
   UPDATE_COMMAND ""
   INSTALL_COMMAND ""
   PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_LIST_DIR}/libyuv/CMakeLists.txt <SOURCE_DIR>/CMakeLists.txt

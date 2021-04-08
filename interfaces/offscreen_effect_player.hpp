@@ -2,25 +2,24 @@
 
 #include <bnb/types/full_image.hpp>
 
+#include "formats.hpp"
+#include "offscreen_render_target.hpp"
 #include "pixel_buffer.hpp"
 
-using pb_sptr = std::shared_ptr<bnb::interfaces::pixel_buffer>;
 
 namespace bnb {
 
-    using oep_pb_ready_cb = std::function<void(std::optional<pb_sptr>)>;
+    using oep_pb_ready_cb = std::function<void(std::optional<ipb_sptr>)>;
 
 namespace interfaces
 {
-    struct orient_format
-    {
-        bnb::camera_orientation orientation;
-        bool is_y_flip;
-    };
-
     class offscreen_effect_player
     {
     public:
+        static std::shared_ptr<offscreen_effect_player> create(
+            const std::vector<std::string>& path_to_resources, const std::string& client_token,
+            int32_t width, int32_t height, bool manual_audio, std::optional<iort_sptr> ort);
+
         virtual ~offscreen_effect_player() = default;
 
         /**
@@ -31,7 +30,7 @@ namespace interfaces
          * @param callback calling when frame will be processed, containing pointer of pixel_buffer for get bytes
          * @param target_orient 
          * 
-         * Example process_image_async(image_sptr, [](pb_sptr sptr){})
+         * Example process_image_async(image_sptr, [](ipb_sptr sptr){})
          */
         virtual void process_image_async(std::shared_ptr<full_image_t> image, oep_pb_ready_cb callback,
                                          std::optional<orient_format> target_orient) = 0;
@@ -98,3 +97,5 @@ namespace interfaces
     };
 }
 } // bnb::interfaces
+
+using ioep_sptr = std::shared_ptr<bnb::interfaces::offscreen_effect_player>;

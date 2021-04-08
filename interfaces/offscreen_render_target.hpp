@@ -2,7 +2,7 @@
 
 #include <bnb/types/base_types.hpp>
 
-#include "offscreen_effect_player.hpp"
+#include "formats.hpp"
 
 namespace bnb::interfaces
 {
@@ -62,3 +62,5 @@ namespace bnb::interfaces
         virtual bnb::data_t read_current_buffer() = 0;
     };
 } // bnb::interfaces
+
+using iort_sptr = std::shared_ptr<bnb::interfaces::offscreen_render_target>;
