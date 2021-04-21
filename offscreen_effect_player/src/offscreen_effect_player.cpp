@@ -36,7 +36,15 @@ namespace bnb
             m_ep->surface_created(width, height);
         };
 
-        m_scheduler.enqueue(task);
+        auto future = m_scheduler.enqueue(task);
+        try {
+            // Wait result of task since initialization of glad can cause exceptions if proceed without
+            future.get();
+        }
+        catch (std::runtime_error& e) {
+            std::cout << "[ERROR] Failed to initialize effect player: " << e.what() << std::endl;
+            throw std::runtime_error("Failed to initialize effect player.");
+        }
     }
 
     offscreen_effect_player::~offscreen_effect_player()
@@ -97,9 +105,11 @@ namespace bnb
 
     void offscreen_effect_player::load_effect(const std::string& effect_path)
     {
-        auto task = [this, &effect_path]() {
+        auto task = [this, effect = effect_path]() {
+            m_ort->activate_context();
+
             if (auto e_manager = m_ep->effect_manager()) {
-                e_manager->load(effect_path);
+                e_manager->load(effect);
             } else {
                 std::cout << "[Error] effect manager not initialized" << std::endl;
             }
@@ -130,15 +140,23 @@ namespace bnb
 
     void offscreen_effect_player::call_js_method(const std::string& method, const std::string& param)
     {
-        if (auto e_manager = m_ep->effect_manager()) {
-            if (auto effect = e_manager->current()) {
-                effect->call_js_method(method, param);
-            } else {
-                std::cout << "[Error] effect not loaded" << std::endl;
+        auto task = [this, method = method, param = param]() {
+            m_ort->activate_context();
+
+            if (auto e_manager = m_ep->effect_manager()) {
+                if (auto effect = e_manager->current()) {
+                    effect->call_js_method(method, param);
+                }
+                else {
+                    std::cout << "[Error] effect not loaded" << std::endl;
+                }
             }
-        } else {
-            std::cout << "[Error] effect manager not initialized" << std::endl;
-        }
+            else {
+                std::cout << "[Error] effect manager not initialized" << std::endl;
+            }
+        };
+
+        m_scheduler.enqueue(task);
     }
 
     void offscreen_effect_player::read_current_buffer(std::function<void(bnb::data_t data)> callback)
