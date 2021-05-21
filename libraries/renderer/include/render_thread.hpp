@@ -18,7 +18,7 @@ namespace bnb::render
         ~render_thread();
 
         void surface_changed(int32_t width, int32_t height);
-        void update_data(full_image_t image);
+        void update_data(int texture_id);
 
     private:
         void thread_func(int32_t width, int32_t height);

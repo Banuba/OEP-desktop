@@ -22,9 +22,10 @@ namespace bnb::render
         }
     }
 
-    void render_thread::update_data(full_image_t image)
+    void render_thread::update_data(int texture_id)
     {
-        m_renderer->update_data(std::move(image));
+        if (m_renderer)
+            m_renderer->update_data(texture_id);
     }
 
     void render_thread::thread_func(int32_t width, int32_t height)
@@ -43,7 +44,7 @@ namespace bnb::render
                 std::this_thread::sleep_for(1us);
             }
         }
-
+        m_renderer.reset();
         glfwMakeContextCurrent(nullptr);
     }
 } // bnb::render

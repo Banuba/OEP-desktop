@@ -8,11 +8,11 @@
 
 using namespace bnb;
 
-glfw_window::glfw_window(const std::string& title)
+glfw_window::glfw_window(const std::string& title, GLFWwindow* share)
 {
     init();
     try {
-        create_window(title);
+        create_window(title, share);
 
         glfwMakeContextCurrent(m_window);
 
@@ -62,7 +62,7 @@ void glfw_window::init()
     }
 }
 
-void glfw_window::create_window(const std::string& title)
+void glfw_window::create_window(const std::string& title, GLFWwindow* share)
 {
     //
     // Choose OpenGL context
@@ -70,11 +70,13 @@ void glfw_window::create_window(const std::string& title)
 
     glfwWindowHint(GLFW_DEPTH_BITS, 0);
     glfwWindowHint(GLFW_STENCIL_BITS, 0);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+    
 
 #if BNB_OS_WINDOWS
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -98,7 +100,7 @@ void glfw_window::create_window(const std::string& title)
         initial_window_height,
         title.c_str(),
         nullptr,
-        nullptr);
+        share);
 
     if (nullptr == m_window) {
         throw std::runtime_error("glfwCreateWindow error");

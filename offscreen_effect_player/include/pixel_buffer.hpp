@@ -21,6 +21,7 @@ namespace bnb
         void get_rgba(oep_image_ready_cb callback) override;
         void get_nv12(oep_image_ready_cb callback) override;
 
+        virtual void get_texture(oep_texture_cb callback) override;
     private:
         oep_wptr m_oep_ptr;
         uint8_t lock_count = 0;

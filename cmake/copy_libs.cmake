@@ -4,21 +4,17 @@ function(copy_sdk target)
         set(SDK_POSTPROCESS_LIB "bnb_postprocess")
         set(SDK_EFFECT_PLAYER_LIB "bnb_effect_player")
         set(SDK_FILE_TYPE "dll")
-    elseif (APPLE)
-        set(SDK_POSTPROCESS_LIB "libbnb_postprocess")
-        set(SDK_EFFECT_PLAYER_LIB "libbnb_effect_player")
-        set(SDK_FILE_TYPE "dylib")
-    endif ()
 
-    add_custom_command(
-        TARGET ${target}
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            $<TARGET_PROPERTY:bnb_effect_player,INTERFACE_BIN_DIR>/$<CONFIG>/${SDK_EFFECT_PLAYER_LIB}.${SDK_FILE_TYPE}
-            $<TARGET_PROPERTY:bnb_effect_player,INTERFACE_BIN_DIR>/$<CONFIG>/${SDK_POSTPROCESS_LIB}.${SDK_FILE_TYPE}
-            $<TARGET_FILE_DIR:${target}>
-        COMMENT "Copy banuba dynamic libs"
-    )
+        add_custom_command(
+            TARGET ${target}
+            POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                $<TARGET_PROPERTY:bnb_effect_player,INTERFACE_BIN_DIR>/$<CONFIG>/${SDK_EFFECT_PLAYER_LIB}.${SDK_FILE_TYPE}
+                $<TARGET_PROPERTY:bnb_effect_player,INTERFACE_BIN_DIR>/$<CONFIG>/${SDK_POSTPROCESS_LIB}.${SDK_FILE_TYPE}
+                $<TARGET_FILE_DIR:${target}>
+            COMMENT "Copy banuba dynamic libs"
+        )
+    endif ()
 endfunction()
 
 function(copy_third target)

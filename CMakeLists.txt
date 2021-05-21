@@ -41,7 +41,21 @@ option(DEPLOY_BUILD "Build for deployment" OFF)
 # Targets #
 ###########
 
-add_executable(example main.cpp)
+if (APPLE)
+    # some magic to add these files to copy phase
+    set(SDK_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}/bnb_sdk/mac")
+    set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/$(CONFIGURATION)/BanubaEffectPlayer.framework")
+    add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
+    set(FullPPFrameworkPath "${SDK_FRAMEWORK_PATH}/$(CONFIGURATION)/BanubaPostprocess.framework")
+    add_custom_command(OUTPUT "${FullPPFrameworkPath}" COMMAND "")
+    
+    add_executable(example main.cpp ${FullEPFrameworkPath} ${FullPPFrameworkPath})
+    
+    set_source_files_properties(${FullEPFrameworkPath} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+    set_source_files_properties(${FullPPFrameworkPath} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
+else (APPLE)
+    add_executable(example main.cpp)
+endif (APPLE)
 
 target_include_directories(example SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 

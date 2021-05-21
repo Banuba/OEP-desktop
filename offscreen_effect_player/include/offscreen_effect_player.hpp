@@ -45,6 +45,7 @@ namespace bnb
         friend class pixel_buffer;
 
         void read_current_buffer(std::function<void(bnb::data_t data)> callback);
+        void get_current_buffer_texture(oep_texture_cb callback);
 
     private:
         bnb::utility m_utility;
