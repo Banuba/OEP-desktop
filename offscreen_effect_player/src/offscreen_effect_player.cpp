@@ -7,14 +7,15 @@ namespace bnb
 {
     ioep_sptr interfaces::offscreen_effect_player::create(
         const std::vector<std::string>& path_to_resources, const std::string& client_token,
-        int32_t width, int32_t height, bool manual_audio, std::optional<iort_sptr> ort = std::nullopt)
+        int32_t width, int32_t height, bool manual_audio, iort_sptr ort)
     {
-        if (!ort.has_value()) {
-            ort = std::make_shared<bnb::offscreen_render_target>(width, height);
+        if (ort == nullptr) {
+            return nullptr;
         }
+
         // we use "new" instead of "make_shared" because the constructor in "offscreen_effect_player" is private
         return oep_sptr(new bnb::offscreen_effect_player(
-                path_to_resources, client_token, width, height, manual_audio, *ort));
+                path_to_resources, client_token, width, height, manual_audio, ort));
     }
 
     offscreen_effect_player::offscreen_effect_player(
@@ -30,10 +31,15 @@ namespace bnb
             , m_ort(offscreen_render_target)
             , m_scheduler(1)
     {
+        // MacOS GLFW requires window creation on main thread, so it is assumed that we are on main thread.
         auto task = [this, width, height]() {
             render_thread_id = std::this_thread::get_id();
             m_ort->init();
+            m_ort->activate_context();
             m_ep->surface_created(width, height);
+#ifdef WIN32 // Only necessary if we want share context via GLFW on Windows
+            m_ort->deactivate_context();
+#endif
         };
 
         auto future = m_scheduler.enqueue(task);
@@ -50,6 +56,11 @@ namespace bnb
     offscreen_effect_player::~offscreen_effect_player()
     {
         m_ep->surface_destroyed();
+        // Deinitialize offscreen render target, should be performed on render thread.
+        auto task = [this]() {
+            m_ort->deinit();
+        };
+        m_scheduler.enqueue(task).get();
     }
 
     void offscreen_effect_player::process_image_async(std::shared_ptr<full_image_t> image, oep_pb_ready_cb callback,
@@ -61,7 +72,9 @@ namespace bnb
         }
 
         if (m_current_frame->is_locked()) {
+#ifdef DEBUG
             std::cout << "[Warning] The interface for processing the previous frame is lock" << std::endl;
+#endif
             return;
         }
 
@@ -72,6 +85,8 @@ namespace bnb
         auto task = [this, image, callback, target_orient]() {
             if (m_incoming_frame_queue_task_count == 1) {
                 m_current_frame->lock();
+
+                m_ort->activate_context();
                 m_ort->prepare_rendering();
                 m_ep->push_frame(std::move(*image));
                 while (m_ep->draw() < 0) {
@@ -93,6 +108,8 @@ namespace bnb
     void offscreen_effect_player::surface_changed(int32_t width, int32_t height)
     {
         auto task = [this, width, height]() {
+            m_ort->activate_context();
+
             m_ep->surface_changed(width, height);
             m_ep->effect_manager()->set_effect_size(width, height);
 
@@ -174,5 +191,22 @@ namespace bnb
         };
         m_scheduler.enqueue(task);
     }
+
+    void offscreen_effect_player::get_current_buffer_texture(oep_texture_cb callback)
+    {
+        if (std::this_thread::get_id() == render_thread_id) {
+            callback(m_ort->get_current_buffer_texture());
+            return;
+        }
+
+        oep_wptr this_ = shared_from_this();
+        auto task = [this_, callback]() {
+            if (auto this_sp = this_.lock()) {
+                callback(this_sp->m_ort->get_current_buffer_texture());
+            }
+        };
+        m_scheduler.enqueue(task);
+    }
+
 
 } // bnb

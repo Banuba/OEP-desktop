@@ -19,7 +19,7 @@ namespace bnb
             "}\n";
 
     const char* ps_default_base =
-            "precision mediump float;\n"
+            "precision highp float;\n"
             "in vec2 vTexCoord;\n"
             "out vec4 FragColor;\n"
             "uniform sampler2D uTexture;\n"
@@ -209,17 +209,13 @@ namespace bnb
 {
     offscreen_render_target::offscreen_render_target(uint32_t width, uint32_t height)
         : m_width(width)
-        , m_height(height) {}
+        , m_height(height) 
+    {
+        create_context();
+    }
 
     offscreen_render_target::~offscreen_render_target()
     {
-        if (m_framebuffer != 0) {
-            GL_CALL(glDeleteFramebuffers(1, &m_framebuffer));
-        }
-        if (m_post_processing_framebuffer != 0) {
-            GL_CALL(glDeleteFramebuffers(1, &m_post_processing_framebuffer));
-        }
-        delete_textures();
     }
 
     void offscreen_render_target::delete_textures()
@@ -236,20 +232,40 @@ namespace bnb
 
     void offscreen_render_target::init()
     {
-        #ifdef __APPLE__
-            run_on_main_queue([this]() { 
-                create_context();
-            });
-        #else
-            create_context();
-        #endif
         activate_context();
 
-        GL_CALL(glGenFramebuffers(1, &m_framebuffer));
-        GL_CALL(glGenFramebuffers(1, &m_post_processing_framebuffer));
+        std::call_once(m_init_flag, [this]() {
+            load_glad_functions();
 
-        m_program = std::make_unique<program>("OrientationChange", vs_default_base, ps_default_base);
-        m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(bnb::camera_orientation::deg_0, false);
+            GL_CALL(glGenFramebuffers(1, &m_framebuffer));
+            GL_CALL(glGenFramebuffers(1, &m_post_processing_framebuffer));
+
+            m_program = std::make_unique<program>("OrientationChange", vs_default_base, ps_default_base);
+            m_frame_surface_handler = std::make_unique<ort_frame_surface_handler>(bnb::camera_orientation::deg_0, false);
+        });
+
+        deactivate_context();
+    }
+
+    void offscreen_render_target::deinit()
+    {
+        activate_context();
+
+        std::call_once(m_deinit_flag, [this]() {
+            m_program.reset();
+            m_frame_surface_handler.reset();
+            if (m_framebuffer != 0) {
+                GL_CALL(glDeleteFramebuffers(1, &m_framebuffer));
+                m_framebuffer = 0;
+            }
+            if (m_post_processing_framebuffer != 0) {
+                GL_CALL(glDeleteFramebuffers(1, &m_post_processing_framebuffer));
+                m_post_processing_framebuffer = 0;
+            }
+            delete_textures();
+        });
+
+        deactivate_context();
     }
 
     void offscreen_render_target::surface_changed(int32_t width, int32_t height)
@@ -260,7 +276,7 @@ namespace bnb
         m_renderer_context.reset();
 
         auto create_context_task = [this]() {
-            m_renderer_context = smart_GLFWwindow(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
+            glfwSetWindowSize(m_renderer_context.get(), m_width, m_height);
         };
 
         #ifdef __APPLE__
@@ -285,10 +301,10 @@ namespace bnb
 
         m_renderer_context.reset();
         m_renderer_context = smart_GLFWwindow(glfwCreateWindow(m_width, m_height, "", nullptr, nullptr));
+    }
 
-        glfwMakeContextCurrent(m_renderer_context.get());
-        load_glad_functions();
-        GL_CALL(glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS));
+    void offscreen_render_target::deactivate_context()
+    {
         glfwMakeContextCurrent(nullptr);
     }
 
@@ -338,6 +354,7 @@ namespace bnb
             std::cout << "[ERROR] Failed to make complete framebuffer object " << status << std::endl;
             return;
         }
+        m_active_texture = m_offscreen_render_texture;
     }
 
     void offscreen_render_target::prepare_post_processing_rendering()
@@ -358,6 +375,7 @@ namespace bnb
 
         GL_CALL(glActiveTexture(GLenum(GL_TEXTURE0)));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_offscreen_render_texture));
+        m_active_texture = m_offscreen_post_processuing_render_texture;
     }
 
     void offscreen_render_target::orient_image(interfaces::orient_format orient)
@@ -385,11 +403,14 @@ namespace bnb
         m_frame_surface_handler->update_vertices_buffer();
         m_frame_surface_handler->draw();
         m_program->unuse();
-        glFlush();
+
+        GL_CALL(glFlush());
     }
 
     data_t offscreen_render_target::read_current_buffer()
     {
+        activate_context();
+
         size_t size = m_width * m_height * 4;
         data_t data = data_t{ std::make_unique<uint8_t[]>(size), size };
 
@@ -398,4 +419,15 @@ namespace bnb
 
         return data;
     }
+
+    int offscreen_render_target::get_current_buffer_texture()
+    {
+        return m_active_texture;
+    }
+
+    interfaces::oep_sharing_context offscreen_render_target::get_sharing_context()
+    {
+        return m_renderer_context.get();
+    }
+
 } // bnb

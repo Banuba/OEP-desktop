@@ -15,40 +15,23 @@ namespace
             " TexCoord = aTexCoord; \n"
         " } \n";
 
-    const char* fs = \
-        "precision highp float; \n "
-        "out vec4 FragColor; \n"
-        "in vec2 TexCoord; \n"
-        "uniform sampler2D yTexture; \n"
-        "uniform sampler2D uvTexture; \n"
-
-        "void main() \n"
-        "{ \n"
-            "float r, g, b, y, u, v; \n"
-            "float Umax = 0.436; \n"
-            "float Vmax = 0.615; \n"
-            "float Wr = 0.299; \n"
-            "float Wb = 0.114; \n"
-            "float Wg = 1. - Wr - Wb; \n"
-            "y = texture(yTexture, TexCoord).x; \n"
-            "u = texture(uvTexture, TexCoord).x - 0.5; \n"
-            "v = texture(uvTexture, TexCoord).y - 0.5; \n"
-
-            "r = y + v * ((1. - Wr) / Vmax); \n"
-            "g = y - u * ((Wb * (1. - Wb)) / (Umax * Wg)) - v * ((Wr * (1. - Wr)) / (Vmax * Wg)); \n"
-            "b = y + u * ((1. - Wb)/Umax); \n"
-            "FragColor = vec4(r, g, b, 1.0); \n"
-        "} \n";
+    const char* fs =
+        "precision highp float;\n"
+        "in vec2 TexCoord;\n"
+        "out vec4 FragColor;\n"
+        "uniform sampler2D uTexture;\n"
+        "void main()\n"
+        "{\n"
+        "FragColor = texture(uTexture, TexCoord);\n"
+        "}\n";
 }
 
 namespace bnb::render
 {
-    using gl_context = renderer_gl_context;
-
-    renderer::renderer(int width, int height) :
-        m_program("RendererCamera", vs, fs)
+    renderer::renderer(int width, int height)
+        : m_program("RendererCamera", vs, fs)
+        , m_frame_surface(camera_orientation::deg_0, false)
     {
-        GL_CALL(glGenTextures(gl_context::textures_amount, m_gl_context.textures));
         surface_change(width, height);
     }
 
@@ -59,16 +42,14 @@ namespace bnb::render
         m_surface_changed = true;
     }
 
-    void renderer::update_data(full_image_t image)
+    void renderer::update_data(int texture_id)
     {
         if (m_texture_updated && m_rendering) {
             return;
         }
 
         m_texture_updated = false;
-        const auto& yuv = image.get_data<yuv_image_t>();
-        m_update_buffer.y_plane = yuv.y_plane;
-        m_update_buffer.uv_plane = yuv.uv_plane;
+        m_texture_id = texture_id;
         m_texture_updated = true;
     }
 
@@ -85,23 +66,16 @@ namespace bnb::render
 
         m_rendering = true;
 
-        std::swap(m_update_buffer, m_show_buffer);
         m_texture_updated = false;
-
-        update_camera_texture();
 
         m_program.use();
 
-        m_gl_context.texture_uniform_location[SamplerIndex::Y] = glGetUniformLocation(m_program.handle(), SamplerName::Y);
-        m_gl_context.texture_uniform_location[SamplerIndex::UV] = glGetUniformLocation(m_program.handle(), SamplerName::UV);
+        GL_CALL(glActiveTexture(GLenum(GL_TEXTURE0)));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture_id));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 
-        for (auto i = 0u; i < gl_context::textures_amount; i++) {
-            GL_CALL(glActiveTexture(GL_TEXTURE0 + i));
-            GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[i]));
-            GL_CALL(glUniform1i(m_gl_context.texture_uniform_location[i], i));
-        }
-
-        m_gl_context.m_frame_surface.draw();
+        m_frame_surface.draw();
 
         m_program.unuse();
         m_rendering = false;
@@ -109,24 +83,4 @@ namespace bnb::render
         return true;
     }
 
-    void renderer::update_camera_texture()
-    {
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::Y]));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
-                    , m_width, m_height, 0,
-                    GL_RED, GL_UNSIGNED_BYTE, m_show_buffer.y_plane.get()));
-
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_gl_context.textures[SamplerIndex::UV]));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
-
-        GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RG
-                        , m_width / 2, m_height / 2, 0,
-                    GL_RG, GL_UNSIGNED_BYTE, m_show_buffer.uv_plane.get()));
-
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
-    }
 } // bnb::render

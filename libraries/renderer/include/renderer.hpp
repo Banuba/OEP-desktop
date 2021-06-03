@@ -3,7 +3,7 @@
 #include <bnb/types/full_image.hpp>
 
 #include "program.hpp"
-#include "renderer_gl_context.hpp"
+#include "frame_surface_handler.hpp"
 
 namespace bnb::render
 {
@@ -20,20 +20,16 @@ namespace bnb::render
 
         void surface_change(int32_t width, int32_t height);
 
-        void update_data(full_image_t image);
+        void update_data(int texture_id);
         bool draw();
 
     private:
-        void update_camera_texture();
-
-        renderer_gl_context m_gl_context;
         program m_program;
+        frame_surface_handler m_frame_surface;
 
         int m_width;
         int m_height;
-
-        nv12_planes m_update_buffer;
-        nv12_planes m_show_buffer;
+        int m_texture_id{ 0 };
 
         std::atomic<bool> m_rendering = false;
         std::atomic<bool> m_texture_updated = false;

@@ -88,4 +88,19 @@ namespace bnb
             std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
         }
     }
+
+    void pixel_buffer::get_texture(oep_texture_cb callback)
+    {
+        if (!is_locked()) {
+            std::cout << "[WARNING] The pixel buffer must be locked" << std::endl;
+            callback(std::nullopt);
+        }
+        if (auto oep_sp = m_oep_ptr.lock()) {
+            oep_sp->get_current_buffer_texture(callback);
+        }
+        else {
+            std::cout << "[ERROR] Offscreen effect player destroyed" << std::endl;
+        }
+    }
+
 } // bnb

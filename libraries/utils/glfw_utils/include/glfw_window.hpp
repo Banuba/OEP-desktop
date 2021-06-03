@@ -9,7 +9,7 @@
 class glfw_window
 {
 public:
-    explicit glfw_window(const std::string& title);
+    explicit glfw_window(const std::string& title, GLFWwindow* share = nullptr);
     ~glfw_window();
 
     void show(uint32_t width_hint, uint32_t height_hint);
@@ -26,6 +26,6 @@ private:
     GLFWwindow* m_window{};
 
     void init();
-    void create_window(const std::string& title);
+    void create_window(const std::string& title, GLFWwindow* share = nullptr);
     void load_glad_functions();
 };
