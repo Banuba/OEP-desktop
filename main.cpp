@@ -3,7 +3,6 @@
 
 #include "glfw_window.hpp"
 #include "render_thread.hpp"
-#include "renderer.hpp"
 
 #include <bnb/spal/camera/ocv_based.hpp>
 
