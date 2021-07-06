@@ -34,13 +34,21 @@ glfw_window::~glfw_window()
     glfwTerminate();
 }
 
+void glfw_window::set_resize_callback(std::function<void(int32_t w, int32_t h)> surface_changed)
+{
+    surface_changed_callback = surface_changed;
+}
+
 void glfw_window::show(uint32_t width_hint, uint32_t height_hint)
 {
+    window_width = width_hint;
+    window_height = height_hint;
+
     async::spawn(
         m_scheduler,
         [this, width_hint, height_hint]() {
             glfwSetWindowSize(m_window, width_hint, height_hint);
-            glfwSetWindowPos(m_window, 0, 0);
+            glfwSetWindowPos(m_window, 100, 100);
             glfwShowWindow(m_window);
         });
 
@@ -52,6 +60,11 @@ void glfw_window::run_main_loop()
     while (!glfwWindowShouldClose(m_window)) {
         glfwWaitEvents();
         m_scheduler.run_all_tasks();
+
+        if (surface_changed_callback && resized) {
+            surface_changed_callback(window_width, window_height);
+            resized = false;
+        }
     }
 }
 
@@ -70,7 +83,7 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
 
     glfwWindowHint(GLFW_DEPTH_BITS, 0);
     glfwWindowHint(GLFW_STENCIL_BITS, 0);
-    glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
     glfwWindowHint(GLFW_DECORATED, GLFW_TRUE);
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
@@ -105,6 +118,13 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
     if (nullptr == m_window) {
         throw std::runtime_error("glfwCreateWindow error");
     }
+
+    glfwSetWindowSizeCallback(m_window, [](GLFWwindow*, int w, int h) {
+        glViewport(0, 0, w, h);
+        window_width = w;
+        window_height = h;
+        resized = true;
+    });
 }
 
 void glfw_window::load_glad_functions()

@@ -42,7 +42,7 @@ int main()
     };
     glfwSetKeyCallback(window->get_window(), key_func);
 
-    oep->load_effect("effects/Afro");
+    oep->load_effect("effects/test_BG");
 
     // Create and run instance of camera, pass callback for frames
     // Callback for received frame from the camera
@@ -68,6 +68,10 @@ int main()
     };
     std::shared_ptr<bnb::camera_base> m_camera_ptr = bnb::create_camera_device(ef_cb, 0);
 
+    window->set_resize_callback([render_t, oep](int32_t w, int32_t h){
+        render_t->surface_changed(w, h);
+        oep->surface_changed(w, h);
+    });
     window->show(oep_width, oep_height);
     window->run_main_loop();
 

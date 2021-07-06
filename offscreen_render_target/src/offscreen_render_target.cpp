@@ -273,18 +273,6 @@ namespace bnb
         m_width = width;
         m_height = height;
 
-        m_renderer_context.reset();
-
-        auto create_context_task = [this]() {
-            glfwSetWindowSize(m_renderer_context.get(), m_width, m_height);
-        };
-
-        #ifdef __APPLE__
-            run_on_main_queue(create_context_task);
-        #else
-            create_context_task();
-        #endif
-
         activate_context();
         delete_textures();
     }
