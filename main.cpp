@@ -64,7 +64,11 @@ int main()
         };
 
         std::optional<bnb::interfaces::orient_format> target_orient{ { bnb::camera_orientation::deg_0, true } };
-        oep->process_image_async(image_ptr, get_pixel_buffer_callback, target_orient);
+
+        ioep_wptr oep_w = oep;
+        if (auto oep_s = oep_w.lock()) {
+            oep_s->process_image_async(image_ptr, get_pixel_buffer_callback, target_orient);
+        }
     };
     std::shared_ptr<bnb::camera_base> m_camera_ptr = bnb::create_camera_device(ef_cb, 0);
 
