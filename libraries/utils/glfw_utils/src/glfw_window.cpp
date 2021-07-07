@@ -34,7 +34,7 @@ glfw_window::~glfw_window()
     glfwTerminate();
 }
 
-void glfw_window::set_resize_callback(std::function<void(int32_t w, int32_t h)> surface_changed)
+void glfw_window::set_resize_callback(std::function<void(int32_t w, int32_t h, int32_t w_glfw_buffer, int32_t h_glfw_buffer)> surface_changed)
 {
     surface_changed_callback = surface_changed;
 }
@@ -62,7 +62,9 @@ void glfw_window::run_main_loop()
         m_scheduler.run_all_tasks();
 
         if (surface_changed_callback && resized) {
-            surface_changed_callback(window_width, window_height);
+            int32_t buffer_width, buffer_height;
+            glfwGetFramebufferSize(m_window, &buffer_width, &buffer_height);
+            surface_changed_callback(window_width, window_height, buffer_width, buffer_height);
             resized = false;
         }
     }

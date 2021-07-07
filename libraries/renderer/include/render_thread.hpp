@@ -29,3 +29,6 @@ namespace bnb::render
         std::atomic<bool> m_cancellation_flag;
     };
 } // bnb::render
+
+using render_t_sptr = std::shared_ptr<bnb::render::render_thread>;
+using render_t_wptr = std::weak_ptr<bnb::render::render_thread>;

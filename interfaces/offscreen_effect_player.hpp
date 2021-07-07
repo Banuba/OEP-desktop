@@ -99,3 +99,4 @@ namespace interfaces
 } // bnb::interfaces
 
 using ioep_sptr = std::shared_ptr<bnb::interfaces::offscreen_effect_player>;
+using ioep_wptr = std::weak_ptr<bnb::interfaces::offscreen_effect_player>;
