@@ -34,7 +34,7 @@ int main()
     // We want to share resources between context, we know that offscreen_render_target is based on GLFW and returned context
     // is GLFWwindow
     window = std::make_shared<glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(ort->get_sharing_context()));
-    std::shared_ptr<bnb::render::render_thread> render_t = std::make_shared<bnb::render::render_thread>(window->get_window(), oep_width, oep_height);
+    render_t_sptr render_t = std::make_shared<bnb::render::render_thread>(window->get_window(), oep_width, oep_height);
     auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -42,7 +42,7 @@ int main()
     };
     glfwSetKeyCallback(window->get_window(), key_func);
 
-    oep->load_effect("effects/Afro");
+    oep->load_effect("effects/test_BG");
 
     // Create and run instance of camera, pass callback for frames
     // Callback for received frame from the camera
@@ -64,10 +64,25 @@ int main()
         };
 
         std::optional<bnb::interfaces::orient_format> target_orient{ { bnb::camera_orientation::deg_0, true } };
-        oep->process_image_async(image_ptr, get_pixel_buffer_callback, target_orient);
+
+        ioep_wptr oep_w = oep;
+        if (auto oep_s = oep_w.lock()) {
+            oep_s->process_image_async(image_ptr, get_pixel_buffer_callback, target_orient);
+        }
     };
     std::shared_ptr<bnb::camera_base> m_camera_ptr = bnb::create_camera_device(ef_cb, 0);
 
+    ioep_wptr oep_w = oep;
+    render_t_wptr r_w = render_t;
+
+    window->set_resize_callback([oep_w, r_w](int32_t w, int32_t h, int32_t w_glfw_buffer, int32_t h_glfw_buffer) {
+        if (auto r_s = r_w.lock()) {
+            r_s->surface_changed(w_glfw_buffer, h_glfw_buffer);
+        }
+        if (auto oep_s = oep_w.lock()) {
+            oep_s->surface_changed(w, h);
+        }
+    });
     window->show(oep_width, oep_height);
     window->run_main_loop();
 
