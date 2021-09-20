@@ -10,24 +10,30 @@ Quick start examples for integrating [Banuba SDK on Desktop](https://docs.banuba
 4. Copy `bnb_viewer_standalone/third` files into the `quickstart-desktop-cpp/third` dir:
     `bnb_viewer_standalone/third/` => `quickstart-desktop-cpp/third`
 5. Copy and Paste your client token into the appropriate section of `quickstart-desktop-cpp/main.cpp`
-6. Generate project files by executing the following commands:
+6. Load submodules and generate project files by executing the following commands:
     ##### Windows x86 build:	
-    ```
+    ```bat
         cd %path_to_repository%
+        git submodule init
+        git submodule update
         mkdir build
         cd build
         cmake -A Win32 ..
     ```
     ##### Windows x64 build:	
-    ```
+    ```bat
         cd %path_to_repository%
+        git submodule init
+        git submodule update
         mkdir build
         cd build
         cmake -A x64 ..
     ```
     ##### MacOS build:	
-    ```
+    ```sh
         cd %path_to_repository%
+        git submodule init
+        git submodule update
         mkdir build
         cd build
         cmake -G Xcode ..
