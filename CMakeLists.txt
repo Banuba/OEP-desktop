@@ -50,15 +50,12 @@ else (APPLE)
     add_executable(example main.cpp)
 endif (APPLE)
 
-#target_include_directories(example SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
-
 target_link_libraries(example
     glfw
     glfw_utils
     offscreen_ep
     opencv
     renderer
-    #yuv
 )
 
 if (APPLE)
