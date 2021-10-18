@@ -1,4 +1,4 @@
 [submodule "oep"]
 	path = oep
-	url = https://github.com/Banuba/OEP-c-api-module.git
-	branch = init
+	url = https://github.com/Banuba/OEP-module.git
+	branch = master

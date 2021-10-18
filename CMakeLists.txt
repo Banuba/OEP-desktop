@@ -26,6 +26,9 @@ add_definitions(
 #
 
 set(BUILD_C_API OFF)
+set(DESKTOP_BUILD ON)
+set(NATIVE_MACOS_BUILD OFF)
+set(ANDROID_BUILD OFF)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/oep)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
