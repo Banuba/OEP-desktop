@@ -1,7 +1,5 @@
 #include "render_thread.hpp"
 
-#include <libyuv.h>
-
 namespace bnb::render
 {
     render_thread::render_thread(GLFWwindow* window, int32_t width, int32_t height)
