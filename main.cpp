@@ -24,7 +24,7 @@ int main()
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
     auto ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
-    
+
     // Create instance of offscreen_effect_player, pass effect_player, offscreen_render_target
     // and dimension of processing frame (for best performance it is better to coincide
     // with camera frame dimensions)

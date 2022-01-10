@@ -24,7 +24,7 @@ namespace bnb::oep
             1,
             bnb::interfaces::nn_mode::automatically,
             bnb::interfaces::face_search_mode::good,
-            false, 
+            false,
             false}))
     {
     }
@@ -93,7 +93,7 @@ namespace bnb::oep
     }
 
     /* effect_player::push_frame */
-    void effect_player::push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation) 
+    void effect_player::push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation)
     {
         using ns = bnb::oep::interfaces::image_format;
         auto bnb_image_format = make_bnb_image_format(image, image_orientation);
@@ -115,9 +115,9 @@ namespace bnb::oep
             case ns::nv12_bt709_video:
                 m_ep->push_frame(
                     full_image_t(yuv_image_t(
-                        color_plane(image->get_base_sptr_of_plane(0)), 
-                        color_plane(image->get_base_sptr_of_plane(1)), 
-                                             bnb_image_format,
+                        color_plane(image->get_base_sptr_of_plane(0)),
+                        color_plane(image->get_base_sptr_of_plane(1)),
+                        bnb_image_format,
                         make_bnb_yuv_format(image))));
                 break;
             case ns::i420_bt601_full:
@@ -126,7 +126,7 @@ namespace bnb::oep
             case ns::i420_bt709_video:
                 m_ep->push_frame(
                     full_image_t(yuv_image_t(
-                        color_plane(image->get_base_sptr_of_plane(0)), 
+                        color_plane(image->get_base_sptr_of_plane(0)),
                         color_plane(image->get_base_sptr_of_plane(1)),
                         color_plane(image->get_base_sptr_of_plane(2)),
                         bnb_image_format,

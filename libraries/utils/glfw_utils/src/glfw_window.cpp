@@ -90,7 +90,6 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
     glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-    
 
 #if BNB_OS_WINDOWS
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

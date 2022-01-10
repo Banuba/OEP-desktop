@@ -36,5 +36,5 @@ private:
     inline static int32_t window_width = 1;
     inline static int32_t window_height = 1;
 
-    inline static bool resized = false; 
+    inline static bool resized = false;
 };

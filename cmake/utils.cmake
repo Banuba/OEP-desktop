@@ -2,8 +2,6 @@
 # Helper functions and utils for CMake
 #
 
-include(CMakeParseArguments)
-
 #
 # Macro for setting default variable values, if the other value one haven't been
 # passed from outside. We use it primarily for variables passed from

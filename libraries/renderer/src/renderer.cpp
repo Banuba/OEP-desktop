@@ -1,7 +1,7 @@
 #include "renderer.hpp"
 #include "opengl.hpp"
 
-//NV12
+// NV12
 namespace
 {
     const char* vs = \
