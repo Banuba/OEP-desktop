@@ -12,22 +12,25 @@ Quick start examples for integrating [Banuba SDK on Desktop](https://docs.banuba
 5. Copy and Paste your client token into the appropriate section of `quickstart-desktop-cpp/main.cpp`
 6. Generate project files by executing the following commands:
     ##### Windows x86 build:	
-    ```
+    ```bat
         cd %path_to_repository%
+        git submodule update --init
         mkdir build
         cd build
         cmake -A Win32 ..
     ```
     ##### Windows x64 build:	
-    ```
+    ```bat
         cd %path_to_repository%
+        git submodule update --init
         mkdir build
         cd build
         cmake -A x64 ..
     ```
     ##### MacOS build:	
-    ```
+    ```sh
         cd %path_to_repository%
+        git submodule update --init
         mkdir build
         cd build
         cmake -G Xcode ..
@@ -48,17 +51,27 @@ Contributions are what make the open source community such an amazing place to l
 
 # Sample structure
 
-- **offscreen_effect_player** - is a wrapper for effect_player. It allows you to use your own implementation for offscreen_render_target
-- **offscreen_render_target** - is an implementation option for the offscreen_render_target interface. Allows to prepare gl framebuffers and textures for receiving a frame from gpu, receive bytes of the processed frame from the gpu and pass them to the cpu, as well as, if necessary, set the orientation for the received frame. This implementation uses GLFW to work with gl context
+- **oep** - is a submodule of the offscreen effect player
 - **libraries**
     - **renderer** - used only to demonstrate how to work with offscreen_effect_player. Draws received frames to the specified GLFW window
     - **utils**
         - **glfw_utils** - contains helper classes to work with GLFW
         - **ogl_utils** - contains helper classes to work with Open GL
         - **utils** - сontains common helper classes such as thread_pool
-- **interfaces** - offscreen effect player interfaces
 - **main.cpp** - contains the main function implementation, demonstrating basic pipeline for frame processing to apply effect offscreen
+- **effect_player.cpp effect_player.hpp** - contains the custom implementation of the effect_player interface with using cpp api
+- **render_context.cpp render_context.hpp** - contains the custom implementation of the render_context interface with using GLFW
+
+## How to change an effect
+1. Open `OEP-desktop/main.cpp`
+2. On line 45 find:
+ ```
+    oep->load_effect("effects/Afro");
+ ```
+3. Write the effect name that you want to run. For example: ("effects/your_effect_name")
+
+*Note:* The effect must be in `OEP-desktop/resources/effect`.
 
 # Note
 
-For integration of the Offscreen Effect player to your application it is necessary to copy the offscreen_effect_player folder and implement interfaces for offscreen_render_target, but if your application is based on the GLFW library, you can just reuse offscreen_render_target with the utility library.
+For the integration of the Offscreen Effect player into your application, it is necessary to copy the OEP folder and implement interfaces for effect_player and render_context, but if your application is based on the GLFW library and using bnb_effect_player CPP API, you can just reuse the current implementation.

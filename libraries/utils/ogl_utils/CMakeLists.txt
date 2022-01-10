@@ -16,4 +16,5 @@ target_include_directories(ogl_utils PUBLIC
 target_link_libraries(ogl_utils
     bnb_effect_player
     glad
+    bnb_oep_opengl_program_target
 )

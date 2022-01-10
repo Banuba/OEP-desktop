@@ -1,8 +1,9 @@
 function(copy_sdk target)
     if (MSVC)
         set_property(TARGET ${target} APPEND PROPERTY LINK_FLAGS /STACK:4194304)
-        set(SDK_EFFECT_PLAYER_LIB "bnb_effect_player")
         set(SDK_FILE_TYPE "dll")
+
+        set(SDK_EFFECT_PLAYER_LIB "bnb_effect_player")
 
         add_custom_command(
             TARGET ${target}
@@ -12,7 +13,7 @@ function(copy_sdk target)
                 $<TARGET_FILE_DIR:${target}>
             COMMENT "Copy banuba dynamic libs"
         )
-    endif ()
+    endif()
 endfunction()
 
 function(copy_third target)

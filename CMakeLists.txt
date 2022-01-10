@@ -21,19 +21,17 @@ add_definitions(
     -DBNB_VIDEO_PLAYER=$<BOOL:${BNB_VIDEO_PLAYER}>
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/libyuv.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
-
 #
 # Main
 #
 
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
+
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/oep)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libraries)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libraries)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/offscreen_effect_player)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/offscreen_render_target)
 
 option(DEPLOY_BUILD "Build for deployment" OFF)
 
@@ -46,23 +44,27 @@ if (APPLE)
     set(SDK_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}/bnb_sdk/mac")
     set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/$(CONFIGURATION)/BanubaEffectPlayer.framework")
     add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
-    
-    add_executable(example main.cpp ${FullEPFrameworkPath})
-    
+
+    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp ${FullEPFrameworkPath})
+
     set_source_files_properties(${FullEPFrameworkPath} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 else (APPLE)
-    add_executable(example main.cpp)
+    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp)
 endif (APPLE)
 
-target_include_directories(example SYSTEM PUBLIC ${LIBYUV_INCLUDE_DIRS})
 
 target_link_libraries(example
     glfw
     glfw_utils
-    offscreen_ep
+    bnb_effect_player
     opencv
     renderer
-    yuv
+    # below OEP targets
+    bnb_oep_pixel_buffer_target
+    bnb_oep_image_processing_result_target
+    bnb_oep_offscreen_effect_player_target
+    bnb_oep_offscreen_render_target_target
+    bnb_oep_camera_target
 )
 
 if (APPLE)
