@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <bnb/types/base_types.hpp>
@@ -105,7 +104,7 @@ namespace bnb::render
             glBindVertexArray(0);
         }
 
-private:
+    private:
         uint32_t m_orientation = 0;
         uint32_t m_y_flip = 0;
         unsigned int m_vao = 0;

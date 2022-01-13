@@ -2,7 +2,7 @@
 
 #include <bnb/types/full_image.hpp>
 
-#include "program.hpp"
+#include <opengl/program.hpp>
 #include "frame_surface_handler.hpp"
 
 namespace bnb::render
@@ -24,7 +24,7 @@ namespace bnb::render
         bool draw();
 
     private:
-        program m_program;
+        bnb::oep::program m_program;
         frame_surface_handler m_frame_surface;
 
         int m_width;

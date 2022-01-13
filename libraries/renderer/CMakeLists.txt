@@ -19,6 +19,6 @@ target_link_libraries(renderer
     bnb_effect_player
     glad
     glfw
+    bnb_oep_opengl_program_target
     ogl_utils
-    yuv
 )
