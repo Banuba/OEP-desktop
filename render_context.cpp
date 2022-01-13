@@ -43,7 +43,7 @@ namespace bnb::oep
         if (0 == gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
             throw std::runtime_error("gladLoadGLLoader error");
         }
-        bnb::utility::load_glad_functions((GLADloadproc) glfwGetProcAddress);
+        bnb::utility::load_gl_functions();
     }
 
     /* render_context::activate */

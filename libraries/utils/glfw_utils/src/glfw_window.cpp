@@ -131,7 +131,7 @@ void glfw_window::load_glad_functions()
 {
 #if BNB_OS_WINDOWS || BNB_OS_MACOS
     // it's only need for use while working with dynamic libs
-    utility::load_glad_functions((GLADloadproc) glfwGetProcAddress);
+    utility::load_gl_functions();
 #endif
 
     if (0 == gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
