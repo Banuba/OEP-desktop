@@ -21,6 +21,10 @@ int main()
     // pass render_context
     auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
 
+    // We need this line to switch the effect_player to OpenGL instead of METAL, which is default for MacOS.
+    // On other platforms this line does no harm.
+    bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
+
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
     auto ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
