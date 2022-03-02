@@ -1,8 +1,8 @@
 #include <interfaces/offscreen_effect_player.hpp>
-#include <interfaces/camera.hpp>
 
 #include "render_context.hpp"
 #include "effect_player.hpp"
+#include "camera_utils.hpp"
 
 #define BNB_CLIENT_TOKEN <#Place your token here#>
 
@@ -20,10 +20,6 @@ int main()
     // Create an instance of our offscreen_render_target implementation, you can use your own.
     // pass render_context
     auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
-
-    // We need this line to switch the effect_player to OpenGL instead of METAL, which is default for MacOS.
-    // On other platforms this line does no harm.
-    bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
 
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
@@ -48,9 +44,8 @@ int main()
 
     oep->load_effect("effects/Afro");
 
-    // Create and run instance of camera, pass callback for frames
     // Callback for received frame from the camera
-    auto ef_cb = [&oep, render_t](pixel_buffer_sptr image) {
+    auto camera_callback = [&oep, render_t](bnb::full_image_t image) {
         // Callback for received pixel buffer from the offscreen effect player
         auto get_pixel_buffer_callback = [render_t](image_processing_result_sptr result) {
             if (result != nullptr) {
@@ -66,9 +61,15 @@ int main()
             }
         };
 
-        oep->process_image_async(image, bnb::oep::interfaces::rotation::deg0, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg180);
+        // Convert bnb full_image_t to OEP pixel_buffer
+        // This function just wraps data from one type to another, without doing any manipulations with
+        // the data itself, and without copying it
+        auto pb_image = bnb::camera_utils::full_image_to_pixel_buffer(image);
+        // Start image processing
+        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg180);
     };
-    auto m_camera_ptr = bnb::oep::interfaces::camera::create(ef_cb, 0);
+    // Create and run instance of camera, pass callback for frames
+    auto m_camera_ptr = bnb::create_camera_device(camera_callback, 0);
 
     std::weak_ptr<bnb::oep::interfaces::offscreen_effect_player> oep_w = oep;
     render_t_wptr r_w = render_t;

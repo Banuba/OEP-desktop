@@ -72,6 +72,7 @@ Contributions are what make the open source community such an amazing place to l
 - **main.cpp** - contains the main function implementation, demonstrating basic pipeline for frame processing to apply effect offscreen
 - **effect_player.cpp, effect_player.hpp** - contains the custom implementation of the effect_player interface with using cpp api
 - **render_context.cpp, render_context.hpp** - contains the custom implementation of the render_context interface with using GLFW
+- **camera_utils.cpp, camera_utils.hpp** - contains a method that helps convert bnb::full_image_t type to OEP pixel_buffer type
 
 ## How to change an effect
 
