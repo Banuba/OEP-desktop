@@ -45,11 +45,11 @@ if (APPLE)
     set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/$(CONFIGURATION)/BanubaEffectPlayer.framework")
     add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
 
-    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp ${FullEPFrameworkPath})
+    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp camera_utils.hpp camera_utils.cpp ${FullEPFrameworkPath})
 
     set_source_files_properties(${FullEPFrameworkPath} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 else (APPLE)
-    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp)
+    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp camera_utils.hpp camera_utils.cpp)
 endif (APPLE)
 
 
@@ -64,7 +64,6 @@ target_link_libraries(example
     bnb_oep_image_processing_result_target
     bnb_oep_offscreen_effect_player_target
     bnb_oep_offscreen_render_target_target
-    bnb_oep_camera_target
 )
 
 if (APPLE)
