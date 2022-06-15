@@ -9,43 +9,40 @@
 int main()
 {
     // Frame size
-    constexpr int32_t oep_width = 1280;
-    constexpr int32_t oep_height = 720;
+    static int32_t oep_width = 1280;
+    static int32_t oep_height = 720;
 
-    std::shared_ptr<glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
+    static std::shared_ptr<glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
 
     // Create instance of render_context.
-    auto rc = bnb::oep::interfaces::render_context::create();
+    static auto rc = bnb::oep::interfaces::render_context::create();
 
     // Create an instance of our offscreen_render_target implementation, you can use your own.
     // pass render_context
-    auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
+    static auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
 
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
-    auto ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
+    static auto ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
 
     // Create instance of offscreen_effect_player, pass effect_player, offscreen_render_target
     // and dimension of processing frame (for best performance it is better to coincide
     // with camera frame dimensions)
-    auto oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
+    static auto oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
 
     // Make glfw_window and render_thread only for show result of OEP
     // We want to share resources between context, we know that render_context is based on
     // GLFW and returned context is GLFWwindow
     window = std::make_shared<glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(rc->get_sharing_context()));
     render_t_sptr render_t = std::make_shared<bnb::render::render_thread>(window->get_window(), oep_width, oep_height);
-    auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        }
-    };
-    glfwSetKeyCallback(window->get_window(), key_func);
 
     oep->load_effect("effects/Afro");
 
     // Callback for received frame from the camera
-    auto camera_callback = [&oep, render_t](bnb::full_image_t image) {
+    static auto camera_callback = [render_t](bnb::full_image_t image) {
+        if (oep == nullptr) {
+            return;
+        }
         // Callback for received pixel buffer from the offscreen effect player
         auto get_pixel_buffer_callback = [render_t](image_processing_result_sptr result) {
             if (result != nullptr) {
@@ -69,7 +66,54 @@ int main()
         oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg180);
     };
     // Create and run instance of camera, pass callback for frames
-    auto m_camera_ptr = bnb::create_camera_device(camera_callback, 0);
+    static size_t camera_index = 0;
+    static bnb::camera_sptr m_camera_ptr = bnb::create_camera_device(camera_callback, camera_index);
+
+    static auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
+        if (action == GLFW_PRESS) {
+            if (key == GLFW_KEY_ESCAPE) {
+                oep->stop();
+                m_camera_ptr = nullptr;
+                oep = nullptr;
+                ep = nullptr;
+                ort = nullptr;
+                glfwSetWindowShouldClose(window, GLFW_TRUE);
+            } else if (key == GLFW_KEY_1) {
+                if (camera_index == 1) {
+                    camera_index = 0;
+
+                    oep->stop();
+                    m_camera_ptr = nullptr;
+                    oep = nullptr;
+                    ep = nullptr;
+                    ort = nullptr;
+                    ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
+                    ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
+                    oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
+                    m_camera_ptr = bnb::create_camera_device(camera_callback, camera_index);
+                    oep->surface_changed(oep_width, oep_height);
+                    oep->load_effect("effects/Afro");
+                }
+            } else if (key == GLFW_KEY_2) {
+                if (camera_index == 0) {
+                    camera_index = 1;
+
+                    oep->stop();
+                    m_camera_ptr = nullptr;
+                    oep = nullptr;
+                    ep = nullptr;
+                    ort = nullptr;
+                    ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
+                    ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
+                    oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
+                    m_camera_ptr = bnb::create_camera_device(camera_callback, camera_index);
+                    oep->surface_changed(oep_width, oep_height);
+                    oep->load_effect("effects/Afro");
+                }
+            }
+        }
+    };
+    glfwSetKeyCallback(window->get_window(), key_func);
 
     std::weak_ptr<bnb::oep::interfaces::offscreen_effect_player> oep_w = oep;
     render_t_wptr r_w = render_t;
@@ -79,6 +123,8 @@ int main()
             r_s->surface_changed(w_glfw_buffer, h_glfw_buffer);
         }
         if (auto oep_s = oep_w.lock()) {
+            oep_width = w;
+            oep_height = h;
             oep_s->surface_changed(w, h);
         }
     });

@@ -86,6 +86,7 @@ namespace bnb::oep
     /* effect_player::pause */
     void effect_player::pause()
     {
+        m_effect_player_playing = false;
         m_ep->playback_pause();
     }
 
@@ -93,6 +94,14 @@ namespace bnb::oep
     void effect_player::resume()
     {
         m_ep->playback_play();
+        m_effect_player_playing = true;
+    }
+
+    /* effect_player::stop */
+    void effect_player::stop()
+    {
+        m_effect_player_playing = false;
+        m_ep->playback_stop();
     }
 
     /* effect_player::push_frame */
@@ -106,34 +115,40 @@ namespace bnb::oep
             case ns::bpc8_rgba:
             case ns::bpc8_bgra:
             case ns::bpc8_argb:
-                m_ep->push_frame(
-                    full_image_t(bpc8_image_t(
-                        color_plane(image->get_base_sptr()),
-                        make_bnb_pixel_format(image),
-                        bnb_image_format)));
+                if (m_effect_player_playing) {
+                    m_ep->push_frame(
+                        full_image_t(bpc8_image_t(
+                            color_plane(image->get_base_sptr()),
+                            make_bnb_pixel_format(image),
+                            bnb_image_format)));
+                }
                 break;
             case ns::nv12_bt601_full:
             case ns::nv12_bt601_video:
             case ns::nv12_bt709_full:
             case ns::nv12_bt709_video:
-                m_ep->push_frame(
-                    full_image_t(yuv_image_t(
-                        color_plane(image->get_base_sptr_of_plane(0)),
-                        color_plane(image->get_base_sptr_of_plane(1)),
-                        bnb_image_format,
-                        make_bnb_yuv_format(image))));
+                if (m_effect_player_playing) {
+                    m_ep->push_frame(
+                        full_image_t(yuv_image_t(
+                            color_plane(image->get_base_sptr_of_plane(0)),
+                            color_plane(image->get_base_sptr_of_plane(1)),
+                            bnb_image_format,
+                            make_bnb_yuv_format(image))));
+                }
                 break;
             case ns::i420_bt601_full:
             case ns::i420_bt601_video:
             case ns::i420_bt709_full:
             case ns::i420_bt709_video:
-                m_ep->push_frame(
-                    full_image_t(yuv_image_t(
-                        color_plane(image->get_base_sptr_of_plane(0)),
-                        color_plane(image->get_base_sptr_of_plane(1)),
-                        color_plane(image->get_base_sptr_of_plane(2)),
-                        bnb_image_format,
-                        make_bnb_yuv_format(image))));
+                if (m_effect_player_playing) {
+                    m_ep->push_frame(
+                        full_image_t(yuv_image_t(
+                            color_plane(image->get_base_sptr_of_plane(0)),
+                            color_plane(image->get_base_sptr_of_plane(1)),
+                            color_plane(image->get_base_sptr_of_plane(2)),
+                            bnb_image_format,
+                            make_bnb_yuv_format(image))));
+                }
                 break;
             default:
                 break;
@@ -143,7 +158,7 @@ namespace bnb::oep
     /* effect_player::draw */
     void effect_player::draw()
     {
-        while (m_ep->draw() < 0) {
+        while (m_effect_player_playing && m_ep->draw() < 0) {
             std::this_thread::yield();
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }

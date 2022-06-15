@@ -28,6 +28,8 @@ namespace bnb::oep
 
         void resume() override;
 
+        void stop() override;
+
         void push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation) override;
 
         void draw() override;
@@ -41,6 +43,7 @@ namespace bnb::oep
         bnb::utility m_utility;
         std::shared_ptr<bnb::interfaces::effect_player> m_ep;
         std::atomic_bool m_is_surface_created {false};
+        std::atomic_bool m_effect_player_playing {true};
     }; /* class effect_player */
 
 } /* namespace bnb::oep */
