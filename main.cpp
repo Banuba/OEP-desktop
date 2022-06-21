@@ -75,6 +75,10 @@ int main()
     render_t_wptr r_w = render_t;
 
     window->set_resize_callback([oep_w, r_w](int32_t w, int32_t h, int32_t w_glfw_buffer, int32_t h_glfw_buffer) {
+        // When minimizing a window on windows, glfw passes zero dimensions. Zero dimensions cannot be passed in OEP
+        if (w <= 0 || h <= 0 || w_glfw_buffer <= 0 || h_glfw_buffer <= 0) {
+            return;
+        }
         if (auto r_s = r_w.lock()) {
             r_s->surface_changed(w_glfw_buffer, h_glfw_buffer);
         }
