@@ -20,7 +20,7 @@
 
     ```bat
         cd %path_to_repository%
-        git submodule update --init
+        git submodule update --init --recursive
         md build
         cd build
         cmake -A Win32 ..
@@ -30,7 +30,7 @@
 
     ```bat
         cd %path_to_repository%
-        git submodule update --init
+        git submodule update --init --recursive
         md build
         cd build
         cmake -A x64 ..
@@ -40,7 +40,7 @@
 
     ```sh
         cd %path_to_repository%
-        git submodule update --init
+        git submodule update --init --recursive
         mkdir build
         cd build
         cmake -G Xcode ..
