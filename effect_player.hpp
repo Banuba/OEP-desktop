@@ -28,6 +28,8 @@ namespace bnb::oep
 
         void resume() override;
 
+        void stop() override;
+
         void push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation) override;
 
         void draw() override;

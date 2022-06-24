@@ -22,9 +22,15 @@ namespace bnb::oep
         : m_utility(path_to_resources, client_token)
         // the description of the passed parameters can be found at the link:
         // https://docs.banuba.com/face-ar-sdk/generated/doxygen/html/structbnb_1_1interfaces_1_1effect__player__configuration.html#a810709129e2bc13eae190305861345ce
+        // Frame buffer for effect player is passed as 1x1 later on surface_created or surface_changed
+        // it will be set to the actual surface size.
+        // NOTE: these parameters explicitly influence performance, for instance, you have a small screen, e.g. 6 inches,
+        // and your rendering surface is large, e.g. 4K, then it is not necessary to render effect in 4K resolution
+        // since such precision will not be seen on the screen, so performance can be improved.
+        // In the sample effect frame buffer and the surface are synced in surface_created and surface_changed
         , m_ep(bnb::interfaces::effect_player::create({
-            1,
-            1,
+            1, // fx_width - the effect's framebuffer width
+            1, // fx_height - the effect's framebuffer height
             bnb::interfaces::nn_mode::automatically,
             bnb::interfaces::face_search_mode::good,
             false,
@@ -41,12 +47,15 @@ namespace bnb::oep
     void effect_player::surface_created(int32_t width, int32_t height)
     {
         m_ep->surface_created(width, height);
+        // Set explicitly the framebuffer of Effect Player to sync with surface size
+        m_ep->effect_manager()->set_effect_size(width, height);
     }
 
     /* effect_player::surface_changed */
     void effect_player::surface_changed(int32_t width, int32_t height)
     {
         m_ep->surface_changed(width, height);
+        // Set explicitly the framebuffer of Effect Player to sync with surface size
         m_ep->effect_manager()->set_effect_size(width, height);
     }
 
@@ -93,6 +102,12 @@ namespace bnb::oep
     void effect_player::resume()
     {
         m_ep->playback_play();
+    }
+
+    /* effect_player::stop */
+    void effect_player::stop()
+    {
+        m_ep->playback_stop();
     }
 
     /* effect_player::push_frame */
