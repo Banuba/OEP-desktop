@@ -7,14 +7,17 @@
 ## Getting Started
 
 1. Get the latest Banuba SDK archive for macOS/Windows and the client token. Please fill out our form at [form at banuba.com](https://www.banuba.com/face-filters-sdk) website, or contact us via [info@banuba.com](mailto:info@banuba.com).
-2. Copy `bnb_viewer_standalone/bnb_sdk/` into the `quickstart-desktop-cpp/bnb_sdk` dir:
-    `bnb_viewer_standalone/bnb_sdk/` => `quickstart-desktop-cpp/bnb_sdk`
-3. Copy `bnb_viewer_standalone/resources/` files into the `quickstart-desktop-cpp/resources` dir:
-    `bnb_viewer_standalone/resources/` => `quickstart-desktop-cpp/resources`
-4. Copy `bnb_viewer_standalone/third` files into the `quickstart-desktop-cpp/third` dir:
-    `bnb_viewer_standalone/third/` => `quickstart-desktop-cpp/third`
-5. Copy and Paste your client token into the appropriate section of `quickstart-desktop-cpp/main.cpp`
-6. Generate project files by executing the following commands:
+2. Copy `bnb_viewer_standalone/bnb_sdk/` into the `OEP-desktop/bnb_sdk` dir:
+    `bnb_viewer_standalone/bnb_sdk/` => `OEP-desktop/bnb_sdk`
+3. Copy `bnb_viewer_standalone/resources/` files into the `OEP-desktop/resources` dir:
+    `bnb_viewer_standalone/resources/` => `OEP-desktop/resources`
+4. Copy `bnb_viewer_standalone/third` files into the `OEP-desktop/third` dir:
+    `bnb_viewer_standalone/third/` => `OEP-desktop/third`
+5. Copy and Paste your client token into the appropriate section of `OEP-desktop/main.cpp`
+6. Configure effect in the appropriate section of `OEP_macos/ViewController.swift`, e.g. `effects/test_BG`
+    The `effects` folder should be located in `OEP-desktop/resources` folder.
+    More effects can be found [here](https://docs.banuba.com/face-ar-sdk-v1/overview/demo_face_filters)
+7. Generate project files by executing the following commands:
 
     ##### Windows x86 build:
 
@@ -46,9 +49,9 @@
         cmake -G Xcode ..
     ```
 
-7. The previous step will generate a Xcode project for macOS and a Visual Studio project for Windows. Open the viewer_standalone project in an appropriate IDE on your platform.
-8. Select target `example`.
-9. Run build.
+8. The previous step will generate a Xcode project for macOS and a Visual Studio project for Windows. Open the viewer_standalone project in an appropriate IDE on your platform.
+9. Select target `example` in Xcode or set the `example` project as Startup in Visual Studio.
+10. Run build.
 
 ## Contributing
 

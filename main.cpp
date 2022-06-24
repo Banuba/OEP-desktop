@@ -42,7 +42,7 @@ int main()
     };
     glfwSetKeyCallback(window->get_window(), key_func);
 
-    oep->load_effect("effects/Afro");
+    oep->load_effect(<#Place the effect name here, e.g. effects/test_BG#>);
 
     // Callback for received frame from the camera
     auto camera_callback = [&oep, render_t](bnb::full_image_t image) {
