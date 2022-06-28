@@ -11,6 +11,8 @@
     `bnb_viewer_standalone/bnb_sdk/` => `OEP-desktop/bnb_sdk`
 3. Copy `bnb_viewer_standalone/resources/` files into the `OEP-desktop/resources` dir:
     `bnb_viewer_standalone/resources/` => `OEP-desktop/resources`
+
+    NOTE: The macOS sample only depends on `asyncplusplus` and `glfw` third-party libraries.
 4. Copy `bnb_viewer_standalone/third` files into the `OEP-desktop/third` dir:
     `bnb_viewer_standalone/third/` => `OEP-desktop/third`
 5. Copy and Paste your client token into the appropriate section of `OEP-desktop/main.cpp`
