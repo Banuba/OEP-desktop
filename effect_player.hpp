@@ -7,21 +7,6 @@
 namespace bnb::oep
 {
 
-    class js_callback: public bnb::interfaces::js_callback
-    {
-    public:
-        js_callback(const oep_eval_js_result_cb& callback)
-            : m_callback(std::move(callback)) {};
-        void on_result(const std::string & result) override;
-    private:
-        const oep_eval_js_result_cb m_callback;
-    }; /* class js_callback */
-
-} /* namespace bnb::oep */
-
-namespace bnb::oep
-{
-
     class effect_player : public bnb::oep::interfaces::effect_player
     {
     public:
@@ -38,9 +23,9 @@ namespace bnb::oep
         bool load_effect(const std::string& effect) override;
 
         bool call_js_method(const std::string& method, const std::string& param) override;
-        
-        bool eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback) override;
-        
+
+        void eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback) override;
+
         void pause() override;
 
         void resume() override;

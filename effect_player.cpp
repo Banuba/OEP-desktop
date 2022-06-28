@@ -8,16 +8,26 @@
 namespace bnb::oep
 {
 
-    void js_callback::on_result(const std::string & result)
+    class js_callback : public bnb::interfaces::js_callback
     {
-        m_callback(result);
-    }
+    public:
+        js_callback(const oep_eval_js_result_cb& callback)
+            : m_callback(std::move(callback)){};
+
+        void on_result(const std::string& result) override
+        {
+            m_callback(result);
+        }
+
+    private:
+        const oep_eval_js_result_cb m_callback;
+    }; /* class js_callback */
 
 } /* namespace bnb::oep */
 
 namespace bnb::oep
 {
-    
+
     /* effect_player::create */
     effect_player_sptr interfaces::effect_player::create(const std::vector<std::string>& path_to_resources, const std::string& client_token)
     {
@@ -101,23 +111,21 @@ namespace bnb::oep
         }
         return true;
     }
-    
+
     /* effect_player::eval_js */
-    bool effect_player::eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback)
+    void effect_player::eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback)
     {
         if (auto e_manager = m_ep->effect_manager()) {
             if (auto effect = e_manager->current()) {
-                auto callback = std::make_shared<bnb::oep::js_callback>(result_callback);
+                std::shared_ptr<bnb::oep::js_callback> callback
+                    = result_callback ? std::make_shared<bnb::oep::js_callback>(result_callback) : nullptr;
                 effect->eval_js(script, callback);
             } else {
                 std::cout << "[Error] effect not loaded" << std::endl;
-                return false;
             }
         } else {
             std::cout << "[Error] effect manager not initialized" << std::endl;
-            return false;
         }
-        return true;
     }
 
     /* effect_player::pause */
