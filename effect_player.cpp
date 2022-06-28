@@ -8,6 +8,16 @@
 namespace bnb::oep
 {
 
+    void js_callback::on_result(const std::string & result)
+    {
+        m_callback(result);
+    }
+
+} /* namespace bnb::oep */
+
+namespace bnb::oep
+{
+    
     /* effect_player::create */
     effect_player_sptr interfaces::effect_player::create(const std::vector<std::string>& path_to_resources, const std::string& client_token)
     {
@@ -81,6 +91,24 @@ namespace bnb::oep
         if (auto e_manager = m_ep->effect_manager()) {
             if (auto effect = e_manager->current()) {
                 effect->call_js_method(method, param);
+            } else {
+                std::cout << "[Error] effect not loaded" << std::endl;
+                return false;
+            }
+        } else {
+            std::cout << "[Error] effect manager not initialized" << std::endl;
+            return false;
+        }
+        return true;
+    }
+    
+    /* effect_player::eval_js */
+    bool effect_player::eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback)
+    {
+        if (auto e_manager = m_ep->effect_manager()) {
+            if (auto effect = e_manager->current()) {
+                auto callback = std::make_shared<bnb::oep::js_callback>(result_callback);
+                effect->eval_js(script, callback);
             } else {
                 std::cout << "[Error] effect not loaded" << std::endl;
                 return false;
