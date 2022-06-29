@@ -22,8 +22,8 @@
       - `openal` - sound library used by the BanubaSDK
       - `ffmpeg` - used by video player to play video as a [background replacement](https://docs.banuba.com/face-ar-sdk-v1/overview/technical_specification#video-formats-support). 
 5. Copy and Paste your client token into the appropriate section of `OEP-desktop/main.cpp`
-6. Configure effect in the appropriate section of `OEP_macos/ViewController.swift`, e.g. `effects/test_BG`
-    The `effects` folder should be located in `OEP-desktop/resources` folder.
+6. Configure effect in the appropriate section of `OEP-desktop/main.cpp`, e.g. `effects/test_BG`
+    The `effects` folder should be located in the `OEP-desktop/resources` folder.
     More effects can be found [here](https://docs.banuba.com/face-ar-sdk-v1/overview/demo_face_filters)
 7. Generate project files by executing the following commands:
 
