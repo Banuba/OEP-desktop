@@ -47,8 +47,7 @@ namespace bnb::oep
     void effect_player::surface_created(int32_t width, int32_t height)
     {
         m_ep->surface_created(width, height);
-        // Set explicitly the framebuffer of Effect Player to sync with surface size
-        m_ep->effect_manager()->set_effect_size(width, height);
+        surface_changed(width, height);
     }
 
     /* effect_player::surface_changed */
@@ -56,7 +55,9 @@ namespace bnb::oep
     {
         m_ep->surface_changed(width, height);
         // Set explicitly the framebuffer of Effect Player to sync with surface size
-        m_ep->effect_manager()->set_effect_size(width, height);
+        if (auto em = m_ep->effect_manager()) {
+            em->set_effect_size(width, height);
+        }
     }
 
     /* effect_player::surface_destroyed */

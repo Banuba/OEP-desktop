@@ -11,15 +11,15 @@ set(BNB_THIRD_FOLDER ${CMAKE_CURRENT_LIST_DIR}/third)
 if(WIN32)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_ENABLE_EXTENDED_ALIGNED_STORAGE")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /D_ENABLE_EXTENDED_ALIGNED_STORAGE")
+
+    # Set to OFF to disable ffmpeg dependency (SDK should be built with disabled video_player also)
+    set(BNB_VIDEO_PLAYER ON)
+
+    add_definitions(
+        -DBNB_RESOURCES_FOLDER="${BNB_RESOURCES_FOLDER}"
+        -DBNB_VIDEO_PLAYER=$<BOOL:${BNB_VIDEO_PLAYER}>
+    )
 endif()
-
-# Set to OFF to disable ffmpeg dependency (SDK should be built with disabled video_player also)
-set(BNB_VIDEO_PLAYER ON)
-
-add_definitions(
-    -DBNB_RESOURCES_FOLDER="${BNB_RESOURCES_FOLDER}"
-    -DBNB_VIDEO_PLAYER=$<BOOL:${BNB_VIDEO_PLAYER}>
-)
 
 #
 # Main
@@ -45,19 +45,53 @@ if (APPLE)
     set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/$(CONFIGURATION)/BanubaEffectPlayer.framework")
     add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
 
-    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp camera_utils.hpp camera_utils.cpp ${FullEPFrameworkPath})
+    set(EXAMPLE_RESOURCES 
+        ${BNB_RESOURCES_FOLDER}/mac/bnb_viewer.icns
+        ${BNB_RESOURCES_FOLDER}/effects)
 
+    set(APP_HEADER_FILES
+        effect_player.hpp
+        render_context.hpp
+        camera_utils.hpp
+    )
+
+    set(APP_SOURCE_FILES
+        main.cpp
+        effect_player.cpp
+        render_context.cpp
+        camera_utils.cpp
+    )
+
+    add_executable(example ${APP_SOURCE_FILES} ${APP_HEADER_FILES} ${FullEPFrameworkPath} ${EXAMPLE_RESOURCES})
+
+    foreach(assetItem ${EXAMPLE_RESOURCES})
+      set_source_files_properties(${assetItem} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)   
+    endforeach()
     set_source_files_properties(${FullEPFrameworkPath} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 else (APPLE)
-    add_executable(example main.cpp effect_player.hpp effect_player.cpp render_context.hpp render_context.cpp camera_utils.hpp camera_utils.cpp)
+
+    set(APP_HEADER_FILES
+        effect_player.hpp
+        render_context.hpp
+        camera_utils.hpp
+    )
+
+    set(APP_SOURCE_FILES
+        main.cpp
+        effect_player.cpp
+        render_context.cpp
+        camera_utils.cpp
+    )
+
+    add_executable(example ${APP_SOURCE_FILES} ${APP_HEADER_FILES})
 endif (APPLE)
+
 
 
 target_link_libraries(example
     glfw
     glfw_utils
     bnb_effect_player
-    opencv
     renderer
     # below OEP targets
     bnb_oep_pixel_buffer_target
@@ -69,17 +103,13 @@ target_link_libraries(example
 if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
 
-    set(EXAMPLE_RESOURCES ${BNB_RESOURCES_FOLDER}/mac/bnb_viewer.icns)
-    target_sources(example PRIVATE
-        ${EXAMPLE_RESOURCES}
-    )
     set(EXAMPLE_BUNDLE_NAME "Banuba Offscreen Rendering Example") # This name can contain up to 15 characters according to Apple's documentation
     set(EXAMPLE_COPYRIGHT "© 2021 Banuba. All rights reserved.")
     set(EXAMPLE_INFO "Banuba Offscreen Rendering Example.")
 
     set_target_properties(example PROPERTIES
         OUTPUT_NAME ${EXAMPLE_BUNDLE_NAME}
-        RESOURCE ${EXAMPLE_RESOURCES}
+        RESOURCE "${EXAMPLE_RESOURCES}"
         MACOSX_BUNDLE TRUE
 
         # The same as stadrard MacOSXBundleInfo.plist.in from CMake but with camera permissions added
