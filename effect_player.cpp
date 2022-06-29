@@ -11,7 +11,7 @@ namespace bnb::oep
     class js_callback : public bnb::interfaces::js_callback
     {
     public:
-        js_callback(const oep_eval_js_result_cb& callback)
+        js_callback(oep_eval_js_result_cb callback)
             : m_callback(std::move(callback)){};
 
         void on_result(const std::string& result) override
@@ -113,7 +113,7 @@ namespace bnb::oep
     }
 
     /* effect_player::eval_js */
-    void effect_player::eval_js(const std::string& script, const oep_eval_js_result_cb& result_callback)
+    void effect_player::eval_js(const std::string& script, oep_eval_js_result_cb result_callback)
     {
         if (auto e_manager = m_ep->effect_manager()) {
             if (auto effect = e_manager->current()) {
