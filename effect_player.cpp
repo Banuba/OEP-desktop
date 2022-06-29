@@ -20,7 +20,7 @@ namespace bnb::oep
         }
 
     private:
-        const oep_eval_js_result_cb m_callback;
+        oep_eval_js_result_cb m_callback;
     }; /* class js_callback */
 
 } /* namespace bnb::oep */
@@ -118,7 +118,7 @@ namespace bnb::oep
         if (auto e_manager = m_ep->effect_manager()) {
             if (auto effect = e_manager->current()) {
                 std::shared_ptr<bnb::oep::js_callback> callback
-                    = result_callback ? std::make_shared<bnb::oep::js_callback>(result_callback) : nullptr;
+                    = result_callback ? std::make_shared<bnb::oep::js_callback>(std::move(result_callback)) : nullptr;
                 effect->eval_js(script, callback);
             } else {
                 std::cout << "[Error] effect not loaded" << std::endl;
