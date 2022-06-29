@@ -13,6 +13,12 @@
     `bnb_viewer_standalone/resources/` => `OEP-desktop/resources`
 
     NOTE: The macOS sample only depends on `asyncplusplus` and `glfw` third-party libraries.
+
+    NOTE: The Windows sample depends on the following third-party libraries:
+      - glfw - provides OGL context and application window
+      - asyncplusplus - used in the class implementing window (can be discarded)
+      - openal - sound library used by the BanubaSDK
+      - ffmpeg - used by video player to play video as a [background replacement](https://docs.banuba.com/face-ar-sdk-v1/overview/technical_specification#video-formats-support). 
 4. Copy `bnb_viewer_standalone/third` files into the `OEP-desktop/third` dir:
     `bnb_viewer_standalone/third/` => `OEP-desktop/third`
 5. Copy and Paste your client token into the appropriate section of `OEP-desktop/main.cpp`
