@@ -111,10 +111,10 @@ namespace bnb::oep
     }
 
     /* effect_player::push_frame */
-    void effect_player::push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation)
+    void effect_player::push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation, bool require_mirroring)
     {
         using ns = bnb::oep::interfaces::image_format;
-        auto bnb_image_format = make_bnb_image_format(image, image_orientation);
+        auto bnb_image_format = make_bnb_image_format(image, image_orientation, require_mirroring);
         switch (image->get_image_format()) {
             case ns::bpc8_rgb:
             case ns::bpc8_bgr:
@@ -165,7 +165,7 @@ namespace bnb::oep
     }
 
     /* effect_player::make_bnb_image_format */
-    bnb::image_format effect_player::make_bnb_image_format(pixel_buffer_sptr image, interfaces::rotation orientation)
+    bnb::image_format effect_player::make_bnb_image_format(pixel_buffer_sptr image, interfaces::rotation orientation, bool require_mirroring)
     {
         bnb::camera_orientation camera_orient {bnb::camera_orientation::deg_0};
 
@@ -185,7 +185,7 @@ namespace bnb::oep
                 break;
         }
 
-        return {static_cast<uint32_t>(image->get_width()), static_cast<uint32_t>(image->get_height()), camera_orient, false, 0, std::nullopt};
+        return {static_cast<uint32_t>(image->get_width()), static_cast<uint32_t>(image->get_height()), camera_orient, require_mirroring, 0, std::nullopt};
     }
 
     /* effect_player::make_bnb_yuv_format */
