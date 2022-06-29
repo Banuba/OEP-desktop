@@ -11,6 +11,8 @@
     `bnb_viewer_standalone/bnb_sdk/` => `OEP-desktop/bnb_sdk`
 3. Copy `bnb_viewer_standalone/resources/` files into the `OEP-desktop/resources` dir:
     `bnb_viewer_standalone/resources/` => `OEP-desktop/resources`
+4. Copy `bnb_viewer_standalone/third` files into the `OEP-desktop/third` dir:
+    `bnb_viewer_standalone/third/` => `OEP-desktop/third`
 
     NOTE: The macOS sample only depends on `asyncplusplus` and `glfw` third-party libraries.
 
@@ -19,8 +21,6 @@
       - `asyncplusplus` - used in the class implementing window (can be discarded)
       - `openal` - sound library used by the BanubaSDK
       - `ffmpeg` - used by video player to play video as a [background replacement](https://docs.banuba.com/face-ar-sdk-v1/overview/technical_specification#video-formats-support). 
-4. Copy `bnb_viewer_standalone/third` files into the `OEP-desktop/third` dir:
-    `bnb_viewer_standalone/third/` => `OEP-desktop/third`
 5. Copy and Paste your client token into the appropriate section of `OEP-desktop/main.cpp`
 6. Configure effect in the appropriate section of `OEP_macos/ViewController.swift`, e.g. `effects/test_BG`
     The `effects` folder should be located in `OEP-desktop/resources` folder.
