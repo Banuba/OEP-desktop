@@ -4,6 +4,11 @@
 #include "effect_player.hpp"
 #include "camera_utils.hpp"
 
+#if defined(__APPLE__)
+#include <mach-o/dyld.h>
+#include "CoreFoundation/CoreFoundation.h"
+#endif
+
 #define BNB_CLIENT_TOKEN <#Place your token here#>
 
 int main()
@@ -23,7 +28,22 @@ int main()
 
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
-    auto ep = bnb::oep::interfaces::effect_player::create({BNB_RESOURCES_FOLDER}, BNB_CLIENT_TOKEN);
+    std::vector<std::string> dirs;
+#if defined(__APPLE__)
+    // The BNB SDK framework includes BNB resources if not compiled with option to separate resources.
+    CFBundleRef bundle = CFBundleGetMainBundle();
+    CFURLRef bundleURL = CFBundleCopyBundleURL(bundle);
+    char path[PATH_MAX];
+    Boolean success = CFURLGetFileSystemRepresentation(bundleURL, TRUE, (UInt8 *)path, PATH_MAX);
+    assert(success);
+    CFRelease(bundleURL);
+
+    dirs.push_back(std::string(path) + "/Contents/Frameworks/BanubaEffectPlayer.framework/Resources/bnb-resources");
+    dirs.push_back(std::string(path) + "/Contents/Resources");
+#else
+    dirs.push_back(BNB_RESOURCES_FOLDER);
+#endif
+    auto ep = bnb::oep::interfaces::effect_player::create(dirs, BNB_CLIENT_TOKEN);
 
     // Create instance of offscreen_effect_player, pass effect_player, offscreen_render_target
     // and dimension of processing frame (for best performance it is better to coincide
@@ -66,7 +86,7 @@ int main()
         // the data itself, and without copying it
         auto pb_image = bnb::camera_utils::full_image_to_pixel_buffer(image);
         // Start image processing
-        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg180);
+        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, false, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg180);
     };
     // Create and run instance of camera, pass callback for frames
     auto m_camera_ptr = bnb::create_camera_device(camera_callback, 0);
