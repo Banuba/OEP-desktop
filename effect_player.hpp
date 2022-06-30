@@ -24,6 +24,8 @@ namespace bnb::oep
 
         bool call_js_method(const std::string& method, const std::string& param) override;
 
+        void eval_js(const std::string& script, oep_eval_js_result_cb result_callback) override;
+
         void pause() override;
 
         void resume() override;

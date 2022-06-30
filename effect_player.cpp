@@ -8,6 +8,26 @@
 namespace bnb::oep
 {
 
+    class js_callback : public bnb::interfaces::js_callback
+    {
+    public:
+        js_callback(oep_eval_js_result_cb callback)
+            : m_callback(std::move(callback)){};
+
+        void on_result(const std::string& result) override
+        {
+            m_callback(result);
+        }
+
+    private:
+        oep_eval_js_result_cb m_callback;
+    }; /* class js_callback */
+
+} /* namespace bnb::oep */
+
+namespace bnb::oep
+{
+
     /* effect_player::create */
     effect_player_sptr interfaces::effect_player::create(const std::vector<std::string>& path_to_resources, const std::string& client_token)
     {
@@ -91,6 +111,22 @@ namespace bnb::oep
             return false;
         }
         return true;
+    }
+
+    /* effect_player::eval_js */
+    void effect_player::eval_js(const std::string& script, oep_eval_js_result_cb result_callback)
+    {
+        if (auto e_manager = m_ep->effect_manager()) {
+            if (auto effect = e_manager->current()) {
+                std::shared_ptr<bnb::oep::js_callback> callback
+                    = result_callback ? std::make_shared<bnb::oep::js_callback>(std::move(result_callback)) : nullptr;
+                effect->eval_js(script, callback);
+            } else {
+                std::cout << "[Error] effect not loaded" << std::endl;
+            }
+        } else {
+            std::cout << "[Error] effect manager not initialized" << std::endl;
+        }
     }
 
     /* effect_player::pause */
