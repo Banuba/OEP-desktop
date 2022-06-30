@@ -2,7 +2,6 @@
 
 #include <interfaces/effect_player.hpp>
 #include <bnb/effect_player/interfaces/all.hpp>
-#include <bnb/effect_player/utility.hpp>
 
 namespace bnb::oep
 {
@@ -42,7 +41,6 @@ namespace bnb::oep
         bnb::interfaces::pixel_format make_bnb_pixel_format(pixel_buffer_sptr image);
 
     private:
-        bnb::utility m_utility;
         std::shared_ptr<bnb::interfaces::effect_player> m_ep;
         std::atomic_bool m_is_surface_created {false};
     }; /* class effect_player */
