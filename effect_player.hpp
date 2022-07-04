@@ -9,7 +9,7 @@ namespace bnb::oep
     class effect_player : public bnb::oep::interfaces::effect_player
     {
     public:
-        effect_player(const std::vector<std::string>& path_to_resources, const std::string& client_token);
+        effect_player(int32_t width, int32_t height);
 
         ~effect_player();
 

@@ -4,6 +4,8 @@
 #include "effect_player.hpp"
 #include "camera_utils.hpp"
 
+#include <bnb/recognizer/interfaces/utility_manager.hpp>
+
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #include "CoreFoundation/CoreFoundation.h"
@@ -43,10 +45,14 @@ int main()
 #else
     dirs.push_back(BNB_RESOURCES_FOLDER);
 #endif
-    auto ep = bnb::oep::interfaces::effect_player::create(dirs, BNB_CLIENT_TOKEN);
+    // Initialize Banuba SDK
+    bnb::interfaces::utility_manager::initialize(dirs, BNB_CLIENT_TOKEN);
+
+    // Create our implementation of effect_player, pass effect player frame buffer sizes
+    auto ep = bnb::oep::interfaces::effect_player::create(oep_width, oep_height);
 
     // Create instance of offscreen_effect_player, pass effect_player, offscreen_render_target
-    // and dimension of processing frame (for best performance it is better to coincide
+    // and dimensions of the processing frame (for the best performance it is better that they will coincide
     // with camera frame dimensions)
     auto oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
 

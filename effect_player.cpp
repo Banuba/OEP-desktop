@@ -5,8 +5,6 @@
 #include <optional>
 #include <iostream>
 
-#include <bnb/effect_player/utility.hpp>
-
 namespace bnb::oep
 {
 
@@ -27,53 +25,32 @@ namespace bnb::oep
 
 } /* namespace bnb::oep */
 
-namespace
-{
-    std::unique_ptr<bnb::utility> s_utility;
-    std::once_flag s_initialized;
-#ifndef DNDEBUG
-    std::vector<std::string> s_path_to_resources;
-#endif
-};
-
 namespace bnb::oep
 {
 
     /* effect_player::create */
-    effect_player_sptr interfaces::effect_player::create(const std::vector<std::string>& path_to_resources, const std::string& client_token)
+    effect_player_sptr interfaces::effect_player::create(int32_t width, int32_t height)
     {
-#ifndef DNDEBUG
-        // When you create the second instance of effect_player the paths array should be the same as passed on first call.
-        if (!s_path_to_resources.empty()) {
-            assert(s_path_to_resources == path_to_resources);
-        } else {
-            s_path_to_resources = path_to_resources;
-        }
-#endif
-
-        std::call_once(s_initialized, [](const std::vector<std::string>& path_to_resources, const std::string& client_token) {
-            s_utility = std::make_unique<bnb::utility>(path_to_resources, client_token);
-        }, path_to_resources, client_token);
         // This particular example relies on OpenGL, so it should be explicitly requested
         bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
 
-        return std::make_shared<bnb::oep::effect_player>(path_to_resources, client_token);
+        return std::make_shared<bnb::oep::effect_player>(width, height);
     }
 
+    // the description of the passed parameters to the Banuba SDK effext_player can be found at the link:
+    // https://docs.banuba.com/face-ar-sdk/generated/doxygen/html/structbnb_1_1interfaces_1_1effect__player__configuration.html#a810709129e2bc13eae190305861345ce
+    // NOTE: The parameters fx_width and fx height explicitly influence performance,
+    // for instance, if you have a small screen, e.g. 6 inches, and your rendering surface
+    // is large, e.g. 4K, then it is not necessary to render effect in 4K resolution
+    // since such precision will not be seen on the screen, so the performance can be improved
+    // via rendering the effect on a smaller surface.
+    // In the sample effect frame buffer and the surface are synced in surface_created and surface_changed methods.
+
     /* effect_player::effect_player CONSTRUCTOR */
-    effect_player::effect_player(const std::vector<std::string>& path_to_resources, const std::string& client_token)
-        :
-        // the description of the passed parameters can be found at the link:
-        // https://docs.banuba.com/face-ar-sdk/generated/doxygen/html/structbnb_1_1interfaces_1_1effect__player__configuration.html#a810709129e2bc13eae190305861345ce
-        // Frame buffer for effect player is passed as 1x1 later on surface_created or surface_changed
-        // it will be set to the actual surface size.
-        // NOTE: these parameters explicitly influence performance, for instance, you have a small screen, e.g. 6 inches,
-        // and your rendering surface is large, e.g. 4K, then it is not necessary to render effect in 4K resolution
-        // since such precision will not be seen on the screen, so performance can be improved.
-        // In the sample effect frame buffer and the surface are synced in surface_created and surface_changed
-        m_ep(bnb::interfaces::effect_player::create({
-            1, // fx_width - the effect's framebuffer width
-            1, // fx_height - the effect's framebuffer height
+    effect_player::effect_player(int32_t width, int32_t height)
+        : m_ep(bnb::interfaces::effect_player::create({
+            width, // fx_width - the effect's framebuffer width
+            height, // fx_height - the effect's framebuffer height
             bnb::interfaces::nn_mode::automatically,
             bnb::interfaces::face_search_mode::good,
             false,
