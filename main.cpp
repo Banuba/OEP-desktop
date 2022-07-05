@@ -22,10 +22,11 @@ int main()
     std::shared_ptr<glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
 
     // Create instance of render_context.
-    // NOTE: each instance of OEP should have its own instance of context
+    // NOTE: each instance of Offscreen Render Target should have its own instance of Render Context
     auto rc = bnb::oep::interfaces::render_context::create();
 
     // Create an instance of our offscreen_render_target implementation, you can use your own.
+    // NOTE: each instance of OEP should have its own instance of Offscreen Render Target
     // pass render_context
     auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
 
