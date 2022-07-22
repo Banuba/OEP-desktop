@@ -1,6 +1,7 @@
 #include "renderer.hpp"
 #include "opengl.hpp"
 
+// NV12
 namespace
 {
     const char* vs = \
@@ -29,8 +30,7 @@ namespace bnb::render
 {
     renderer::renderer(int width, int height)
         : m_program("RendererCamera", vs, fs)
-        // Need to flip because image on the texture is oriented head at the top, but for OpenGL it should be upside down
-        , m_frame_surface(camera_orientation::deg_0, true)
+        , m_frame_surface(camera_orientation::deg_0, false)
     {
         surface_change(width, height);
     }

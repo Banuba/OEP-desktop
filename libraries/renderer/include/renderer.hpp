@@ -7,6 +7,12 @@
 
 namespace bnb::render
 {
+    struct nv12_planes
+    {
+        color_plane y_plane;
+        color_plane uv_plane;
+    };
+
     class renderer
     {
     public:
