@@ -15,6 +15,12 @@
 
 int main()
 {
+    // Frame size
+    constexpr int32_t oep_width = 1280;
+    constexpr int32_t oep_height = 720;
+
+    std::shared_ptr<glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
+                                               
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
     std::vector<std::string> dirs;
@@ -34,14 +40,7 @@ int main()
 #endif
 
     // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
-    // In the current implementation of the sample this class should be created before any other
     bnb::utility m_utility(dirs, BNB_CLIENT_TOKEN);
-
-    // Frame size
-    constexpr int32_t oep_width = 1280;
-    constexpr int32_t oep_height = 720;
-
-    std::shared_ptr<glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
 
     // Create instance of render_context.
     // NOTE: each instance of Offscreen Render Target should have its own instance of Render Context
