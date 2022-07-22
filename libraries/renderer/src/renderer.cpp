@@ -1,9 +1,10 @@
 #include "renderer.hpp"
 #include "opengl.hpp"
 
-// NV12
+// RGBA texture
 namespace
 {
+    // NOTE: The shader below assumes that texture image is oriented head at the top, so it inverts y-axis
     const char* vs = \
         " precision highp float; \n "
         " layout (location = 0) in vec3 aPos; \n"
@@ -11,7 +12,7 @@ namespace
         " out vec2 TexCoord; \n"
         " void main() \n"
         " { \n"
-            " gl_Position = vec4(aPos, 1.0); \n"
+            " gl_Position = vec4(aPos.x, -aPos.y, aPos.z, 1.0); \n"
             " TexCoord = aTexCoord; \n"
         " } \n";
 
