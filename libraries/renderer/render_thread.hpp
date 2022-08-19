@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include <glad.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
@@ -10,6 +10,15 @@
 
 namespace bnb::render
 {
+    class render_thread;
+}
+
+using render_t_sptr = std::shared_ptr<bnb::render::render_thread>;
+using render_t_wptr = std::weak_ptr<bnb::render::render_thread>;
+
+namespace bnb::render
+{
+
     class render_thread
     {
     public:
@@ -27,8 +36,6 @@ namespace bnb::render
         GLFWwindow* m_window;
         std::thread m_thread;
         std::atomic<bool> m_cancellation_flag;
-    };
-} // bnb::render
+    }; /* class render_thread */
 
-using render_t_sptr = std::shared_ptr<bnb::render::render_thread>;
-using render_t_wptr = std::weak_ptr<bnb::render::render_thread>;
+} /* namespace bnb::render */

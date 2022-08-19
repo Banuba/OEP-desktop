@@ -1,12 +1,13 @@
 #pragma once
 
-#include <glad/glad.h>
+#include <glad.h>
 #define BNB_GL
 
 #include <bnb/utils/singleton.hpp>
 
 namespace bnb::gl
 {
+
     enum class mali_gpu_family
     {
         generic, // all not listed
@@ -46,9 +47,9 @@ namespace bnb::gl
 
         const char* error_code_to_string(GLenum error_code) const;
         void on_error(GLenum error_code, const char* file, int line);
-    };
+    }; /* class context_info */
 
-} // namespace bnb::gl
+} /* namespace bnb::gl */
 
 #define GL_CHECK_ERROR() bnb::gl::context_info::instance().check_error(__FILE__, __LINE__)
 #define GL_CALL(FUNC) [&]() {FUNC; GL_CHECK_ERROR(); }()

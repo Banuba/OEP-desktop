@@ -1,10 +1,9 @@
 #include "renderer.hpp"
 #include "opengl.hpp"
 
-// RGBA texture
+// NV12
 namespace
 {
-    // NOTE: The shader below assumes that texture image is oriented head at the top, so it inverts y-axis
     const char* vs = \
         " precision highp float; \n "
         " layout (location = 0) in vec3 aPos; \n"
@@ -12,7 +11,7 @@ namespace
         " out vec2 TexCoord; \n"
         " void main() \n"
         " { \n"
-            " gl_Position = vec4(aPos.x, -aPos.y, aPos.z, 1.0); \n"
+            " gl_Position = vec4(aPos, 1.0); \n"
             " TexCoord = aTexCoord; \n"
         " } \n";
 
@@ -29,13 +28,16 @@ namespace
 
 namespace bnb::render
 {
-    renderer::renderer(int width, int height)
+
+    /* renderer::renderer */
+    renderer::renderer(int32_t width, int32_t height)
         : m_program("RendererCamera", vs, fs)
         , m_frame_surface(camera_orientation::deg_0, false)
     {
         surface_change(width, height);
     }
 
+    /* renderer::surface_change */
     void renderer::surface_change(int32_t width, int32_t height)
     {
         m_width = width;
@@ -43,6 +45,7 @@ namespace bnb::render
         m_surface_changed = true;
     }
 
+    /* renderer::update_data */
     void renderer::update_data(int texture_id)
     {
         if (m_texture_updated && m_rendering) {
@@ -54,6 +57,7 @@ namespace bnb::render
         m_texture_updated = true;
     }
 
+    /* renderer::draw */
     bool renderer::draw()
     {
         if (!m_texture_updated) {
@@ -84,4 +88,4 @@ namespace bnb::render
         return true;
     }
 
-} // bnb::render
+} /* namespace bnb::render */
