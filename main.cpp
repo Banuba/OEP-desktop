@@ -19,7 +19,7 @@ int main()
     constexpr int32_t oep_width = 1280;
     constexpr int32_t oep_height = 720;
 
-    std::shared_ptr<glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
+    std::shared_ptr<bnb::gl::glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
                                                
     // Create an instance of effect_player implementation with cpp api, pass path to location of
     // effects and client token
@@ -62,7 +62,7 @@ int main()
     // Make glfw_window and render_thread only for show result of OEP
     // We want to share resources between context, we know that render_context is based on
     // GLFW and returned context is GLFWwindow
-    window = std::make_shared<glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(rc->get_sharing_context()));
+    window = std::make_shared<bnb::gl::glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(rc->get_sharing_context()));
     render_t_sptr render_t = std::make_shared<bnb::render::render_thread>(window->get_window(), oep_width, oep_height);
     auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {

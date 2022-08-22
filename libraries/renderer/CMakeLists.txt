@@ -1,10 +1,10 @@
 set(include_dirs
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/
+    ${CMAKE_CURRENT_SOURCE_DIR}/
 )
 
 file(GLOB_RECURSE srcs
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
 )
 
 add_library(renderer STATIC ${srcs})
@@ -20,5 +20,4 @@ target_link_libraries(renderer
     glad
     glfw
     bnb_oep_opengl_program_target
-    ogl_utils
 )
