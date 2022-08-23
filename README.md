@@ -78,7 +78,6 @@ Contributions are what make the open source community such an amazing place to l
   - **renderer** - used only to demonstrate how to work with offscreen_effect_player. Draws received frames to the specified GLFW window
   - **utils**
     - **glfw_utils** - contains helper classes to work with GLFW
-    - **ogl_utils** - contains helper classes to work with Open GL
     - **utils** - contains common helper classes such as thread_pool
 - **main.cpp** - contains the main function implementation, demonstrating basic pipeline for frame processing to apply effect offscreen
 - **effect_player.cpp, effect_player.hpp** - contains the custom implementation of the effect_player interface with using cpp api
