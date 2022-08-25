@@ -66,7 +66,7 @@ const float frame_surface_handler::vertices[2][frame_surface_handler::v_size][5 
 }};
 // clang-format on
 
-frame_surface_handler::frame_surface_handler(camera_orientation orientation, bool is_y_flip)
+frame_surface_handler::frame_surface_handler(bnb::oep::interfaces::rotation orientation, bool is_y_flip)
     : m_orientation(static_cast<uint32_t>(orientation))
     , m_y_flip(static_cast<uint32_t>(is_y_flip))
 {

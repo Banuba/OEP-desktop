@@ -31,7 +31,7 @@ using namespace bnb::render;
 
 renderer::renderer(int32_t width, int32_t height)
     : m_program("RendererCamera", vs, fs)
-    , m_frame_surface(camera_orientation::deg_0, false)
+    , m_frame_surface(bnb::oep::interfaces::rotation::deg0, false)
 {
     surface_change(width, height);
 }

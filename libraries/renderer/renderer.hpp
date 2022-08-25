@@ -1,7 +1,5 @@
 #pragma once
 
-#include <bnb/types/full_image.hpp>
-
 #include <opengl/program.hpp>
 #include "frame_surface_handler.hpp"
 

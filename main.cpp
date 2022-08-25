@@ -3,6 +3,7 @@
 #include "render_context.hpp"
 #include "effect_player.hpp"
 #include "camera_utils.hpp"
+#include "libraries/utils/glfw_window.hpp"
 
 #include <bnb/effect_player/utility.hpp>
 

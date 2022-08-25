@@ -1,9 +1,8 @@
 #pragma once
 
-#include <bnb/types/base_types.hpp>
-
 #include <glad/glad.h>
 #include <algorithm>
+#include <interfaces/image_format.hpp>
 
 #define BNB_GLSL_VERSION "#version 330 core \n"
 
@@ -12,7 +11,7 @@ namespace bnb::render
     class frame_surface_handler
     {
     private:
-        static const auto v_size = static_cast<uint32_t>(camera_orientation::deg_270) + 1;
+        static const auto v_size = static_cast<uint32_t>(bnb::oep::interfaces::rotation::deg270) + 1;
 
     public:
         /**
@@ -22,7 +21,7 @@ namespace bnb::render
          */
         static const float vertices[2][v_size][5 * 4];
 
-        explicit frame_surface_handler(camera_orientation orientation, bool is_y_flip);
+        explicit frame_surface_handler(bnb::oep::interfaces::rotation orientation, bool is_y_flip);
         virtual ~frame_surface_handler() final;
 
         frame_surface_handler(const frame_surface_handler&) = delete;

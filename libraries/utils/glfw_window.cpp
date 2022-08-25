@@ -1,8 +1,5 @@
 #include "glfw_window.hpp"
 
-#include <bnb/effect_player/utility.hpp>
-#include <bnb/utils/defs.hpp>
-
 #include <glad/glad.h>
 
 using namespace bnb::gl;
