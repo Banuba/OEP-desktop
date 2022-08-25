@@ -78,7 +78,6 @@ Contributions are what make the open source community such an amazing place to l
   - **glad** -  OpenGL loader
   - **renderer** - used only to demonstrate how to work with offscreen_effect_player. Draws received frames to the specified GLFW window
   - **utils** - wrapper for GLFW
-    - **glfw_window.cpp, glfw_window.hpp** - contains helper classes to work with GLFW
 - **main.cpp** - contains the main function implementation, demonstrating basic pipeline for frame processing to apply effect offscreen
 - **effect_player.cpp, effect_player.hpp** - contains the custom implementation of the effect_player interface with using cpp api
 - **render_context.cpp, render_context.hpp** - contains the custom implementation of the render_context interface with using GLFW
