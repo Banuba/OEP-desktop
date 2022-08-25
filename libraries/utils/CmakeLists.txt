@@ -1,2 +1,12 @@
-add_subdirectory(glfw_utils)
-add_subdirectory(ogl_utils)
+file(GLOB_RECURSE srcs
+    ${CMAKE_CURRENT_SOURCE_DIR}/glfw_window.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/glfw_window.hpp
+)
+
+add_library(glfw_utils STATIC ${srcs})
+
+target_link_libraries(glfw_utils
+    Async++
+    glad
+    glfw
+)

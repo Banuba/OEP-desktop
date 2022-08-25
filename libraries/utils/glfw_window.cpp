@@ -1,11 +1,8 @@
 #include "glfw_window.hpp"
 
-#include <bnb/effect_player/utility.hpp>
-#include <bnb/utils/defs.hpp>
-
 #include <glad/glad.h>
 
-using namespace bnb;
+using namespace bnb::gl;
 
 glfw_window::glfw_window(const std::string& title, GLFWwindow* share)
 {
@@ -49,7 +46,8 @@ void glfw_window::show(uint32_t width_hint, uint32_t height_hint)
             glfwSetWindowSize(m_window, width_hint, height_hint);
             glfwSetWindowPos(m_window, 100, 100);
             glfwShowWindow(m_window);
-        });
+        }
+    );
 
     glfwPostEmptyEvent();
 }
@@ -113,7 +111,8 @@ void glfw_window::create_window(const std::string& title, GLFWwindow* share)
         initial_window_height,
         title.c_str(),
         nullptr,
-        share);
+        share
+    );
 
     if (nullptr == m_window) {
         throw std::runtime_error("glfwCreateWindow error");

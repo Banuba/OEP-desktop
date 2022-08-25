@@ -89,8 +89,6 @@ endif (APPLE)
 
 
 target_link_libraries(example
-    glfw
-    glfw_utils
     bnb_effect_player
     renderer
     # below OEP targets
