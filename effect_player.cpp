@@ -1,7 +1,6 @@
 #include "effect_player.hpp"
 
 #include <iostream>
-#include <thread>
 #include <optional>
 #include <iostream>
 
@@ -193,12 +192,9 @@ namespace bnb::oep
     }
 
     /* effect_player::draw */
-    void effect_player::draw()
+    int64_t effect_player::draw()
     {
-        while (m_ep->draw() < 0) {
-            std::this_thread::yield();
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
+        return m_ep->draw();
     }
 
     /* effect_player::make_bnb_image_format */
