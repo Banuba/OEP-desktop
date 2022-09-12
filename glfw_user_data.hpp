@@ -42,7 +42,7 @@ namespace bnb
             return m_camera;
         }
 
-        const bnb::camera_base::push_frame_cb_t& push_frame_cb()
+        bnb::camera_base::push_frame_cb_t push_frame_cb()
         {
             return m_push_frame_cb;
         }
@@ -50,6 +50,6 @@ namespace bnb
         std::weak_ptr<offscreen_effect_player_sptr::element_type> m_oep;
         bnb::camera_sptr& m_camera;
         std::weak_ptr<render_t_sptr::element_type> m_render_target;
-        const bnb::camera_base::push_frame_cb_t m_push_frame_cb;
+        bnb::camera_base::push_frame_cb_t m_push_frame_cb;
     };
 } // namespace viewer
