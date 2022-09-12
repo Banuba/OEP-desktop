@@ -55,6 +55,10 @@ namespace bnb::oep
             false,
             false}))
     {
+        // Disable future filter. See method description for details.
+        m_ep->set_recognizer_use_future_filter(false);
+        // Remove freeze during effect activation
+        m_ep->set_render_consistency_mode(bnb::interfaces::consistency_mode::asynchronous_consistent_when_effect_loaded);
     }
 
     /* effect_player::~effect_player */

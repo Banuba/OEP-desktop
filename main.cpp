@@ -105,6 +105,9 @@ int main()
 
     glfwSetWindowUserPointer(window->get_window(), &ud);
 
+    // Demonstration of key press processing.
+    // The method demonstrates how to initiate application close by pressing the escape key and 
+    // how to start/stop the camera via camera destruction/construction.
     auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
         auto ud = static_cast<::bnb::glfw_user_data*>(glfwGetWindowUserPointer(window));
         if (!ud) {
@@ -113,13 +116,14 @@ int main()
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
-        } else if (key == GLFW_KEY_S) {
+        } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             if (auto oep = ud->oep()) {
                 oep->stop();
                 ud->camera_ptr().reset();
             }
-        } else if (key == GLFW_KEY_P) {
+        } else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
             if (auto oep = ud->oep()) {
+                // If key pressed when oep unstopped
                 if (ud->camera_ptr().get() == nullptr) {
                     ud->camera_ptr() = bnb::create_camera_device((ud->push_frame_cb(), 0);
                     oep->resume();
