@@ -1,7 +1,6 @@
 #include "effect_player.hpp"
 
 #include <iostream>
-#include <thread>
 #include <optional>
 #include <iostream>
 
@@ -56,6 +55,10 @@ namespace bnb::oep
             false,
             false}))
     {
+        // Disable future filter. See method description for details.
+        m_ep->set_recognizer_use_future_filter(false);
+        // Remove freeze during effect activation
+        m_ep->set_render_consistency_mode(bnb::interfaces::consistency_mode::asynchronous_consistent_when_effect_loaded);
     }
 
     /* effect_player::~effect_player */
@@ -193,12 +196,9 @@ namespace bnb::oep
     }
 
     /* effect_player::draw */
-    void effect_player::draw()
+    int64_t effect_player::draw()
     {
-        while (m_ep->draw() < 0) {
-            std::this_thread::yield();
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
-        }
+        return m_ep->draw();
     }
 
     /* effect_player::make_bnb_image_format */

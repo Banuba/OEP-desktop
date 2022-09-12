@@ -33,7 +33,7 @@ namespace bnb::oep
 
         void push_frame(pixel_buffer_sptr image, bnb::oep::interfaces::rotation image_orientation, bool require_mirroring) override;
 
-        void draw() override;
+        int64_t draw() override;
 
     private:
         bnb::image_format make_bnb_image_format(pixel_buffer_sptr image, interfaces::rotation orientation, bool require_mirroring);
