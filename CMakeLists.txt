@@ -53,6 +53,7 @@ if (APPLE)
         effect_player.hpp
         render_context.hpp
         camera_utils.hpp
+        glfw_user_data.hpp
     )
 
     set(APP_SOURCE_FILES
@@ -74,6 +75,7 @@ else (APPLE)
         effect_player.hpp
         render_context.hpp
         camera_utils.hpp
+        glfw_user_data.hpp
     )
 
     set(APP_SOURCE_FILES
