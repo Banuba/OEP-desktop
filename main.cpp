@@ -64,7 +64,7 @@ int main()
     // We want to share resources between context, we know that render_context is based on
     // GLFW and returned context is GLFWwindow
     window = std::make_shared<bnb::gl::glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(rc->get_sharing_context()));
-    render_t_sptr render_t = std::make_shared<bnb::render::render_thread>(window->get_window(), oep_width, oep_height);
+    auto render_t = std::make_shared<bnb::render::renderer>();
 
     oep->load_effect(<#Place the effect name here, e.g. effects/test_BG#>);
 
@@ -83,7 +83,7 @@ int main()
                 auto render_callback = [render_t](std::optional<rendered_texture_t> texture_id) {
                     if (texture_id.has_value()) {
                         auto gl_texture = static_cast<GLuint>(reinterpret_cast<int64_t>(*texture_id));
-                        render_t->update_data(gl_texture);
+                        render_t->update_texture(gl_texture);
                     }
                 };
                 // Get texture id from shared context and render it
@@ -115,6 +115,9 @@ int main()
         }
 
         if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+            if (auto renderer = ud->render_target()) {
+                renderer->stop_auto_rendering();
+            }
             glfwSetWindowShouldClose(window, GLFW_TRUE);
         } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
             if (auto oep = ud->oep()) {
@@ -125,7 +128,7 @@ int main()
             if (auto oep = ud->oep()) {
                 // If key pressed when oep unstopped
                 if (ud->camera_ptr().get() == nullptr) {
-                    ud->camera_ptr() = bnb::create_camera_device((ud->push_frame_cb(), 0);
+                    ud->camera_ptr() = bnb::create_camera_device(ud->push_frame_cb(), 0);
                     oep->resume();
                 }
             }
@@ -153,6 +156,7 @@ int main()
             oep->surface_changed(w, h);
         }
     });
+    render_t->start_auto_rendering(window->get_window());
     window->show(oep_width, oep_height);
     window->run_main_loop();
 
