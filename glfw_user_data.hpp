@@ -13,7 +13,7 @@ namespace bnb
     public:
         glfw_user_data(
             offscreen_effect_player_sptr oep,
-            renderer_sptr render_target,
+            render_t_sptr render_target,
             bnb::camera_sptr& camera,
             bnb::camera_base::push_frame_cb_t push_frame_cb)
             : m_oep(oep)
@@ -32,7 +32,7 @@ namespace bnb
             return m_oep.lock();
         }
 
-        renderer_sptr render_target()
+        render_t_sptr render_target()
         {
             return m_render_target.lock();
         }
@@ -49,7 +49,7 @@ namespace bnb
     private:
         std::weak_ptr<offscreen_effect_player_sptr::element_type> m_oep;
         bnb::camera_sptr& m_camera;
-        std::weak_ptr<renderer_sptr::element_type> m_render_target;
+        std::weak_ptr<render_t_sptr::element_type> m_render_target;
         bnb::camera_base::push_frame_cb_t m_push_frame_cb;
     };
 } // namespace viewer
