@@ -125,7 +125,7 @@ int main()
             if (auto oep = ud->oep()) {
                 // If key pressed when oep unstopped
                 if (ud->camera_ptr().get() == nullptr) {
-                    ud->camera_ptr() = bnb::create_camera_device((ud->push_frame_cb(), 0);
+                    ud->camera_ptr() = bnb::create_camera_device(ud->push_frame_cb(), 0);
                     oep->resume();
                 }
             }
