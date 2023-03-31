@@ -3,6 +3,3 @@
 .DS_Store
 /cmake-build-*
 /build
-/bnb_sdk
-/third
-/resources

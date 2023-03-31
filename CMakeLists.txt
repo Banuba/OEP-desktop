@@ -31,7 +31,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/oep)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libraries)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glfw)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/asyncplusplus)
 
 option(DEPLOY_BUILD "Build for deployment" OFF)
 
@@ -46,7 +47,6 @@ if (APPLE)
     add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
 
     set(EXAMPLE_RESOURCES 
-        ${BNB_RESOURCES_FOLDER}/mac/bnb_viewer.icns
         ${BNB_RESOURCES_FOLDER}/effects)
 
     set(APP_HEADER_FILES
@@ -104,7 +104,7 @@ if (APPLE)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
 
     set(EXAMPLE_BUNDLE_NAME "Banuba Offscreen Rendering Example") # This name can contain up to 15 characters according to Apple's documentation
-    set(EXAMPLE_COPYRIGHT "© 2021 Banuba. All rights reserved.")
+    set(EXAMPLE_COPYRIGHT "© 2023 Banuba. All rights reserved.")
     set(EXAMPLE_INFO "Banuba Offscreen Rendering Example.")
 
     set_target_properties(example PROPERTIES
@@ -118,7 +118,6 @@ if (APPLE)
         MACOSX_BUNDLE_BUNDLE_NAME           ${EXAMPLE_BUNDLE_NAME}            # Sets CFBundleName
         MACOSX_BUNDLE_COPYRIGHT             ${EXAMPLE_COPYRIGHT}              # Sets NSHumanReadableCopyright
         MACOSX_BUNDLE_GUI_IDENTIFIER        "com.banuba.sdk.offsceen.sample"  # Sets CFBundleIdentifier
-        MACOSX_BUNDLE_ICON_FILE             bnb_viewer.icns                   # Sets CFBundleIconFile
         MACOSX_BUNDLE_INFO_STRING           ${EXAMPLE_INFO}                   # Sets CFBundleGetInfoString
 
         # Explicitly skip code signing (CMake tries to turn it on for application bundles)
