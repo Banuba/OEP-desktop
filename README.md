@@ -3,13 +3,14 @@
 ## Getting Started
 
 1. Get the latest Banuba SDK archive for MacOS/Windows and the client token. Please fill out our form at [form at banuba.com](https://www.banuba.com/face-filters-sdk) website, or contact us via [info@banuba.com](mailto:info@banuba.com).
-2. Copy `bnb_sdk.tar.gz/mac` or `bnb_sdk.zip/win` into the `OEP-desktop/bnb_sdk` dir.
-3. Copy and Paste your client token into the appropriate section of [`OEP-desktop/main.cpp`][main.cpp#L15]
-4. Copy `effects` from release archive into `OEP-desktop/resources`. 
+2. Copy `bnb_sdk.tar.gz/mac` (for Mac OS) or `bnb_sdk.zip/bin` with `bnb_sdk.zip/include` (for Windows) into `quickstart-desktop-cpp/bnb_sdk` dir.
+3. Windows only: copy **contents** of `bnb_sdk.zip/resources` into `quickstart-desktop-cpp/resources`.
+4. Copy and Paste your client token into the appropriate section of [`OEP-desktop/main.cpp`][main.cpp#L15]
+5. Copy `effects` from release archive into `OEP-desktop/resources`. 
 Configure effect in the appropriate section of [`OEP-desktop/main.cpp`](main.cpp#L69), e.g. `effects/test_BG`
     The `effects` folder should be located in the `OEP-desktop/resources` folder.
     More effects can be found [here](https://docs.banuba.com/face-ar-sdk-v1/overview/demo_face_filters)
-7. Generate project files by executing the following commands:
+6. Generate project files by executing the following commands:
 
     ##### Windows x86 build:
 
@@ -41,19 +42,10 @@ Configure effect in the appropriate section of [`OEP-desktop/main.cpp`](main.cpp
         cmake -G Xcode ..
     ```
 
-8. The previous step will generate a Xcode project for macOS and a Visual Studio project for Windows. Open the viewer_standalone project in an appropriate IDE on your platform.
-9. Select target `example` in Xcode or set the `example` project as Startup in Visual Studio.
-10. Run build.
+7. The previous step will generate a Xcode project for macOS and a Visual Studio project for Windows. Open the viewer_standalone project in an appropriate IDE on your platform.
+8. Select target `example` in Xcode or set the `example` project as Startup in Visual Studio.
+9. Run build.
 
-## Contributing
-
-Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature`)
-4. Push to the Branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
 
 ## Sample structure
 
