@@ -3,8 +3,8 @@
 ## Getting Started
 
 1. Get the latest Banuba SDK archive for MacOS/Windows and the client token. Please fill out our form at [form at banuba.com](https://www.banuba.com/face-filters-sdk) website, or contact us via [info@banuba.com](mailto:info@banuba.com).
-2. Copy `bnb_sdk.tar.gz/mac` (for Mac OS) or `bnb_sdk.zip/bin` with `bnb_sdk.zip/include` (for Windows) into `quickstart-desktop-cpp/bnb_sdk` dir.
-3. Windows only: copy **contents** of `bnb_sdk.zip/resources` into `quickstart-desktop-cpp/resources`.
+2. Copy `bnb_sdk.tar.gz/mac` (for Mac OS) or `bnb_sdk.zip/bin` with `bnb_sdk.zip/include` (for Windows) into `OEP-desktop/bnb_sdk` dir.
+3. Windows only: copy **contents** of `bnb_sdk.zip/resources` into `OEP-desktop/resources`.
 4. Copy and Paste your client token into the appropriate section of [`OEP-desktop/main.cpp`][main.cpp#L15]
 5. Copy `effects` from release archive into `OEP-desktop/resources`. 
 Configure effect in the appropriate section of [`OEP-desktop/main.cpp`](main.cpp#L69), e.g. `effects/test_BG`
