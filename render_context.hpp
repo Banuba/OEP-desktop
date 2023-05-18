@@ -2,7 +2,7 @@
 
 #include <interfaces/render_context.hpp>
 #include "libraries/utils/glfw_window.hpp"
-#include "libraries/renderer/render_thread.hpp"
+#include "libraries/renderer/renderer.hpp"
 
 namespace bnb::oep
 {
