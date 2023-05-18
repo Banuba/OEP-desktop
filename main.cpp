@@ -96,7 +96,7 @@ int main()
         // the data itself, and without copying it
         auto pb_image = bnb::camera_utils::full_image_to_pixel_buffer(image);
         // Start image processing
-        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, false, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg180);
+        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, true, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg0);
     };
     // Create and run instance of camera, pass callback for frames
     auto camera_ptr = bnb::create_camera_device(camera_callback, 0);
