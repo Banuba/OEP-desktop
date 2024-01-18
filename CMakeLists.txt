@@ -43,7 +43,7 @@ option(DEPLOY_BUILD "Build for deployment" OFF)
 if (APPLE)
     # some magic to add these files to copy phase
     set(SDK_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}/bnb_sdk/mac")
-    set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/$(CONFIGURATION)/BanubaEffectPlayer.framework")
+    set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/BanubaEffectPlayer.framework")
     add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
 
     set(EXAMPLE_RESOURCES 
