@@ -33,6 +33,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libraries)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glfw)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/asyncplusplus)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/player_api)
 
 option(DEPLOY_BUILD "Build for deployment" OFF)
 
@@ -98,6 +99,8 @@ target_link_libraries(example
     bnb_oep_image_processing_result_target
     bnb_oep_offscreen_effect_player_target
     bnb_oep_offscreen_render_target_target
+    #
+    bnb_player_api
 )
 
 if (APPLE)

@@ -1,0 +1,233 @@
+#pragma once
+
+#include <bnb/player_api/player/player.hpp>
+#include <bnb/effect_player/interfaces/all.hpp>
+#include <bnb/types/interfaces/all.hpp>
+
+#include <bnb/player_api/render_target/opengl_render_target.hpp>
+
+#include <iostream>
+
+namespace bnb::player_api
+{
+    
+    /* player::player */
+    player::player(std::shared_ptr<opengl_context> context)
+        : m_thread_started(true)
+        , m_render_mode(render_mode::loop)
+    {
+    
+        auto thread_func = [this]() {
+            while (m_thread_started) {
+                using namespace std::chrono_literals;
+
+                {
+                    std::unique_lock<std::mutex> lock(m_tasks_mutex);
+                    while (!m_tasks.empty()) {
+                        m_tasks.front()();
+                        m_tasks.pop();
+                    }
+                }
+                
+                std::this_thread::sleep_for(1ms);
+                draw();
+            }
+        };
+
+        m_thread = std::thread(thread_func);
+
+        enqueue([this, context] {
+            context->activate();
+            
+            // This particular example relies on OpenGL, so it should be explicitly requested
+            bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
+            
+            m_effect_player = bnb::interfaces::effect_player::create(bnb::interfaces::effect_player_configuration::create(720, 480));
+            m_render_target = std::make_shared<opengl_render_target>(m_effect_player, context);
+            m_effect_player->surface_created(1, 1);
+        }).get();
+    }
+
+    /* player::~player */
+    player::~player()
+    {
+        m_thread_started = false;
+        m_thread.join();
+    }
+
+    /* player::set_render_mode */
+    void player::set_render_mode(render_mode new_render_mode)
+    {
+        m_render_mode = new_render_mode;
+    }
+
+    /* player::play */
+    void player::play()
+    {
+        enqueue([this]() {
+            m_effect_player->playback_play();
+        });
+    }
+
+    /* player::pause */
+    void player::pause()
+    {
+        enqueue([this]() {
+            m_effect_player->playback_pause();
+        });
+    }
+
+    /* player::get_effect_player */
+    effect_player_sptr player::get_effect_player()
+    {
+        return m_effect_player;
+    }
+
+    /* player::use */
+    void player::use(const input_sptr input)
+    {
+        enqueue([this, input]() {
+            m_input = input;
+        });
+    }
+
+    /* player::use */
+    void player::use(const output_sptr output)
+    {
+        enqueue([this, output]() {
+            m_outputs.clear();
+            m_outputs.push_back(output);
+        });
+    }
+
+    /* player::use */
+    void player::use(const std::vector<output_sptr> outputs)
+    {
+        enqueue([this, outputs]() {
+            m_outputs = outputs;
+        });
+    }
+
+    /* player::use */
+    void player::use(const input_sptr input, const output_sptr output)
+    {
+        enqueue([this, input, output]() {
+            m_input = input;
+            m_outputs.clear();
+            m_outputs.push_back(output);
+        });
+    }
+
+    /* player::use */
+    void player::use(const input_sptr input, const std::vector<output_sptr> outputs)
+    {
+        enqueue([this, input, outputs]() {
+            m_input = input;
+            m_outputs = outputs;
+        });
+    }
+
+    /* player::add_output */
+    void player::add_output(const output_sptr output)
+    {
+        enqueue([this, output]() {
+            m_outputs.push_back(output);
+        });
+    }
+
+    /* player::remove_output */
+    void player::remove_output(const output_sptr output)
+    {
+        enqueue([this, output]() {
+            m_outputs.erase(std::remove_if(m_outputs.begin(), m_outputs.end(), [output](const output_sptr& o) {
+                return o == output;
+            }), m_outputs.end());
+        });
+    }
+
+    /* player::load */
+    effect_sptr player::load(const std::string & url)
+    {
+        return enqueue([this](const std::string & url) {
+            if (auto effect_manager = m_effect_player->effect_manager()) {
+                return m_current_effect = effect_manager->load(url);
+            }
+            return m_current_effect = nullptr;
+        }, url).get();
+    }
+    
+    /* player::load_async */
+    effect_sptr player::load_async(const std::string & url)
+    {
+        if (auto effect_manager = m_effect_player->effect_manager()) {
+            return m_current_effect = effect_manager->load_async(url);
+        }
+        return m_current_effect = nullptr;
+    }
+
+    /* player::eval_js */
+    void player::eval_js(const std::string& script, js_callback_sptr callback)
+    {
+        if (m_current_effect != nullptr) {
+            m_current_effect->eval_js(script, callback);
+        } else if (auto effect_manager = m_effect_player->effect_manager()) {
+            effect_manager->current()->eval_js(script, callback);
+        }
+    }
+
+    /* player::render */
+    bool player::render()
+    {
+        enqueue([this]() {
+            if (m_render_mode == render_mode::manual) {
+                draw();
+            }
+        });
+    }
+
+    /* player::draw( */
+    bool player::draw() {
+        bool is_not_active = m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
+        bool is_drawing_forbidden = is_not_active || m_outputs.empty()|| m_input == nullptr;
+        if (is_drawing_forbidden) {
+            return false;
+        }
+
+        auto frame_processor = m_input->get_frame_processor();
+        auto input_frame_data = frame_processor->pop().frame_data;
+        if (input_frame_data == nullptr) {
+            return false;
+        }
+
+        m_render_target->set_frame_time_us(m_input->get_frame_time_us());
+        m_render_target->prepare_to_render();
+        resize(input_frame_data->get_full_img_format());
+
+        auto frame_number = m_effect_player->draw_with_external_frame_data(input_frame_data);
+        if (frame_number < 0) {
+            return false;
+        }
+
+        for (const auto output : m_outputs) {
+            output->present(m_render_target);
+        }
+
+        return true;
+    }
+
+    /* player::resize */
+    void player::resize(const bnb::interfaces::full_image_format& format)
+    {
+        const auto is_vertical = format.orientation == bnb::interfaces::rotation::deg_0 
+                || format.orientation == bnb::interfaces::rotation::deg_180;
+        const auto width = is_vertical ? format.width : format.height;
+        const auto height = is_vertical ? format.height : format.width;
+        const auto size = m_effect_player->effect_manager()->surface_size();
+
+        if (size.width != width || size.height != height) {
+            m_effect_player->surface_changed(width, height);
+            m_effect_player->effect_manager()->set_effect_size(width, height);
+        }
+    }
+
+} /* namespace bnb::player_api */
