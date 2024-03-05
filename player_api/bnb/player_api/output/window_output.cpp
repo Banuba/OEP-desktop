@@ -53,6 +53,8 @@ namespace bnb::player_api
     /* window_output::set_orientation */
     void window_output::set_orientation(orientation orient, bool mirroring)
     {
+        m_orientation = orient;
+        m_mirroring = mirroring;
     }
 
     /* window_output::present */
@@ -60,7 +62,7 @@ namespace bnb::player_api
     {
         int32_t x, y, w, h;
         calculate_frame_layout(m_window_width, m_window_height, render_target->get_render_width(), render_target->get_render_height(), m_content_mode, x, y, w, h);
-        render_target->present(x, y, w, h);
+        render_target->present(x, y, w, h, m_orientation, m_mirroring);
     }
 
     /* window_output::set_window_size */

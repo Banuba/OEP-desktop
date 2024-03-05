@@ -14,7 +14,7 @@ namespace bnb::player_api
 
         void set_content_mode(content_mode new_content_mode) override;
 
-        void set_orientation(orientation orient, bool mirroring) override;
+        void set_orientation(orientation orient, bool mirroring = false) override;
 
         void present(const render_target_sptr render_target) override;
         
@@ -24,6 +24,8 @@ namespace bnb::player_api
         content_mode m_content_mode {content_mode::aspect_fit};
         int32_t m_window_width {0};
         int32_t m_window_height {0};
+        orientation m_orientation {orientation::up};
+        bool m_mirroring {false};
     };
 
 } /* namespace bnb::player_api */

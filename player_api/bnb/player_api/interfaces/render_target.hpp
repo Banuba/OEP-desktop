@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bnb/player_api/interfaces/orientation.hpp>
 #include <memory>
 
 namespace bnb::player_api::interfaces
@@ -29,8 +30,10 @@ namespace bnb::player_api::interfaces
 
         /**
          * Prepare render target to render
+         *  @param width rendering surface width
+         *  @param height rendering surface height
          */
-        virtual void prepare_to_render() = 0;
+        virtual void prepare_to_render(int32_t width, int32_t height) = 0;
 
         /**
          * Set presentation frame time
@@ -60,7 +63,7 @@ namespace bnb::player_api::interfaces
          * @param width
          * @param height
          */
-        virtual void present(int32_t left, int32_t top, int32_t width, int32_t height) = 0;
+        virtual void present(int32_t left, int32_t top, int32_t width, int32_t height, orientation orient = orientation::up, bool mirroring = false) = 0;
     };
 
 } /* namespace bnb::player_api::interfaces */

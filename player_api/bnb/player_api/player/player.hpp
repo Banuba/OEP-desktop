@@ -1,8 +1,9 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/player.hpp>
-#include <bnb/player_api/interfaces/render_context.hpp>
+#include <bnb/player_api/interfaces/render_target.hpp>
 
+#include <atomic>
 #include <vector>
 #include <queue>
 #include <thread>
@@ -18,7 +19,7 @@ namespace bnb::player_api
     {
     public:
 
-        player(render_context_sptr context);
+        player(const render_target_sptr& render_target);
 
         ~player();
 
@@ -63,7 +64,7 @@ namespace bnb::player_api
 
     private:
         std::thread m_thread;
-        bool m_thread_started;
+        std::atomic_bool m_thread_started {true};
 
         std::queue<std::function<void()>> m_tasks;
         std::mutex m_tasks_mutex;
@@ -78,7 +79,7 @@ namespace bnb::player_api
 
         effect_sptr m_current_effect;
         
-        render_mode m_render_mode;
+        render_mode m_render_mode {render_mode::loop};
     };
 
 

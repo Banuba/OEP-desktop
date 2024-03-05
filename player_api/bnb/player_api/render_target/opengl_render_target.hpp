@@ -14,11 +14,11 @@ namespace bnb::player_api
     class opengl_render_target : public bnb::player_api::interfaces::render_target
     {
     public:
-        opengl_render_target(effect_player_sptr effect_player, render_context_sptr context);
+        opengl_render_target(const render_context_sptr& context);
 
         ~opengl_render_target() override;
 
-        void prepare_to_render() override;
+        void prepare_to_render(int32_t width, int32_t height) override;
 
         void set_frame_time_us(uint64_t time_us) noexcept override;
 
@@ -28,7 +28,7 @@ namespace bnb::player_api
 
         int32_t get_render_height() const noexcept override;
 
-        void present(int32_t left, int32_t top, int32_t width, int32_t height) override;
+        void present(int32_t left, int32_t top, int32_t width, int32_t height, orientation orient = orientation::up, bool mirroring = false) override;
 
     private:
         effect_player_sptr m_effect_player;

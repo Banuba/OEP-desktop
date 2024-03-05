@@ -8,6 +8,7 @@
 #include <bnb/player_api/player/player.hpp>
 #include <bnb/player_api/input/stream_input.hpp>
 #include <bnb/player_api/output/window_output.hpp>
+#include <bnb/player_api/render_target/opengl_render_target.hpp>
 
 #include <bnb/spal/camera/base.hpp>
 #include "glfw_window.hpp"
@@ -43,16 +44,18 @@ int main()
 
     // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
     bnb::utility utility(get_resources_folders(), BNB_CLIENT_TOKEN);
-    bnb::utility::load_gl_functions();
 
     auto context = std::make_shared<bnb::opengl_context>(main_window);
-    auto player = std::make_shared<bnb::player_api::player>(context);
+    auto render_target = std::make_shared<bnb::player_api::opengl_render_target>(context);
+    auto player = std::make_shared<bnb::player_api::player>(render_target);
     auto input = std::make_shared<bnb::player_api::stream_input>();
     auto output = std::make_shared<bnb::player_api::window_output>();
 
     player->use(input, output);
     player->play();
-    player->load("effects/DebugFRX");
+    player->load_async("effects/DebugFRX");
+
+    output->set_orientation(bnb::player_api::orientation::down, true);
 
     auto camera_callback = [input](bnb::full_image_t image) {
         input->push(image);

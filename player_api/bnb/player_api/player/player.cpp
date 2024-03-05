@@ -10,9 +10,8 @@ namespace bnb::player_api
 {
 
     /* player::player */
-    player::player(render_context_sptr context)
-        : m_thread_started(true)
-        , m_render_mode(render_mode::loop)
+    player::player(const render_target_sptr& render_target)
+        : m_render_target(render_target)
     {
         auto thread_func = [this]() {
             auto run_tasks = [this]() {
@@ -29,20 +28,15 @@ namespace bnb::player_api
                 std::this_thread::sleep_for(1ms);
                 draw();
             }
-            
+
             run_tasks();
         };
 
         m_thread = std::thread(thread_func);
 
-        enqueue([this, context] {
-            context->activate();
-            
-            // This particular example relies on OpenGL, so it should be explicitly requested
-            bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
-            
+        enqueue([this] {
+            m_render_target->prepare_to_render(0, 0);
             m_effect_player = bnb::interfaces::effect_player::create(bnb::interfaces::effect_player_configuration::create(1, 1));
-            m_render_target = std::make_shared<opengl_render_target>(m_effect_player, context);
             m_effect_player->surface_created(1, 1);
         }).get();
     }
@@ -205,7 +199,8 @@ namespace bnb::player_api
         }
 
         m_render_target->set_frame_time_us(m_input->get_frame_time_us());
-        m_render_target->prepare_to_render();
+        auto effect_manager = m_effect_player->effect_manager();
+        m_render_target->prepare_to_render(effect_manager->surface_size().width, effect_manager->surface_size().height);
         resize(processor_result.frame_data->get_full_img_format());
 
         auto frame_number = m_effect_player->draw_with_external_frame_data(processor_result.frame_data);

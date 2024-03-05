@@ -1,6 +1,6 @@
 #include <bnb/player_api/render_target/opengl_render_target.hpp>
 
-#include <bnb/effect_player/interfaces/all.hpp>
+#include <bnb/effect_player/utility.hpp>
 
 namespace
 {
@@ -49,46 +49,52 @@ namespace bnb::player_api
 {
 
     /* opengl_render_target::opengl_render_target */
-    opengl_render_target::opengl_render_target(effect_player_sptr effect_player, render_context_sptr context)
-        : m_effect_player(effect_player)
-        , m_context(context)
-        , m_shader(std::make_unique<opengl_shader_program>(vertex_shader_source, fragment_shader_source))
-        , m_frame_handler(std::make_unique<opengl_frame_surface_handler>())
+    opengl_render_target::opengl_render_target(const render_context_sptr& context)
+        : m_context(context)
     {
+        // This particular example relies on OpenGL, so it should be explicitly requested
+        bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
+
+        bnb::utility::load_gl_functions();
+        
         m_context->activate();
+        
+        m_shader = std::make_unique<opengl_shader_program>(vertex_shader_source, fragment_shader_source);
+        m_frame_handler = std::make_unique<opengl_frame_surface_handler>();
+        
         GL_CALL(glGenFramebuffers(1, &m_framebuffer));
+        
+        m_context->deactivate();
     }
 
     /* opengl_render_target::~opengl_render_target */
     opengl_render_target::~opengl_render_target()
     {
         m_context->activate();
-        m_shader = nullptr;
-        m_frame_handler = nullptr;
         if (glIsFramebuffer(m_framebuffer)) {
             GL_CALL(glDeleteFramebuffers(1, &m_framebuffer));
             m_framebuffer = 0;
         }
         m_context->deactivate();
-        m_context = nullptr;
     }
 
     /* opengl_render_target::prepare_to_render */
-    void opengl_render_target::prepare_to_render()
+    void opengl_render_target::prepare_to_render(int32_t width, int32_t height)
     {
         m_context->activate();
 
-        auto effect_manager = m_effect_player->effect_manager();
-        auto w = effect_manager->surface_size().width;
-        auto h = effect_manager->surface_size().height;
+        if (width == 0 || height == 0) {
+            // just activate context and return
+            return;
+        }
 
-        if (m_render_width != w || m_render_height != h) {
+        if (m_render_width != width || m_render_height != height) {
             if (m_framebuffer_texture != 0) {
                 delete_texture(m_framebuffer_texture);
             }
-            create_texture(m_framebuffer_texture, w, h);
-            m_render_width = w;
-            m_render_height = h;
+            create_texture(m_framebuffer_texture, width, height);
+            m_render_width = width;
+            m_render_height = height;
         }
 
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer));
@@ -132,13 +138,16 @@ namespace bnb::player_api
     }
 
     /* opengl_render_target::present */
-    void opengl_render_target::present(int32_t left, int32_t top, int32_t width, int32_t height)
+    void opengl_render_target::present(int32_t left, int32_t top, int32_t width, int32_t height, orientation orient, bool mirroring)
     {
         m_context->activate();
+
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
         GL_CALL(glEnable(GL_BLEND));
         GL_CALL(glBlendEquation(GL_FUNC_ADD));
         GL_CALL(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        GL_CALL(glDisable(GL_CULL_FACE));
+        GL_CALL(glDisable(GL_DEPTH_TEST));
         GL_CALL(glViewport(left, top, width, height));
         GL_CALL(glClearColor(1.0f, 1.0f, 1.0f, 0.0f));
         GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
@@ -149,7 +158,7 @@ namespace bnb::player_api
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_framebuffer_texture));
         m_shader->set_uniform_texture(m_shader->get_uniform_location("uTexture"), 0);
 
-        m_frame_handler->draw_surface();
+        m_frame_handler->draw_surface(orient, mirroring);
 
         opengl_shader_program::unuse();
 

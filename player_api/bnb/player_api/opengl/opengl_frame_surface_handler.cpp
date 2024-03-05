@@ -80,8 +80,6 @@ namespace bnb::player_api
         GL_CALL(glEnableVertexAttribArray(1));
         GL_CALL(glBindBuffer(GL_ARRAY_BUFFER, 0));
         GL_CALL(glBindVertexArray(0));
-
-        set_orientation(orientation::up, false);
     }
 
     /* opengl_frame_surface_handler::opengl_frame_surface_handler */
@@ -97,18 +95,13 @@ namespace bnb::player_api
         }
     }
 
-    /* opengl_frame_surface_handler::set_orientation */
-    void opengl_frame_surface_handler::set_orientation(orientation orient, bool mirroring)
-    {
-        int32_t mirroring_geometry_offset = mirroring ? drawing_plane_vert_count * 4 : 0;
-        m_drawing_surface_geometry_offset = static_cast<int32_t>(orient) / 90 * drawing_plane_vert_count + mirroring_geometry_offset;
-    }
-
     /* opengl_frame_surface_handler::draw_surface */
-    void opengl_frame_surface_handler::draw_surface()
+    void opengl_frame_surface_handler::draw_surface(orientation orient, bool mirroring)
     {
+        int32_t mirroring_geometry_offset = mirroring ? 4 * drawing_plane_vert_count : 0;
+        int32_t drawing_plane_geometry_offset = static_cast<int32_t>(orient) / 90 * drawing_plane_vert_count + mirroring_geometry_offset;
         GL_CALL(glBindVertexArray(m_vao));
-        GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, m_drawing_surface_geometry_offset, drawing_plane_vert_count));
+        GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, drawing_plane_geometry_offset, drawing_plane_vert_count));
         GL_CALL(glBindVertexArray(0));
     }
 
