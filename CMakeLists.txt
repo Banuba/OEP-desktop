@@ -25,8 +25,7 @@ endif()
 # Main
 #
 
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/copy_libs.cmake)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glfw)
