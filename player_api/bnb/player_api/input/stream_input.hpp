@@ -12,7 +12,7 @@ namespace bnb::player_api
     public:
         stream_input();
 
-        ~stream_input();
+        ~stream_input() = default;
 
         void push(const frame_data_sptr& fd);
         

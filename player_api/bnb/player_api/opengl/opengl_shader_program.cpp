@@ -106,15 +106,21 @@ namespace bnb::player_api
     }
 
     /* opengl_shader_program::set_uniform_vec2 */
-    void opengl_shader_program::set_uniform_vec2(int32_t uniform, float* vec) const
+    void opengl_shader_program::set_uniform_vec2(int32_t uniform, const float* const vec) const
     {
         GL_CALL(glUniform2fv(uniform, 1, vec));
     }
 
     /* opengl_shader_program::set_uniform_vec4 */
-    void opengl_shader_program::set_uniform_vec4(int32_t uniform, float* vec) const
+    void opengl_shader_program::set_uniform_vec4(int32_t uniform, const float* const vec) const
     {
         GL_CALL(glUniform4fv(uniform, 1, vec));
+    }
+
+    /* opengl_shader_program::set_uniform_mat4 */
+    void opengl_shader_program::set_uniform_mat4(int32_t uniform, const float* const mat) const
+    {
+        GL_CALL(glUniformMatrix4fv(uniform, 1, GL_FALSE, mat));
     }
 
 } /* namespace bnb::player_api */

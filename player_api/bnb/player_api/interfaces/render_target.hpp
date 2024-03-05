@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bnb/player_api/interfaces/orientation.hpp>
 #include <memory>
 
 namespace bnb::player_api::interfaces
@@ -63,7 +62,12 @@ namespace bnb::player_api::interfaces
          * @param width
          * @param height
          */
-        virtual void present(int32_t left, int32_t top, int32_t width, int32_t height, orientation orient = orientation::up, bool mirroring = false) = 0;
+        virtual void present(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4) = 0;
+
+        /**
+         * Swap buffers
+         */
+        virtual void swap_buffers() = 0;
     };
 
 } /* namespace bnb::player_api::interfaces */

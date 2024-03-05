@@ -11,7 +11,7 @@ namespace bnb::player_api
         opengl_frame_surface_handler();
         ~opengl_frame_surface_handler();
 
-        void draw_surface(orientation orient = orientation::up, bool mirroring = false);
+        void draw_surface();
 
     private:
         uint32_t m_vbo {0};

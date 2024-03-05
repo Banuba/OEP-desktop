@@ -25,8 +25,8 @@ namespace bnb::player_api
             while (m_thread_started) {
                 using namespace std::chrono_literals;
                 run_tasks();
-                std::this_thread::sleep_for(1ms);
                 draw();
+                std::this_thread::sleep_for(1ms);
             }
 
             run_tasks();
@@ -36,8 +36,10 @@ namespace bnb::player_api
 
         enqueue([this] {
             m_render_target->prepare_to_render(0, 0);
-            m_effect_player = bnb::interfaces::effect_player::create(bnb::interfaces::effect_player_configuration::create(1, 1));
+            auto ep_conf = bnb::interfaces::effect_player_configuration::create(1, 1);
+            m_effect_player = bnb::interfaces::effect_player::create(ep_conf);
             m_effect_player->surface_created(1, 1);
+            m_effect_player->playback_pause();
         }).get();
     }
 
@@ -139,7 +141,7 @@ namespace bnb::player_api
     {
         enqueue([this, output]() {
             m_outputs.erase(std::remove_if(m_outputs.begin(), m_outputs.end(), [output](const output_sptr& o) {
-                return o == output;
+                return o.get() == output.get();
             }), m_outputs.end());
         });
     }
@@ -186,8 +188,8 @@ namespace bnb::player_api
 
     /* player::draw( */
     bool player::draw() {
-        bool is_not_active = m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
-        bool is_drawing_forbidden = is_not_active || m_outputs.empty()|| m_input == nullptr;
+        auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
+        auto is_drawing_forbidden = is_not_active || m_outputs.empty()|| m_input == nullptr;
         if (is_drawing_forbidden) {
             return false;
         }
@@ -209,6 +211,7 @@ namespace bnb::player_api
         }
 
         for (const auto output : m_outputs) {
+            m_render_target->prepare_to_render(0, 0);
             output->present(m_render_target);
         }
 

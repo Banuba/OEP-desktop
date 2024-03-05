@@ -1,4 +1,4 @@
-[submodule "third"]
-	path = third
-	url = https://github.com/Banuba/desktop-samples-dependencies.git
+[submodule "glfw"]
+	path = third/glfw
+	url = https://github.com/glfw/glfw.git
 	branch = master

@@ -15,49 +15,12 @@ namespace
     constexpr int32_t drawing_plane_vert_stride = sizeof(float) * drawing_plane_coords_per_vert;
 
     // clang-format off
-    static const float drawing_plane_coords[] = {
+    constexpr float drawing_plane_coords[] = {
         /* X      Y     Z     U     V */
-        /* mirroring 0, 0 degrees */
         -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* vertex 0 bottom left */
         1.0f,  -1.0f, 0.0f, 1.0f, 1.0f, /* vertex 1 bottom right */
         -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, /* vertex 2 top left */
         1.0f,   1.0f, 0.0f, 1.0f, 0.0f, /* vertex 3 top right */
-        /* mirroring 0, 90 degrees */
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* vertex 0 bottom left */
-        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, /* vertex 1 bottom right */
-        -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, /* vertex 2 top left */
-        1.0f,   1.0f, 0.0f, 1.0f, 1.0f, /* vertex 3 top right */
-        /* mirroring 0, 180 degrees */
-        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* vertex 0 bottom left */
-        1.0f,  -1.0f, 0.0f, 0.0f, 0.0f, /* vertex 1 bottom right */
-        -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, /* vertex 2 top left */
-        1.0f,   1.0f, 0.0f, 0.0f, 1.0f, /* vertex 3 top right */
-        /* mirroring 0, 270 degrees */
-        -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* vertex 0 bottom left */
-        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, /* vertex 1 bottom right */
-        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* vertex 2 top left */
-        1.0f,   1.0f, 0.0f, 0.0f, 0.0f, /* vertex 3 top right */
-
-        /* mirroring 1, 0 degrees */
-        1.0f,  -1.0f, 0.0f, 0.0f, 1.0f, /* vertex 0 bottom left */
-        -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, /* vertex 1 bottom right */
-        1.0f,   1.0f, 0.0f, 0.0f, 0.0f, /* vertex 2 top left */
-        -1.0f,  1.0f, 0.0f, 1.0f, 0.0f, /* vertex 3 top right */
-        /* mirroring 1, 90 degrees */
-        1.0f,  -1.0f, 0.0f, 0.0f, 0.0f, /* vertex 0 bottom left */
-        -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* vertex 1 bottom right */
-        1.0f,   1.0f, 0.0f, 1.0f, 0.0f, /* vertex 2 top left */
-        -1.0f,  1.0f, 0.0f, 1.0f, 1.0f, /* vertex 3 top right */
-        /* mirroring 1, 180 degrees */
-        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, /* vertex 0 bottom left */
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* vertex 1 bottom right */
-        1.0f,   1.0f, 0.0f, 1.0f, 1.0f, /* vertex 2 top left */
-        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* vertex 3 top right */
-        /* mirroring 1, 270 degrees */
-        1.0f,  -1.0f, 0.0f, 1.0f, 1.0f, /* vertex 0 bottom left */
-        -1.0f, -1.0f, 0.0f, 1.0f, 0.0f, /* vertex 1 bottom right */
-        1.0f,   1.0f, 0.0f, 0.0f, 1.0f, /* vertex 2 top left */
-        -1.0f,  1.0f, 0.0f, 0.0f, 0.0f  /* vertex 3 top right */
     };
     // clang-format on
 }
@@ -96,12 +59,10 @@ namespace bnb::player_api
     }
 
     /* opengl_frame_surface_handler::draw_surface */
-    void opengl_frame_surface_handler::draw_surface(orientation orient, bool mirroring)
+    void opengl_frame_surface_handler::draw_surface()
     {
-        int32_t mirroring_geometry_offset = mirroring ? 4 * drawing_plane_vert_count : 0;
-        int32_t drawing_plane_geometry_offset = static_cast<int32_t>(orient) / 90 * drawing_plane_vert_count + mirroring_geometry_offset;
         GL_CALL(glBindVertexArray(m_vao));
-        GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, drawing_plane_geometry_offset, drawing_plane_vert_count));
+        GL_CALL(glDrawArrays(GL_TRIANGLE_STRIP, 0, drawing_plane_vert_count));
         GL_CALL(glBindVertexArray(0));
     }
 

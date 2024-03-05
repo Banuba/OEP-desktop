@@ -30,7 +30,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glfw)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glad)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glad)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/player_api)
 
 option(DEPLOY_BUILD "Build for deployment" OFF)

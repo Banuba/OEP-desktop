@@ -61,7 +61,7 @@ namespace bnb::player_api::interfaces
         /**
          * Present the drawn frame by the player to the output
          */
-        virtual void present(const render_target_sptr render_target) = 0;
+        virtual void present(const render_target_sptr& render_target) = 0;
     };
 
 } /* namespace bnb::player_api::interfaces */

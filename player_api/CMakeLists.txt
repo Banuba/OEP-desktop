@@ -28,6 +28,9 @@ set(BNB_PLAYER_API_SOURCES
 
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/render_target/opengl_render_target.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/render_target/opengl_render_target.cpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/utils/utils.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/utils/utils.cpp
 )
 
 add_library(bnb_player_api STATIC ${BNB_PLAYER_API_SOURCES})

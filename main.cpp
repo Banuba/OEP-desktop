@@ -40,11 +40,10 @@ std::vector<std::string> get_resources_folders()
 
 int main()
 {
-    auto main_window = std::make_shared<bnb::glfw_window>("Player API Example"); // Should be declared here to destroy in the last turn
-
     // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
     bnb::utility utility(get_resources_folders(), BNB_CLIENT_TOKEN);
 
+    auto main_window = std::make_shared<bnb::glfw_window>("Player API Example");
     auto context = std::make_shared<bnb::opengl_context>(main_window);
     auto render_target = std::make_shared<bnb::player_api::opengl_render_target>(context);
     auto player = std::make_shared<bnb::player_api::player>(render_target);
@@ -55,13 +54,11 @@ int main()
     player->play();
     player->load_async("effects/DebugFRX");
 
-    output->set_orientation(bnb::player_api::orientation::down, true);
-
-    auto camera_callback = [input](bnb::full_image_t image) {
+    auto camera = bnb::create_camera_device([input](bnb::full_image_t image) {
         input->push(image);
-    };
-    auto camera = bnb::create_camera_device(camera_callback, 0);
+    }, 0);
 
+    output->set_orientation(bnb::player_api::orientation::up, false);
     main_window->set_surface_changed_callback([output](int w, int h) {
         output->set_window_size(w, h);
     });

@@ -112,17 +112,12 @@ namespace bnb::player_api
         m_frame_processor = bnb::interfaces::frame_processor::create_realtime_processor(bnb::interfaces::realtime_processor_mode::async_when_effect_loaded, config);
     }
 
-    /* stream_input::~stream_input */
-    stream_input::~stream_input()
-    {
-    }
-    
     /* stream_input::push */
     void stream_input::push(const frame_data_sptr& fd)
     {
         m_frame_processor->push(fd);
     }
-    
+
     /* stream_input::push */
     void stream_input::push(const full_image_t& image, uint64_t timestamp_us)
     {
