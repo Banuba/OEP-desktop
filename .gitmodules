@@ -1,8 +1,3 @@
-[submodule "oep"]
-	path = oep
-	url = https://github.com/Banuba/OEP-module.git
-	branch = master
-
 [submodule "third"]
 	path = third
 	url = https://github.com/Banuba/desktop-samples-dependencies.git

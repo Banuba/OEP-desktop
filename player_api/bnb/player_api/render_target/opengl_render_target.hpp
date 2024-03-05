@@ -1,9 +1,9 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/render_target.hpp>
+#include <bnb/player_api/interfaces/render_context.hpp>
 #include <bnb/player_api/interfaces/player.hpp>
 #include <bnb/player_api/opengl/opengl.hpp>
-#include <bnb/player_api/opengl/opengl_context.hpp>
 #include <bnb/player_api/opengl/opengl_shader_program.hpp>
 #include <bnb/player_api/opengl/opengl_frame_surface_handler.hpp>
 
@@ -14,7 +14,7 @@ namespace bnb::player_api
     class opengl_render_target : public bnb::player_api::interfaces::render_target
     {
     public:
-        opengl_render_target(effect_player_sptr effect_player, std::shared_ptr<opengl_context> context);
+        opengl_render_target(effect_player_sptr effect_player, render_context_sptr context);
 
         ~opengl_render_target() override;
 
@@ -32,7 +32,7 @@ namespace bnb::player_api
 
     private:
         effect_player_sptr m_effect_player;
-        std::shared_ptr<opengl_context> m_context;
+        render_context_sptr m_context;
         std::unique_ptr<opengl_shader_program> m_shader;
         std::unique_ptr<opengl_frame_surface_handler> m_frame_handler;
         

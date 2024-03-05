@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(offscreen_effect_player-desktop-cpp)
+project(playerapi-desktop-cpp)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -28,11 +28,9 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/utils.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/copy_libs.cmake)
 
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/oep)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/libraries)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glfw)
-add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/asyncplusplus)
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/glad)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/player_api)
 
 option(DEPLOY_BUILD "Build for deployment" OFF)
@@ -41,74 +39,42 @@ option(DEPLOY_BUILD "Build for deployment" OFF)
 # Targets #
 ###########
 
+set(APP_SOURCES
+    glfw_window.hpp
+    glfw_window.cpp
+    main.cpp
+    opengl_context.hpp
+)
+
 if (APPLE)
     # some magic to add these files to copy phase
     set(SDK_FRAMEWORK_PATH "${CMAKE_CURRENT_LIST_DIR}/bnb_sdk/mac")
     set(FullEPFrameworkPath "${SDK_FRAMEWORK_PATH}/BanubaEffectPlayer.framework")
     add_custom_command(OUTPUT "${FullEPFrameworkPath}" COMMAND "")
 
-    set(EXAMPLE_RESOURCES 
-        ${BNB_RESOURCES_FOLDER}/effects)
+    set(EXAMPLE_RESOURCES ${BNB_RESOURCES_FOLDER}/effects)
 
-    set(APP_HEADER_FILES
-        effect_player.hpp
-        render_context.hpp
-        camera_utils.hpp
-        glfw_user_data.hpp
-    )
-
-    set(APP_SOURCE_FILES
-        main.cpp
-        effect_player.cpp
-        render_context.cpp
-        camera_utils.cpp
-    )
-
-    add_executable(example ${APP_SOURCE_FILES} ${APP_HEADER_FILES} ${FullEPFrameworkPath} ${EXAMPLE_RESOURCES})
+    add_executable(example ${APP_SOURCES} ${FullEPFrameworkPath} ${EXAMPLE_RESOURCES})
 
     foreach(assetItem ${EXAMPLE_RESOURCES})
       set_source_files_properties(${assetItem} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)   
     endforeach()
     set_source_files_properties(${FullEPFrameworkPath} PROPERTIES MACOSX_PACKAGE_LOCATION Frameworks)
 else (APPLE)
-
-    set(APP_HEADER_FILES
-        effect_player.hpp
-        render_context.hpp
-        camera_utils.hpp
-        glfw_user_data.hpp
-    )
-
-    set(APP_SOURCE_FILES
-        main.cpp
-        effect_player.cpp
-        render_context.cpp
-        camera_utils.cpp
-    )
-
-    add_executable(example ${APP_SOURCE_FILES} ${APP_HEADER_FILES})
+    add_executable(example ${APP_SOURCES})
 endif (APPLE)
 
-
-
 target_link_libraries(example
-    bnb_effect_player
-    renderer
-    # below OEP targets
-    bnb_oep_pixel_buffer_target
-    bnb_oep_image_processing_result_target
-    bnb_oep_offscreen_effect_player_target
-    bnb_oep_offscreen_render_target_target
-    #
+    glfw
     bnb_player_api
 )
 
 if (APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.12")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13")
 
-    set(EXAMPLE_BUNDLE_NAME "Banuba Offscreen Rendering Example") # This name can contain up to 15 characters according to Apple's documentation
-    set(EXAMPLE_COPYRIGHT "© 2023 Banuba. All rights reserved.")
-    set(EXAMPLE_INFO "Banuba Offscreen Rendering Example.")
+    set(EXAMPLE_BUNDLE_NAME "Banuba Player API Example") # This name can contain up to 15 characters according to Apple's documentation
+    set(EXAMPLE_COPYRIGHT "© 2024 Banuba. All rights reserved.")
+    set(EXAMPLE_INFO "Banuba Player API Example.")
 
     set_target_properties(example PROPERTIES
         OUTPUT_NAME ${EXAMPLE_BUNDLE_NAME}
@@ -120,7 +86,7 @@ if (APPLE)
 
         MACOSX_BUNDLE_BUNDLE_NAME           ${EXAMPLE_BUNDLE_NAME}            # Sets CFBundleName
         MACOSX_BUNDLE_COPYRIGHT             ${EXAMPLE_COPYRIGHT}              # Sets NSHumanReadableCopyright
-        MACOSX_BUNDLE_GUI_IDENTIFIER        "com.banuba.sdk.offsceen.sample"  # Sets CFBundleIdentifier
+        MACOSX_BUNDLE_GUI_IDENTIFIER        "com.banuba.sdk.playerapi.sample" # Sets CFBundleIdentifier
         MACOSX_BUNDLE_INFO_STRING           ${EXAMPLE_INFO}                   # Sets CFBundleGetInfoString
 
         # Explicitly skip code signing (CMake tries to turn it on for application bundles)

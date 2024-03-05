@@ -26,7 +26,7 @@ namespace bnb::player_api
         } else if (degrees == 270) {
             return orientation::right;
         }
-        throw std::invalid_argument("unknown degrees value: " + degrees);
+        throw std::invalid_argument("Unknown degrees value");
     }
 
 } /* namespace bnb::player_api */

@@ -124,7 +124,7 @@ namespace bnb::player_api
     }
     
     /* stream_input::push */
-    void stream_input::push(const full_image_t& image, uint64_t timestamp_us, orientation orient, bool require_mirroring)
+    void stream_input::push(const full_image_t& image, uint64_t timestamp_us)
     {
         m_timestamp = timestamp_us;
         auto fd = bnb::interfaces::frame_data::create();
@@ -148,9 +148,7 @@ namespace bnb::player_api
                         color_plane(image->get_base_sptr()),
                         make_bnb_pixel_format(image),
                         bnb_image_format)),
-                    timestamp_us,
-                    orient,
-                    require_mirroring);
+                    timestamp_us);
                 break;
             case ns::nv12_bt601_full:
             case ns::nv12_bt601_video:
@@ -162,9 +160,7 @@ namespace bnb::player_api
                         color_plane(image->get_base_sptr_of_plane(1)),
                         bnb_image_format,
                         make_bnb_yuv_format(image))),
-                    timestamp_us,
-                    orient,
-                    require_mirroring);
+                    timestamp_us);
                 break;
             case ns::i420_bt601_full:
             case ns::i420_bt601_video:
@@ -177,9 +173,7 @@ namespace bnb::player_api
                         color_plane(image->get_base_sptr_of_plane(2)),
                         bnb_image_format,
                         make_bnb_yuv_format(image))),
-                    timestamp_us,
-                    orient,
-                    require_mirroring);
+                    timestamp_us);
                 break;
             default:
                 break;

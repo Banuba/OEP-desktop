@@ -1,9 +1,15 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/player.hpp>
-#include <bnb/player_api/player/thread_pool.hpp>
-#include <bnb/player_api/opengl/opengl_context.hpp>
+#include <bnb/player_api/interfaces/render_context.hpp>
 
+#include <vector>
+#include <queue>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <future>
+#include <stdexcept>
 
 namespace bnb::player_api
 {
@@ -12,7 +18,7 @@ namespace bnb::player_api
     {
     public:
 
-        player(std::shared_ptr<opengl_context> context);
+        player(render_context_sptr context);
 
         ~player();
 

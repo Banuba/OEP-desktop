@@ -1,5 +1,3 @@
-#pragma once
-
 #include <bnb/player_api/player/player.hpp>
 #include <bnb/effect_player/interfaces/all.hpp>
 #include <bnb/types/interfaces/all.hpp>
@@ -10,28 +8,29 @@
 
 namespace bnb::player_api
 {
-    
+
     /* player::player */
-    player::player(std::shared_ptr<opengl_context> context)
+    player::player(render_context_sptr context)
         : m_thread_started(true)
         , m_render_mode(render_mode::loop)
     {
-    
         auto thread_func = [this]() {
+            auto run_tasks = [this]() {
+                std::unique_lock<std::mutex> lock(m_tasks_mutex);
+                while (!m_tasks.empty()) {
+                    m_tasks.front()();
+                    m_tasks.pop();
+                }
+            };
+
             while (m_thread_started) {
                 using namespace std::chrono_literals;
-
-                {
-                    std::unique_lock<std::mutex> lock(m_tasks_mutex);
-                    while (!m_tasks.empty()) {
-                        m_tasks.front()();
-                        m_tasks.pop();
-                    }
-                }
-                
+                run_tasks();
                 std::this_thread::sleep_for(1ms);
                 draw();
             }
+            
+            run_tasks();
         };
 
         m_thread = std::thread(thread_func);
@@ -42,7 +41,7 @@ namespace bnb::player_api
             // This particular example relies on OpenGL, so it should be explicitly requested
             bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
             
-            m_effect_player = bnb::interfaces::effect_player::create(bnb::interfaces::effect_player_configuration::create(720, 480));
+            m_effect_player = bnb::interfaces::effect_player::create(bnb::interfaces::effect_player_configuration::create(1, 1));
             m_render_target = std::make_shared<opengl_render_target>(m_effect_player, context);
             m_effect_player->surface_created(1, 1);
         }).get();
@@ -51,6 +50,9 @@ namespace bnb::player_api
     /* player::~player */
     player::~player()
     {
+        enqueue([this] {
+            m_effect_player->surface_destroyed();
+        });
         m_thread_started = false;
         m_thread.join();
     }
@@ -88,6 +90,7 @@ namespace bnb::player_api
     {
         enqueue([this, input]() {
             m_input = input;
+            m_effect_player->set_frame_processor(m_input->get_frame_processor());
         });
     }
 
@@ -115,6 +118,7 @@ namespace bnb::player_api
             m_input = input;
             m_outputs.clear();
             m_outputs.push_back(output);
+            m_effect_player->set_frame_processor(m_input->get_frame_processor());
         });
     }
 
@@ -124,6 +128,7 @@ namespace bnb::player_api
         enqueue([this, input, outputs]() {
             m_input = input;
             m_outputs = outputs;
+            m_effect_player->set_frame_processor(m_input->get_frame_processor());
         });
     }
 
@@ -194,16 +199,16 @@ namespace bnb::player_api
         }
 
         auto frame_processor = m_input->get_frame_processor();
-        auto input_frame_data = frame_processor->pop().frame_data;
-        if (input_frame_data == nullptr) {
+        auto processor_result = frame_processor->pop();
+        if (processor_result.frame_data == nullptr) {
             return false;
         }
 
         m_render_target->set_frame_time_us(m_input->get_frame_time_us());
         m_render_target->prepare_to_render();
-        resize(input_frame_data->get_full_img_format());
+        resize(processor_result.frame_data->get_full_img_format());
 
-        auto frame_number = m_effect_player->draw_with_external_frame_data(input_frame_data);
+        auto frame_number = m_effect_player->draw_with_external_frame_data(processor_result.frame_data);
         if (frame_number < 0) {
             return false;
         }

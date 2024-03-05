@@ -16,7 +16,7 @@ namespace bnb::player_api
 
         void push(const frame_data_sptr& fd);
         
-        void push(const full_image_t& image, uint64_t timestamp_us = 0, orientation orient = orientation::up, bool require_mirroring = false);
+        void push(const full_image_t& image, uint64_t timestamp_us = 0);
         
         void push(const pixel_buffer_sptr& image, uint64_t timestamp_us = 0, orientation orient = orientation::up, bool require_mirroring = false);
 

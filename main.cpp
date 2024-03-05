@@ -1,29 +1,24 @@
-#include <interfaces/offscreen_effect_player.hpp>
-
-#include "render_context.hpp"
-#include "effect_player.hpp"
-#include "camera_utils.hpp"
-#include "glfw_user_data.hpp"
-
-#include <bnb/effect_player/utility.hpp>
-
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #include "CoreFoundation/CoreFoundation.h"
 #endif
 
-#define BNB_CLIENT_TOKEN <#Place your token here#>
+#include <bnb/effect_player/utility.hpp>
 
-int main()
+#include <bnb/player_api/player/player.hpp>
+#include <bnb/player_api/input/stream_input.hpp>
+#include <bnb/player_api/output/window_output.hpp>
+
+#include <bnb/spal/camera/base.hpp>
+#include "glfw_window.hpp"
+#include "opengl_context.hpp"
+
+#include <iostream>
+
+#define BNB_CLIENT_TOKEN <#PUT YOUR TOKEN HERE#>
+
+std::vector<std::string> get_resources_folders()
 {
-    // Frame size
-    constexpr int32_t oep_width = 1280;
-    constexpr int32_t oep_height = 720;
-
-    std::shared_ptr<bnb::gl::glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
-                                               
-    // Create an instance of effect_player implementation with cpp api, pass path to location of
-    // effects and client token
     std::vector<std::string> dirs;
 #if defined(__APPLE__)
     // The BNB SDK framework includes BNB resources if not compiled with option to separate resources.
@@ -39,126 +34,36 @@ int main()
 #else
     dirs.push_back(BNB_RESOURCES_FOLDER);
 #endif
+    return dirs;
+}
+
+int main()
+{
+    auto main_window = std::make_shared<bnb::glfw_window>("Player API Example"); // Should be declared here to destroy in the last turn
 
     // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
-    bnb::utility m_utility(dirs, BNB_CLIENT_TOKEN);
+    bnb::utility utility(get_resources_folders(), BNB_CLIENT_TOKEN);
+    bnb::utility::load_gl_functions();
 
-    // Create instance of render_context.
-    // NOTE: each instance of Offscreen Render Target should have its own instance of Render Context
-    auto rc = bnb::oep::interfaces::render_context::create();
+    auto context = std::make_shared<bnb::opengl_context>(main_window);
+    auto player = std::make_shared<bnb::player_api::player>(context);
+    auto input = std::make_shared<bnb::player_api::stream_input>();
+    auto output = std::make_shared<bnb::player_api::window_output>();
 
-    // Create an instance of our offscreen_render_target implementation, you can use your own.
-    // NOTE: each instance of OEP should have its own instance of Offscreen Render Target
-    // pass render_context
-    auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
+    player->use(input, output);
+    player->play();
+    player->load("effects/DebugFRX");
 
-    // Create our implementation of effect_player, pass effect player frame buffer sizes
-    auto ep = bnb::oep::interfaces::effect_player::create(oep_width, oep_height);
-
-    // Create instance of offscreen_effect_player, pass effect_player, offscreen_render_target
-    // and dimensions of the processing frame (for the best performance it is better that they will coincide
-    // with camera frame dimensions)
-    auto oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
-
-    // Make glfw_window and render_thread only for show result of OEP
-    // We want to share resources between context, we know that render_context is based on
-    // GLFW and returned context is GLFWwindow
-    window = std::make_shared<bnb::gl::glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(rc->get_sharing_context()));
-    auto render_t = std::make_shared<bnb::render::renderer>();
-
-    oep->load_effect(<#Place the effect name here, e.g. effects/test_BG#>);
-
-    // Callback for received frame from the camera
-    auto camera_callback = [weak_oep = std::weak_ptr<decltype(oep)::element_type>(oep),
-        weak_render_t = std::weak_ptr<decltype(render_t)::element_type>(render_t)](bnb::full_image_t image) {
-        auto oep = weak_oep.lock();
-        auto render_t = weak_render_t.lock();
-        if (!oep || !render_t) {
-            return;
-        }
-        // Callback for received pixel buffer from the offscreen effect player
-        auto get_pixel_buffer_callback = [render_t](image_processing_result_sptr result) {
-            if (result != nullptr) {
-                // Callback for update data in render thread
-                auto render_callback = [render_t](std::optional<rendered_texture_t> texture_id) {
-                    if (texture_id.has_value()) {
-                        auto gl_texture = static_cast<GLuint>(reinterpret_cast<int64_t>(*texture_id));
-                        render_t->update_texture(gl_texture);
-                    }
-                };
-                // Get texture id from shared context and render it
-                result->get_texture(render_callback);
-            }
-        };
-
-        // Convert bnb full_image_t to OEP pixel_buffer
-        // This function just wraps data from one type to another, without doing any manipulations with
-        // the data itself, and without copying it
-        auto pb_image = bnb::camera_utils::full_image_to_pixel_buffer(image);
-        // Start image processing
-        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, true, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg0);
+    auto camera_callback = [input](bnb::full_image_t image) {
+        input->push(image);
     };
-    // Create and run instance of camera, pass callback for frames
-    auto camera_ptr = bnb::create_camera_device(camera_callback, 0);
+    auto camera = bnb::create_camera_device(camera_callback, 0);
 
-    bnb::glfw_user_data ud(oep, render_t, camera_ptr, camera_callback);
-
-    glfwSetWindowUserPointer(window->get_window(), &ud);
-
-    // Demonstration of key press processing.
-    // The method demonstrates how to initiate application close by pressing the escape key and 
-    // how to start/stop the camera via camera destruction/construction.
-    auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        auto ud = static_cast<::bnb::glfw_user_data*>(glfwGetWindowUserPointer(window));
-        if (!ud) {
-            return;
-        }
-
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            if (auto renderer = ud->render_target()) {
-                renderer->stop_auto_rendering();
-            }
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-            if (auto oep = ud->oep()) {
-                oep->stop();
-                ud->camera_ptr().reset();
-            }
-        } else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-            if (auto oep = ud->oep()) {
-                // If key pressed when oep unstopped
-                if (ud->camera_ptr().get() == nullptr) {
-                    ud->camera_ptr() = bnb::create_camera_device(ud->push_frame_cb(), 0);
-                    oep->resume();
-                }
-            }
-        }
-    };
-    glfwSetKeyCallback(window->get_window(), key_func);
-    window->set_resize_callback([weak_window = std::weak_ptr<decltype(window)::element_type>(window)](int32_t w, int32_t h, int32_t w_glfw_buffer, int32_t h_glfw_buffer) {
-        auto window = weak_window.lock();
-        if (!window) {
-            return;
-        }
-        auto ud = static_cast<::bnb::glfw_user_data*>(glfwGetWindowUserPointer(window->get_window()));
-        if (!ud) {
-            return;
-        }
-
-        // When minimizing a window on windows, glfw passes zero dimensions. Zero dimensions cannot be passed in OEP
-        if (w <= 0 || h <= 0 || w_glfw_buffer <= 0 || h_glfw_buffer <= 0) {
-            return;
-        }
-        if (auto render_t = ud->render_target(); render_t.get()) {
-            render_t->surface_changed(w_glfw_buffer, h_glfw_buffer);
-        }
-        if (auto oep = ud->oep(); oep.get()) {
-            oep->surface_changed(w, h);
-        }
+    main_window->set_surface_changed_callback([output](int w, int h) {
+        output->set_window_size(w, h);
     });
-    render_t->start_auto_rendering(window->get_window());
-    window->show(oep_width, oep_height);
-    window->run_main_loop();
+
+    main_window->show_and_run_events_loop();
 
     return 0;
 }

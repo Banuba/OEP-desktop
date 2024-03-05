@@ -49,7 +49,7 @@ namespace bnb::player_api
 {
 
     /* opengl_render_target::opengl_render_target */
-    opengl_render_target::opengl_render_target(effect_player_sptr effect_player, std::shared_ptr<opengl_context> context)
+    opengl_render_target::opengl_render_target(effect_player_sptr effect_player, render_context_sptr context)
         : m_effect_player(effect_player)
         , m_context(context)
         , m_shader(std::make_unique<opengl_shader_program>(vertex_shader_source, fragment_shader_source))
@@ -96,7 +96,8 @@ namespace bnb::player_api
 
         if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-            std::runtime_error("Failed to make complete framebuffer object: " + status);
+            // TODO: message with status
+            std::runtime_error("Failed to make complete framebuffer object: " );
         }
 
         GL_CALL(glViewport(0, 0, m_render_width, m_render_height));
@@ -143,7 +144,7 @@ namespace bnb::player_api
         GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
         m_shader->use();
-        
+
         GL_CALL(glActiveTexture(GL_TEXTURE0));
         GL_CALL(glBindTexture(GL_TEXTURE_2D, m_framebuffer_texture));
         m_shader->set_uniform_texture(m_shader->get_uniform_location("uTexture"), 0);
@@ -151,7 +152,7 @@ namespace bnb::player_api
         m_frame_handler->draw_surface();
 
         opengl_shader_program::unuse();
-        
+
         m_context->swap_buffers();
     }
     
