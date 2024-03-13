@@ -15,7 +15,7 @@
 namespace bnb::player_api
 {
 
-    class player : public interfaces::player
+    class player : public bnb::player_api::interfaces::player
     {
     public:
 
@@ -24,6 +24,8 @@ namespace bnb::player_api
         ~player();
 
         void set_render_mode(render_mode new_render_mode) override;
+
+        void set_render_status_callback(render_status_callback callback) override;
 
         void play() override;
 
@@ -80,6 +82,8 @@ namespace bnb::player_api
         effect_sptr m_current_effect;
         
         render_mode m_render_mode {render_mode::loop};
+
+        render_status_callback m_render_callback;
     };
 
 

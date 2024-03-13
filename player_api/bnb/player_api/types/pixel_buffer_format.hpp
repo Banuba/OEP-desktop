@@ -23,6 +23,6 @@ namespace bnb::player_api
         i420_bt601_video, /* three planes: first RED, second RED, third RED */
         i420_bt709_full,  /* three planes: first RED, second RED, third RED */
         i420_bt709_video  /* three planes: first RED, second RED, third RED */
-    }; /* enum class image_format */
+    }; /* enum class pixel_buffer_format */
 
 } /* namespace bnb::player_api */

@@ -59,6 +59,12 @@ namespace bnb::player_api
         m_render_mode = new_render_mode;
     }
 
+    /* player::set_render_status_callback */
+    void player::set_render_status_callback(render_status_callback callback)
+    {
+        m_render_callback = callback;
+    }
+
     /* player::play */
     void player::play()
     {
@@ -188,15 +194,22 @@ namespace bnb::player_api
 
     /* player::draw( */
     bool player::draw() {
+        auto rc = m_render_callback;
         auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
         auto is_drawing_forbidden = is_not_active || m_outputs.empty()|| m_input == nullptr;
         if (is_drawing_forbidden) {
+            if (rc != nullptr) {
+                rc(-1);
+            }
             return false;
         }
 
         auto frame_processor = m_input->get_frame_processor();
         auto processor_result = frame_processor->pop();
         if (processor_result.frame_data == nullptr) {
+            if (rc != nullptr) {
+                rc(-1);
+            }
             return false;
         }
 
@@ -207,6 +220,9 @@ namespace bnb::player_api
 
         auto frame_number = m_effect_player->draw_with_external_frame_data(processor_result.frame_data);
         if (frame_number < 0) {
+            if (rc != nullptr) {
+                rc(-1);
+            }
             return false;
         }
 
@@ -215,6 +231,9 @@ namespace bnb::player_api
             output->present(m_render_target);
         }
 
+        if (rc != nullptr) {
+            rc(frame_number);
+        }
         return true;
     }
 

@@ -6,6 +6,7 @@
 #include <bnb/effect_player/interfaces/effect.hpp>
 
 #include <memory>
+#include <functional>
 
 namespace bnb::player_api::interfaces
 {
@@ -43,6 +44,8 @@ namespace bnb::player_api::interfaces
             manual
         };
 
+        using render_status_callback = std::function<void(int64_t)>;
+
     public:
         virtual ~player() = default;
 
@@ -51,6 +54,12 @@ namespace bnb::player_api::interfaces
          * @param new_render_mode new rendering mode
          */
         virtual void set_render_mode(render_mode new_render_mode) = 0;
+
+        /**
+         * Set rendering callback status
+         * @param callback render callback
+         */
+        virtual void set_render_status_callback(render_status_callback callback) = 0;
 
         /**
          * Resume the playback of the effect.

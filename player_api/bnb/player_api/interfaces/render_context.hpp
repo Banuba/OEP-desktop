@@ -26,8 +26,6 @@ namespace bnb::player_api::interfaces
         virtual void activate() = 0;
 
         virtual void deactivate() = 0;
-
-        virtual void swap_buffers() = 0;
     };
 
 } /* namespace bnb::player_api::interfaces */

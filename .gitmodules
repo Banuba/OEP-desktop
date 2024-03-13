@@ -1,4 +1,6 @@
-[submodule "glfw"]
-	path = third/glfw
-	url = https://github.com/glfw/glfw.git
-	branch = master
+[submodule "third/nanogui"]
+	path = third/nanogui
+	url = https://github.com/wjakob/nanogui.git
+[submodule "player_api/bnb/player_api/third/libyuv"]
+	path = player_api/bnb/player_api/third/libyuv
+	url = https://chromium.googlesource.com/libyuv/libyuv

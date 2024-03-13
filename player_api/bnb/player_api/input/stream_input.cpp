@@ -1,7 +1,7 @@
 #include <bnb/player_api/input/stream_input.hpp>
 
-#include <bnb/player_api/interfaces/pixel_buffer_format.hpp>
 #include <bnb/effect_player/interfaces/all.hpp>
+#include <bnb/player_api/types/pixel_buffer_format.hpp>
 #include <bnb/types/interfaces/all.hpp>
 
 namespace

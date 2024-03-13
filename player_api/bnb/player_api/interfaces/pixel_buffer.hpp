@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bnb/player_api/interfaces/pixel_buffer_format.hpp>
+#include <bnb/player_api/types/pixel_buffer_format.hpp>
 
 #include <memory>
 #include <functional>

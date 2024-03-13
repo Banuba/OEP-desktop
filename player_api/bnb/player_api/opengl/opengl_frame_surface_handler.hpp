@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bnb/player_api/interfaces/orientation.hpp>
+#include <bnb/player_api/types/orientation.hpp>
 
 namespace bnb::player_api
 {
