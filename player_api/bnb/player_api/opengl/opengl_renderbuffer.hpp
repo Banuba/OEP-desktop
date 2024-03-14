@@ -12,6 +12,7 @@ namespace bnb::player_api
         ~opengl_renderbuffer();
 
         void prepare(int32_t width, int32_t height);
+        static void unbind();
 
         int32_t get_width() const noexcept;
         int32_t get_height() const noexcept;

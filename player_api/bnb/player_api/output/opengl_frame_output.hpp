@@ -43,12 +43,11 @@ namespace bnb::player_api
         bool m_format_is_nv12 {false};
         bool m_format_is_i420 {false};
 
-        uint32_t m_read_image_format {0};
+        uint32_t m_gl_read_pixels_format {0};
 
         int32_t m_uniform_texture {0};
         int32_t m_uniform_matrix {0};
         int32_t m_uniform_yuv_plane_convert_coefs {0};
-        int32_t m_uniform_yuv_pixel_step {0};
     }; /* class opengl_frame_output */
 
 } /* namespace bnb::player_api */

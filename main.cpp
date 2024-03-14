@@ -46,6 +46,75 @@ std::vector<std::string> get_resources_folders()
     return dirs;
 }
 
+void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_buffer_sptr& pb)
+{
+    using t = bnb::player_api::pixel_buffer_format;
+    switch (pb->get_format()) {
+            case t::bpc8_rgb:
+            case t::bpc8_bgr:
+            case t::bpc8_rgba:
+            case t::bpc8_bgra:
+            case t::bpc8_argb:
+                stbi_write_png(
+                    (path + ".png").c_str(),
+                    pb->get_width(),
+                    pb->get_height(),
+                    pb->get_bytes_per_pixel(),
+                    pb->get_base_ptr(),
+                    pb->get_bytes_per_row()
+                );
+                break;
+            case t::nv12_bt601_full:
+            case t::nv12_bt601_video:
+            case t::nv12_bt709_full:
+            case t::nv12_bt709_video:
+                {
+                    int rgb_stride = pb->get_width() * 3;
+                    size_t size = rgb_stride * pb->get_height();
+                    uint8_t* raw_ptr = new uint8_t[size];
+                    libyuv::NV12ToRGB24(
+                        pb->get_base_ptr_of_plane(0),
+                        pb->get_bytes_per_row_of_plane(0),
+                        pb->get_base_ptr_of_plane(1),
+                        pb->get_bytes_per_row_of_plane(1),
+                        raw_ptr,
+                        rgb_stride,
+                        pb->get_width(),
+                        pb->get_height()
+                    );
+                    stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
+                    delete [] raw_ptr;
+                    stbi_write_png((path + ".raw.png").c_str(), pb->get_width(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                }
+                break;
+            case t::i420_bt601_full:
+            case t::i420_bt601_video:
+            case t::i420_bt709_full:
+            case t::i420_bt709_video:
+                {
+                    int rgb_stride = pb->get_width() * 3;
+                    size_t size = rgb_stride * pb->get_height();
+                    uint8_t* raw_ptr = new uint8_t[size];
+                    libyuv::I420ToRGB24(
+                        pb->get_base_ptr_of_plane(0),
+                        pb->get_bytes_per_row_of_plane(0),
+                        pb->get_base_ptr_of_plane(1),
+                        pb->get_bytes_per_row_of_plane(1),
+                        pb->get_base_ptr_of_plane(2),
+                        pb->get_bytes_per_row_of_plane(2),
+                        raw_ptr,
+                        rgb_stride,
+                        pb->get_width(),
+                        pb->get_height()
+                    );
+                    stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
+                    delete [] raw_ptr;
+                    stbi_write_png((path + "raw.png").c_str(), pb->get_width(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                }
+                break;
+        }
+}
+
 int main()
 {
     // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
@@ -59,77 +128,11 @@ int main()
     auto player = std::make_shared<bnb::player_api::player>(render_target);
     auto input = std::make_shared<bnb::player_api::stream_input>();
     auto window_output = std::make_shared<bnb::player_api::window_output>();
-    auto frame_output = std::make_shared<bnb::player_api::opengl_frame_output>([](const bnb::player_api::pixel_buffer_sptr& pb) {
-        using t = bnb::player_api::pixel_buffer_format;
-        std::string subdir = "/Users/petrkulbaka/work/cpp_player_api/build/";
-        switch (pb->get_format()) {
-            case t::bpc8_rgb:
-                stbi_write_png((subdir + "bpc8_rgb.png").c_str(), pb->get_width(), pb->get_height(), 3, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                break;
-            case t::bpc8_bgr:
-                stbi_write_png((subdir + "bpc8_bgr.png").c_str(), pb->get_width(), pb->get_height(), 3, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                break;
-            case t::bpc8_rgba:
-                stbi_write_png((subdir + "bpc8_rgba.png").c_str(), pb->get_width(), pb->get_height(), 4, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                break;
-            case t::bpc8_bgra:
-                stbi_write_png((subdir + "bpc8_bgra.png").c_str(), pb->get_width(), pb->get_height(), 4, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                break;
-            case t::bpc8_argb:
-                stbi_write_png((subdir + "bpc8_argb.png").c_str(), pb->get_width(), pb->get_height(), 4, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                break;
-            case t::nv12_bt601_full:
-            case t::nv12_bt601_video:
-            case t::nv12_bt709_full:
-            case t::nv12_bt709_video:
-                {
-                    int rgb_stride = pb->get_width() * 3;
-                    size_t size = rgb_stride * pb->get_height();
-                    uint8_t* raw_ptr = new uint8_t[size];
-                    libyuv::NV12ToRGB24(
-                        pb->get_base_sptr_of_plane(0).get(),
-                        pb->get_bytes_per_row_of_plane(0),
-                        pb->get_base_sptr_of_plane(1).get(),
-                        pb->get_bytes_per_row_of_plane(1),
-                        raw_ptr,
-                        rgb_stride,
-                        pb->get_width(),
-                        pb->get_height()
-                    );
-                    stbi_write_png((subdir + "yuv_nv12.png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
-                    delete [] raw_ptr;
-                    stbi_write_png((subdir + "yuv_nv12_raw.png").c_str(), pb->get_width(), pb->get_height() * 2, 1, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                }
-                break;
-            case t::i420_bt601_full:
-            case t::i420_bt601_video:
-            case t::i420_bt709_full:
-            case t::i420_bt709_video:
-                {
-                    int rgb_stride = pb->get_width() * 3;
-                    size_t size = rgb_stride * pb->get_height();
-                    uint8_t* raw_ptr = new uint8_t[size];
-                    libyuv::I420ToRGB24(
-                        pb->get_base_sptr_of_plane(0).get(),
-                        pb->get_bytes_per_row_of_plane(0),
-                        pb->get_base_sptr_of_plane(1).get(),
-                        pb->get_bytes_per_row_of_plane(1),
-                        pb->get_base_sptr_of_plane(2).get(),
-                        pb->get_bytes_per_row_of_plane(2),
-                        raw_ptr,
-                        rgb_stride,
-                        pb->get_width(),
-                        pb->get_height()
-                    );
-                    stbi_write_png((subdir + "yuv_i420.png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
-                    delete [] raw_ptr;
-                    stbi_write_png((subdir + "yuv_i420_raw.png").c_str(), pb->get_width(), pb->get_height() * 2, 1, pb->get_base_sptr().get(), pb->get_bytes_per_row());
-                }
-                break;
-        }
 
-        
-    }, bnb::player_api::pixel_buffer_format::i420_bt601_full);
+    auto frame_output = std::make_shared<bnb::player_api::opengl_frame_output>([](const bnb::player_api::pixel_buffer_sptr& pb) {
+        std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format());
+        save_pixel_buffer_to_file(file_path, pb);
+    }, bnb::player_api::pixel_buffer_format::nv12_bt601_video);
 
     player->use(input, window_output);
     player->add_output(frame_output);

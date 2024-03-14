@@ -140,7 +140,7 @@ namespace bnb::player_api
             case ns::bpc8_argb:
                 push(
                     full_image_t(bpc8_image_t(
-                        color_plane(image->get_base_sptr()),
+                        color_plane(image->get_base_ptr()),
                         make_bnb_pixel_format(image),
                         bnb_image_format)),
                     timestamp_us);
@@ -151,8 +151,8 @@ namespace bnb::player_api
             case ns::nv12_bt709_video:
                 push(
                     full_image_t(yuv_image_t(
-                        color_plane(image->get_base_sptr_of_plane(0)),
-                        color_plane(image->get_base_sptr_of_plane(1)),
+                        color_plane(image->get_base_ptr_of_plane(0)),
+                        color_plane(image->get_base_ptr_of_plane(1)),
                         bnb_image_format,
                         make_bnb_yuv_format(image))),
                     timestamp_us);
@@ -163,9 +163,9 @@ namespace bnb::player_api
             case ns::i420_bt709_video:
                 push(
                     full_image_t(yuv_image_t(
-                        color_plane(image->get_base_sptr_of_plane(0)),
-                        color_plane(image->get_base_sptr_of_plane(1)),
-                        color_plane(image->get_base_sptr_of_plane(2)),
+                        color_plane(image->get_base_ptr_of_plane(0)),
+                        color_plane(image->get_base_ptr_of_plane(1)),
+                        color_plane(image->get_base_ptr_of_plane(2)),
                         bnb_image_format,
                         make_bnb_yuv_format(image))),
                     timestamp_us);

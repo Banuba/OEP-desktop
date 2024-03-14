@@ -100,9 +100,11 @@ namespace bnb::player_api
     }
 
     /* opengl_shader_program::set_uniform_texture */
-    void opengl_shader_program::set_uniform_texture(int32_t uniform, int32_t val) const
+    void opengl_shader_program::set_uniform_texture(int32_t uniform, uint32_t texture, uint32_t texture_index) const
     {
-        GL_CALL(glUniform1i(uniform, val));
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_index));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
+        GL_CALL(glUniform1i(uniform, texture_index));
     }
 
     /* opengl_shader_program::set_uniform_vec2 */

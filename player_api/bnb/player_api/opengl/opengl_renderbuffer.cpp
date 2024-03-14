@@ -51,9 +51,18 @@ namespace bnb::player_api
         GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, m_framebuffer));
         GL_CALL(glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, 0));
 
+        GL_CALL(glClearColor(1.0f, 1.0f, 1.0f, 0.0f));
+        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
+
         if (GLenum status; (status = glCheckFramebufferStatus(GL_FRAMEBUFFER)) != GL_FRAMEBUFFER_COMPLETE) {
             std::runtime_error("Failed to make complete framebuffer object.");
         }
+    }
+
+    /* opengl_renderbuffer::unbind */
+    void opengl_renderbuffer::unbind()
+    {
+        GL_CALL(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     }
 
     /* opengl_renderbuffer::get_width */

@@ -39,6 +39,8 @@ set(BNB_PLAYER_API_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/content_mode.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/orientation.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/pixel_buffer_format.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/yuv_conversion_matrices.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/yuv_conversion_matrices.cpp
 )
 
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/third)
