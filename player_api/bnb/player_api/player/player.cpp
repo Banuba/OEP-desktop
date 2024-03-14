@@ -16,6 +16,9 @@ namespace bnb::player_api
         auto thread_func = [this]() {
             auto run_tasks = [this]() {
                 std::unique_lock<std::mutex> lock(m_tasks_mutex);
+                if (!m_tasks.empty()) {
+                    m_render_target->prepare_to_render(0, 0); // activate context
+                }
                 while (!m_tasks.empty()) {
                     m_tasks.front()();
                     m_tasks.pop();
@@ -39,7 +42,6 @@ namespace bnb::player_api
             auto ep_conf = bnb::interfaces::effect_player_configuration::create(1, 1);
             m_effect_player = bnb::interfaces::effect_player::create(ep_conf);
             m_effect_player->surface_created(1, 1);
-            m_effect_player->playback_pause();
         }).get();
     }
 
@@ -47,6 +49,7 @@ namespace bnb::player_api
     player::~player()
     {
         enqueue([this] {
+            clear_outputs();
             m_effect_player->surface_destroyed();
         });
         m_thread_started = false;
@@ -100,8 +103,9 @@ namespace bnb::player_api
     void player::use(const output_sptr output)
     {
         enqueue([this, output]() {
-            m_outputs.clear();
+            clear_outputs();
             m_outputs.push_back(output);
+            output->attach();
         });
     }
 
@@ -109,7 +113,11 @@ namespace bnb::player_api
     void player::use(const std::vector<output_sptr> outputs)
     {
         enqueue([this, outputs]() {
+            clear_outputs();
             m_outputs = outputs;
+            for (auto& o : outputs) {
+                o->attach();
+            }
         });
     }
 
@@ -118,8 +126,9 @@ namespace bnb::player_api
     {
         enqueue([this, input, output]() {
             m_input = input;
-            m_outputs.clear();
+            clear_outputs();
             m_outputs.push_back(output);
+            output->attach();
             m_effect_player->set_frame_processor(m_input->get_frame_processor());
         });
     }
@@ -129,7 +138,11 @@ namespace bnb::player_api
     {
         enqueue([this, input, outputs]() {
             m_input = input;
+            clear_outputs();
             m_outputs = outputs;
+            for (auto& o : outputs) {
+                o->attach();
+            }
             m_effect_player->set_frame_processor(m_input->get_frame_processor());
         });
     }
@@ -139,6 +152,7 @@ namespace bnb::player_api
     {
         enqueue([this, output]() {
             m_outputs.push_back(output);
+            output->attach();
         });
     }
 
@@ -147,7 +161,11 @@ namespace bnb::player_api
     {
         enqueue([this, output]() {
             m_outputs.erase(std::remove_if(m_outputs.begin(), m_outputs.end(), [output](const output_sptr& o) {
-                return o.get() == output.get();
+                auto ret = o.get() == output.get();
+                if (ret) {
+                    o->detach();
+                }
+                return ret;
             }), m_outputs.end());
         });
     }
@@ -162,7 +180,7 @@ namespace bnb::player_api
             return m_current_effect = nullptr;
         }, url).get();
     }
-    
+
     /* player::load_async */
     effect_sptr player::load_async(const std::string & url)
     {
@@ -189,7 +207,7 @@ namespace bnb::player_api
             if (m_render_mode == render_mode::manual) {
                 draw();
             }
-        });
+        }).get();
     }
 
     /* player::draw( */
@@ -250,6 +268,15 @@ namespace bnb::player_api
             m_effect_player->surface_changed(width, height);
             m_effect_player->effect_manager()->set_effect_size(width, height);
         }
+    }
+
+    /* player::clear_outputs */
+    void player::clear_outputs()
+    {
+        for (auto& o : m_outputs) {
+            o->detach();
+        }
+        m_outputs.clear();
     }
 
 } /* namespace bnb::player_api */

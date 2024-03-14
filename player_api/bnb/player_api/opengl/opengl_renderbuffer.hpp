@@ -1,7 +1,5 @@
 #pragma once
 
-#include <bnb/player_api/opengl/opengl.hpp>
-
 #include <cstdint>
 
 namespace bnb::player_api

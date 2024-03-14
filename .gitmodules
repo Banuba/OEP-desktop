@@ -4,3 +4,6 @@
 [submodule "player_api/bnb/player_api/third/libyuv"]
 	path = player_api/bnb/player_api/third/libyuv
 	url = https://chromium.googlesource.com/libyuv/libyuv
+[submodule "third/stb"]
+	path = third/stb
+	url = https://github.com/nothings/stb.git

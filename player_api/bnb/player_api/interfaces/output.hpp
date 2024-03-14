@@ -27,6 +27,16 @@ namespace bnb::player_api::interfaces
         virtual ~output() = default;
 
         /**
+         * Attach output to the player. Called by the player on the render thread.
+         */
+        virtual void attach() {}
+
+        /**
+         * Detach output from the player. Called by the player on the render thread.
+         */
+        virtual void detach() {}
+
+        /**
          * Present the drawn frame by the player to the output
          */
         virtual void present(const render_target_sptr& render_target) = 0;

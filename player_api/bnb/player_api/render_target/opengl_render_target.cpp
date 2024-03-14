@@ -1,5 +1,6 @@
 #include <bnb/player_api/render_target/opengl_render_target.hpp>
 
+#include <bnb/player_api/opengl/opengl.hpp>
 #include <bnb/effect_player/interfaces/effect_player.hpp>
 #include <bnb/effect_player/utility.hpp>
 
@@ -59,8 +60,9 @@ namespace bnb::player_api
     opengl_render_target::~opengl_render_target()
     {
         m_context->activate();
+        m_shader = nullptr;
+        m_frame_handler = nullptr;
         m_renderbuffer = nullptr;
-        m_output_renderbuffer = nullptr;
         m_context->deactivate();
     }
 
@@ -111,7 +113,7 @@ namespace bnb::player_api
     /* opengl_render_target::get_output_texture */
     texture_t opengl_render_target::get_output_texture() const noexcept
     {
-        return reinterpret_cast<texture_t>(m_renderbuffer->get_texture());
+        return static_cast<texture_t>(m_renderbuffer->get_texture());
     }
 
     /* opengl_render_target::present */
@@ -125,8 +127,6 @@ namespace bnb::player_api
         GL_CALL(glDisable(GL_CULL_FACE));
         GL_CALL(glDisable(GL_DEPTH_TEST));
         GL_CALL(glViewport(left, top, width, height));
-        GL_CALL(glClearColor(1.0f, 1.0f, 1.0f, 0.0f));
-        GL_CALL(glClear(GL_COLOR_BUFFER_BIT));
 
         m_shader->use();
 

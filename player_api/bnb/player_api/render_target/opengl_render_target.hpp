@@ -2,7 +2,6 @@
 
 #include <bnb/player_api/interfaces/render_target.hpp>
 #include <bnb/player_api/interfaces/render_context.hpp>
-#include <bnb/player_api/opengl/opengl.hpp>
 #include <bnb/player_api/opengl/opengl_shader_program.hpp>
 #include <bnb/player_api/opengl/opengl_frame_surface_handler.hpp>
 #include <bnb/player_api/opengl/opengl_renderbuffer.hpp>
@@ -38,7 +37,6 @@ namespace bnb::player_api
         std::unique_ptr<opengl_shader_program> m_shader;
         std::unique_ptr<opengl_frame_surface_handler> m_frame_handler;
         std::unique_ptr<opengl_renderbuffer> m_renderbuffer;
-        std::unique_ptr<opengl_renderbuffer> m_output_renderbuffer;
 
         uint64_t m_frame_time_us {0};
 

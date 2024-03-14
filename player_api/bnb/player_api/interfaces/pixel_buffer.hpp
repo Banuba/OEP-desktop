@@ -25,6 +25,17 @@ namespace bnb::player_api::interfaces
 
         struct plane_data
         {
+            plane_data(plane_sptr ptr, size_t sz, int32_t stride)
+                : data(ptr)
+                , size(sz)
+                , bytes_per_row(stride)
+            {
+            }
+
+            plane_data()
+            {
+            }
+
             plane_sptr data{nullptr};
             size_t size{0};
             int32_t bytes_per_row{0};

@@ -64,6 +64,8 @@ namespace bnb::player_api
 
         void resize(const bnb::interfaces::full_image_format& format);
 
+        void clear_outputs();
+
     private:
         std::thread m_thread;
         std::atomic_bool m_thread_started {true};

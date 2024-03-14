@@ -1,5 +1,7 @@
 #include <bnb/player_api/opengl/opengl_renderbuffer.hpp>
 
+#include <bnb/player_api/opengl/opengl.hpp>
+
 #include <stdexcept>
 
 namespace bnb::player_api

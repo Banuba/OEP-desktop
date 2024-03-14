@@ -1,6 +1,5 @@
 #pragma once
 
-#include <bnb/player_api/opengl/opengl.hpp>
 #include <string_view>
 
 namespace bnb::player_api
