@@ -97,19 +97,30 @@ namespace
         }
         return fmt;
     }
-}
+
+} /* namespace */
 
 namespace bnb::player_api
 {
 
     /* stream_input::stream_input */
-    stream_input::stream_input()
+    stream_input::stream_input(processor_type processor, bool offline_mode, bool future_interpolate, bool future_filter)
     {
         auto config = bnb::interfaces::processor_configuration::create();
-        config->set_use_offline_mode(false);
-        config->set_use_future_filter(false);
-        config->set_use_future_interpolate(false);
-        m_frame_processor = bnb::interfaces::frame_processor::create_realtime_processor(bnb::interfaces::realtime_processor_mode::async_when_effect_loaded, config);
+        config->set_use_offline_mode(offline_mode);
+        config->set_use_future_interpolate(future_interpolate);
+        config->set_use_future_filter(future_filter);
+        switch (processor) {
+        case processor_type::realtime:
+            m_frame_processor = bnb::interfaces::frame_processor::create_realtime_processor(bnb::interfaces::realtime_processor_mode::async_when_effect_loaded, config);
+            break;
+        case processor_type::photo:
+            m_frame_processor = bnb::interfaces::frame_processor::create_photo_processor(config);
+            break;
+        case processor_type::video:
+            m_frame_processor = bnb::interfaces::frame_processor::create_video_processor(config);
+            break;
+        }
     }
 
     /* stream_input::push */

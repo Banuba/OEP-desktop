@@ -10,7 +10,15 @@ namespace bnb::player_api
     class stream_input : public bnb::player_api::interfaces::input
     {
     public:
-        stream_input();
+        enum class processor_type : int32_t
+        {
+            realtime,
+            photo,
+            video
+        }; /* enum class processor_type */
+
+    public:
+        stream_input(processor_type processor = processor_type::realtime, bool offline_mode = false, bool future_interpolate = false, bool future_filter = false);
 
         ~stream_input() = default;
 
