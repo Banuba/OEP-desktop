@@ -12,10 +12,10 @@ namespace
         "layout (location = 0) in vec3 aPos;\n"
         "layout (location = 1) in vec2 aTexCoord;\n"
         "out vec2 vTexCoord;\n"
-        "uniform mat4 uTextureMatrix;\n"
+        "uniform mat4 uMatrix;\n"
         "void main() {\n"
-        "  gl_Position = uTextureMatrix * vec4(aPos, 1.0);\n"
-        "  vTexCoord = vec2(aTexCoord.x, 1.0 - aTexCoord.y);\n"
+        "  gl_Position = uMatrix * vec4(aPos, 1.0);\n"
+        "  vTexCoord = aTexCoord;\n"
         "}\n";
 
     constexpr std::string_view fragment_shader_source =
@@ -48,7 +48,7 @@ namespace bnb::player_api
 
         m_shader->use();
         m_uniform_texture = m_shader->get_uniform_location("uTexture");
-        m_uniform_matrix = m_shader->get_uniform_location("uTextureMatrix");
+        m_uniform_matrix = m_shader->get_uniform_location("uMatrix");
         opengl_shader_program::unuse();
 
         m_renderbuffer = std::make_unique<opengl_renderbuffer>();
@@ -67,7 +67,7 @@ namespace bnb::player_api
     }
 
     /* opengl_render_target::prepare_to_render */
-    void opengl_render_target::prepare_to_render(int32_t width, int32_t height)
+    void opengl_render_target::prepare_to_offscreen_render(int32_t width, int32_t height)
     {
         m_context->activate();
 
@@ -82,6 +82,12 @@ namespace bnb::player_api
         GL_CALL(glDisable(GL_CULL_FACE));
         GL_CALL(glDisable(GL_DEPTH_TEST));
         GL_CALL(glEnable(GL_PROGRAM_POINT_SIZE));
+    }
+
+    /* opengl_render_target::prepare_to_screen_render */
+    void opengl_render_target::prepare_to_screen_render()
+    {
+        opengl_renderbuffer::unbind();
     }
 
     /* opengl_render_target::set_frame_time_us */
@@ -117,8 +123,6 @@ namespace bnb::player_api
     /* opengl_render_target::present */
     void opengl_render_target::present(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4)
     {
-        m_context->activate();
-
         GL_CALL(glDisable(GL_BLEND));
         GL_CALL(glDisable(GL_CULL_FACE));
         GL_CALL(glDisable(GL_DEPTH_TEST));
@@ -126,17 +130,9 @@ namespace bnb::player_api
 
         m_shader->use();
         m_shader->set_uniform_texture(m_uniform_texture, m_renderbuffer->get_texture());
-        m_shader->set_uniform_mat4(m_uniform_matrix, mat4);
+        m_shader->set_uniform_mat4(m_uniform_matrix, mat4, true);
         m_frame_handler->draw_surface();
         opengl_shader_program::unuse();
-    }
-
-    /* opengl_render_target::present_to_screen */
-    void opengl_render_target::present_to_screen(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4)
-    {
-        m_context->activate();
-        opengl_renderbuffer::unbind();
-        present(left, top, width, height, mat4);
     }
 
 } /* namespace bnb::player_api */

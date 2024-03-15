@@ -1,5 +1,7 @@
 #include <bnb/player_api/output/window_output.hpp>
 
+#include <cmath>
+
 namespace bnb::player_api
 {
 
@@ -13,11 +15,12 @@ namespace bnb::player_api
     }
 
     /* window_output::present */
-    void window_output::present(const render_target_sptr& render_target)
+    void window_output::present(const output_sptr&, const render_target_sptr& render_target)
     {
         int32_t x, y, w, h;
         oriented_frame_layout(render_target, m_frame_width, m_frame_height, x, y, w, h);
-        render_target->present_to_screen(x + m_frame_left, y + m_frame_top, w, h, get_orientation_matrix());
+        render_target->prepare_to_screen_render();
+        render_target->present(x + m_frame_left, y + m_frame_top, w, h, get_orientation_matrix());
     }
 
 } /* namespace bnb::player_api */

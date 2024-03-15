@@ -26,6 +26,21 @@ namespace bnb::player_api::interfaces
     public:
         virtual ~output() = default;
 
+        void active()
+        {
+            m_output_is_active = true;
+        }
+
+        void deactive()
+        {
+            m_output_is_active = false;
+        }
+
+        [[nodiscard]] bool is_active()
+        {
+            return m_output_is_active;
+        }
+
         /**
          * Attach output to the player. Called by the player on the render thread.
          */
@@ -39,7 +54,9 @@ namespace bnb::player_api::interfaces
         /**
          * Present the drawn frame by the player to the output
          */
-        virtual void present(const render_target_sptr& render_target) = 0;
+        virtual void present(const output_sptr& self, const render_target_sptr& render_target) = 0;
+    protected:
+        bool m_output_is_active {true};
     };
 
 } /* namespace bnb::player_api::interfaces */

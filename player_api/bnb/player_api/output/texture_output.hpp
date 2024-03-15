@@ -16,7 +16,7 @@ namespace bnb::player_api
 
         ~texture_output() = default;
 
-        void present(const render_target_sptr& render_target) override;
+        void present(const output_sptr&, const render_target_sptr& render_target) override;
 
     private:
         texture_ready_callback m_callback;

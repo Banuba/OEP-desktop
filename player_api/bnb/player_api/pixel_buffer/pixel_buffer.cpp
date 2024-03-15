@@ -1,40 +1,6 @@
 #include <bnb/player_api/pixel_buffer/pixel_buffer.hpp>
 
-namespace
-{
-    struct image_format_info
-    {
-        int32_t planes_num{0}; /* [1..3] - number of planes */
-        int32_t pixel_sizes[3]{0, 0, 0};
-    }; /* image_format_info */
-
-    
-    image_format_info get_image_format_info(bnb::player_api::pixel_buffer_format fmt)
-    {
-        image_format_info ret;
-        using ns = bnb::player_api::pixel_buffer_format;
-        switch (fmt) {
-            case ns::bpc8_rgb:
-            case ns::bpc8_bgr:
-                return {1, 3, 0, 0};
-            case ns::bpc8_rgba:
-            case ns::bpc8_bgra:
-            case ns::bpc8_argb:
-                return {1, 4, 0, 0};
-            case ns::nv12_bt601_full:
-            case ns::nv12_bt601_video:
-            case ns::nv12_bt709_full:
-            case ns::nv12_bt709_video:
-                return {2, 1, 2, 0};
-            case ns::i420_bt601_full:
-            case ns::i420_bt601_video:
-            case ns::i420_bt709_full:
-            case ns::i420_bt709_video:
-                return {3, 1, 1, 1};
-        }
-        return {0, 0, 0, 0};;
-    }
-}
+#include <bnb/player_api/types/yuv_conversion.hpp>
 
 namespace bnb::player_api
 {
@@ -89,8 +55,8 @@ namespace bnb::player_api
 
         m_planes[1].data = const_cast<uint8_t*>(uv_plane);
         m_planes[1].bytes_per_row = uv_stride;
-        m_planes[1].width = width / 2;
-        m_planes[1].height = height / 2;
+        m_planes[1].width = uv_plane_width(width);
+        m_planes[1].height = uv_plane_height(height);
         m_planes[1].pixel_size = 2;
         m_planes[1].deleter = uv_delete;
     }
@@ -109,11 +75,11 @@ namespace bnb::player_api
         plane_deleter u_deleter,
         plane_deleter v_deleter)
     {
-        if (!pixel_buffer_format_is_nv12(fmt)) {
+        if (!pixel_buffer_format_is_i420(fmt)) {
             throw std::runtime_error("Format should be i420.");
         }
 
-        m_plane_count = 2;
+        m_plane_count = 3;
         m_pixel_buffer_format = fmt;
         
         m_planes[0].data = const_cast<uint8_t*>(y_plane);
@@ -125,15 +91,15 @@ namespace bnb::player_api
 
         m_planes[1].data = const_cast<uint8_t*>(u_plane);
         m_planes[1].bytes_per_row = u_stride;
-        m_planes[1].width = width / 2;
-        m_planes[1].height = height / 2;
+        m_planes[1].width = uv_plane_width(width);
+        m_planes[1].height = uv_plane_height(height);
         m_planes[1].pixel_size = 1;
         m_planes[1].deleter = u_deleter;
 
         m_planes[2].data = const_cast<uint8_t*>(v_plane);
         m_planes[2].bytes_per_row = v_stride;
-        m_planes[2].width = width / 2;
-        m_planes[2].height = height / 2;
+        m_planes[2].width = uv_plane_width(width);
+        m_planes[2].height = uv_plane_height(height);
         m_planes[2].pixel_size = 1;
         m_planes[2].deleter = v_deleter;
     }

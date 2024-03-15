@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string_view>
+#include <cstdint>
 
 namespace bnb::player_api
 {
@@ -21,7 +22,8 @@ namespace bnb::player_api
         void set_uniform_texture(int32_t uniform, uint32_t texture, uint32_t texture_index = 0) const;
         void set_uniform_vec2(int32_t uniform, const float* const vec) const;
         void set_uniform_vec4(int32_t uniform, const float* const vec) const;
-        void set_uniform_mat4(int32_t uniform, const float* const mat) const;
+        void set_uniform_mat4(int32_t uniform, const float* const mat, bool transpose = false) const;
+        void set_uniform_int(int32_t uniform, int32_t val) const;
 
     private:
         uint32_t m_program {0};

@@ -1,6 +1,6 @@
 #include <bnb/player_api/output/opengl_frame_output.hpp>
 
-#include <bnb/player_api/types/yuv_conversion_matrices.hpp>
+#include <bnb/player_api/types/yuv_conversion.hpp>
 #include <bnb/player_api/opengl/opengl.hpp>
 #include <libyuv.h>
 
@@ -57,30 +57,46 @@ namespace
         "    FragColor.r = a + dot(rgb, texture(uTexture, vTexCoord).rgb);\n"
         "}\n";
 
+    int32_t align_by_8(int32_t x)
+    {
+        return (x + 7) &~ 7;
+    }
+
+    int32_t align_by_16(int32_t width)
+    {
+        return (width + 15) &~ 15;
+    }
+
+    uint8_t* alloc_pixels(size_t size)
+    {
+        return new uint8_t[size];
+    }
+
+    void dealloc_pixels(uint8_t* p)
+    {
+        delete [] p;
+    }
+
     bnb::player_api::pixel_buffer_sptr allocate_pixel_buffer(bnb::player_api::pixel_buffer_format format, int32_t width, int32_t height)
     {
         using pb_t = bnb::player_api::pixel_buffer;
-        uint8_t* data_raw_ptr;
-
         using t = bnb::player_api::pixel_buffer_format;
         switch (format) {
             case t::bpc8_rgb:
             case t::bpc8_bgr:
                 {
-                    int32_t stride = (width * 3 + 7) &~ 7;
-                    uint8_t* data = new uint8_t[stride * height];
-                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, format, width, height,
-                        [](uint8_t* p) {delete [] p;});
+                    auto stride = align_by_8(width * 3);
+                    auto* data = alloc_pixels(stride * height);
+                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, format, width, height, dealloc_pixels);
                 }
                 break;
             case t::bpc8_rgba:
             case t::bpc8_bgra:
             case t::bpc8_argb:
                 {
-                    int32_t stride = (width * 4 + 7) &~ 7;
-                    uint8_t* data = new uint8_t[stride * height];
-                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, format, width, height,
-                        [](uint8_t* p) {delete [] p;});
+                    auto stride = align_by_8(width * 4);
+                    auto* data = alloc_pixels(stride * height);
+                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, format, width, height, dealloc_pixels);
                 }
                 break;
             case t::nv12_bt601_full:
@@ -88,13 +104,10 @@ namespace
             case t::nv12_bt709_full:
             case t::nv12_bt709_video:
                 {
-                    int32_t stride = (width + 15) &~ 15;
-                    uint8_t* data = new uint8_t[stride * height * 2];
-
-                    auto* y_data = data;
+                    auto stride = align_by_16(width);
+                    auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height) + stride);
                     auto* uv_data = data + stride * height;
-                    return std::make_shared<bnb::player_api::pixel_buffer>(y_data, stride, uv_data, stride, format, width, height,
-                        [](uint8_t* p) {delete [] p;}, [](uint8_t*) {});
+                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, uv_data, stride, format, width, height, dealloc_pixels, nullptr);
                 }
                 break;
             case t::i420_bt601_full:
@@ -102,14 +115,11 @@ namespace
             case t::i420_bt709_full:
             case t::i420_bt709_video:
                 {
-                    int32_t stride = (width + 15) &~ 15;
-                    uint8_t* data = new uint8_t[stride * height * 2];
-
-                    auto* y_data = data;
+                    auto stride = align_by_16(width);
+                    auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height));
                     auto* u_data = data + stride * height;
-                    auto* v_data = data + stride * height + ((width / 2 + 7) &~ 7);
-                    return std::make_shared<bnb::player_api::pixel_buffer>(y_data, stride, u_data, stride, v_data, stride, format, width, height,
-                        [](uint8_t* p) {delete [] p;}, [](uint8_t*) {}, [](uint8_t*) {});
+                    auto* v_data = data + stride * height + align_by_8(bnb::player_api::uv_plane_width(width));
+                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, u_data, stride, v_data, stride, format, width, height, dealloc_pixels, nullptr, nullptr);
                 }
                 break;
         }
@@ -188,72 +198,74 @@ namespace bnb::player_api
     }
 
     /* opengl_frame_output::present */
-    void opengl_frame_output::present(const render_target_sptr& render_target)
+    void opengl_frame_output::present(const output_sptr& self, const render_target_sptr& render_target)
     {
-        GL_CALL(glDisable(GL_BLEND));
-        GL_CALL(glDisable(GL_CULL_FACE));
-        GL_CALL(glDisable(GL_DEPTH_TEST));
-
         m_shader->use();
         m_shader->set_uniform_texture(m_uniform_texture, static_cast<uint32_t>(render_target->get_output_texture()));
-        m_shader->set_uniform_mat4(m_uniform_matrix, get_orientation_matrix());
+        m_shader->set_uniform_mat4(m_uniform_matrix, get_orientation_matrix(true));
 
-        auto width = render_target->get_render_width();
-        auto height = render_target->get_render_height();
-        auto read_width = width;
-        auto read_height = height;
+        int32_t width, height;
+        oriented_frame_size(render_target, width, height);
+        auto renderbuffer_width = width;
+        auto renderbuffer_height = height;
         auto pb = allocate_pixel_buffer(m_format, width, height);
 
         if (m_format_is_bpc8) {
-            m_renderbuffer->prepare(width, height);
+            m_renderbuffer->prepare(renderbuffer_width, renderbuffer_height);
+            GL_CALL(glDisable(GL_BLEND));
+            GL_CALL(glDisable(GL_CULL_FACE));
+            GL_CALL(glDisable(GL_DEPTH_TEST));
 
             GL_CALL(glViewport(0, 0, width, height));
             m_frame_handler->draw_surface();
         } else if (m_format_is_nv12 || m_format_is_i420) {
-            auto half_width = width / 2;
-            auto half_height = height / 2;
-            auto aligned_width = (width + 15) &~ 15;
-            auto aligned_half_width = (half_width + 7) &~ 7;
-            auto full_height = m_format_is_nv12 ? height * 2 : height + half_height;
-            read_width = aligned_width;
-            read_height = full_height;
-            auto height_indent_for_nv12 = m_format_is_nv12 ? half_height : 0;
+            auto uv_width = uv_plane_width(width);
+            auto uv_height = uv_plane_height(height);
+            renderbuffer_width = align_by_16(width);
+            renderbuffer_height = height + uv_height + static_cast<int32_t>(m_format_is_nv12);
+            // for optimization so that when converting to nv12 there are no additional memory allocations
+            auto height_indent_for_nv12 = static_cast<int32_t>(m_format_is_nv12);
 
-            m_renderbuffer->prepare(read_width, read_height);
+            m_renderbuffer->prepare(renderbuffer_width, renderbuffer_height);
+            GL_CALL(glDisable(GL_BLEND));
+            GL_CALL(glDisable(GL_CULL_FACE));
+            GL_CALL(glDisable(GL_DEPTH_TEST));
 
             GL_CALL(glViewport(0, 0, width, height));
             m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_y_plane_convert_coefs);
             m_frame_handler->draw_surface();
 
-            GL_CALL(glViewport(0, height + height_indent_for_nv12, half_width, half_height));
-            m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_v_plane_convert_coefs);
+            GL_CALL(glViewport(0, height + height_indent_for_nv12, uv_width, uv_height));
+            m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_u_plane_convert_coefs);
             m_frame_handler->draw_surface();
 
-            GL_CALL(glViewport(aligned_half_width, height + height_indent_for_nv12, half_width, half_height));
-            m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_u_plane_convert_coefs);
+            GL_CALL(glViewport(align_by_8(uv_width), height + height_indent_for_nv12, uv_width, uv_height));
+            m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_v_plane_convert_coefs);
             m_frame_handler->draw_surface();
         }
 
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 8));
-        GL_CALL(glReadPixels(0, 0, read_width, read_height, m_gl_read_pixels_format, GL_UNSIGNED_BYTE, pb->get_base_ptr()));
+        GL_CALL(glReadPixels(0, 0, renderbuffer_width, renderbuffer_height, m_gl_read_pixels_format, GL_UNSIGNED_BYTE, pb->get_base_ptr()));
 
         if (m_format_is_nv12) {
+            auto u_plane_indent = pb->get_bytes_per_row_of_plane(1);
+            auto v_plane_indent = u_plane_indent + align_by_8(uv_plane_width(width));
             libyuv::MergeUVPlane(
-                pb->get_base_ptr_of_plane(1) + height / 2 * pb->get_bytes_per_row_of_plane(1),
+                pb->get_base_ptr_of_plane(1) + u_plane_indent,
                 pb->get_bytes_per_row_of_plane(1),
-                pb->get_base_ptr_of_plane(1) + height / 2 * pb->get_bytes_per_row_of_plane(1) + ((width / 2 + 7) &~ 7),
+                pb->get_base_ptr_of_plane(1) + v_plane_indent,
                 pb->get_bytes_per_row_of_plane(1),
                 pb->get_base_ptr_of_plane(1),
                 pb->get_bytes_per_row_of_plane(1),
-                pb->get_width(),
-                pb->get_height()
+                pb->get_width_of_plane(1),
+                pb->get_height_of_plane(1)
             );
         }
 
         opengl_renderbuffer::unbind();
         opengl_shader_program::unuse();
 
-        m_pixel_buffer_callback(pb);
+        m_pixel_buffer_callback(self, pb);
     }
 
 } /* namespace bnb::player_api */

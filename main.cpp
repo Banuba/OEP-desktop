@@ -24,6 +24,8 @@
 #include "graphical_user_interface.hpp"
 #include <libyuv.h>
 
+#include <thread>
+
 #define BNB_CLIENT_TOKEN <#TOKEN#>
 
 std::vector<std::string> get_resources_folders()
@@ -84,7 +86,7 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
                     );
                     stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
                     delete [] raw_ptr;
-                    stbi_write_png((path + ".raw.png").c_str(), pb->get_width(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                    stbi_write_png((path + ".raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
                 }
                 break;
             case t::i420_bt601_full:
@@ -109,10 +111,19 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
                     );
                     stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
                     delete [] raw_ptr;
-                    stbi_write_png((path + "raw.png").c_str(), pb->get_width(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                    stbi_write_png((path + "raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
                 }
                 break;
         }
+}
+
+void run_async(std::function<void()> f)
+{
+    auto thread_func = [f]() {
+        f();
+    };
+    auto thread = std::thread(thread_func);
+    thread.detach();
 }
 
 int main()
@@ -129,11 +140,16 @@ int main()
     auto input = std::make_shared<bnb::player_api::stream_input>();
     auto window_output = std::make_shared<bnb::player_api::window_output>();
 
-    auto frame_output = std::make_shared<bnb::player_api::opengl_frame_output>([](const bnb::player_api::pixel_buffer_sptr& pb) {
+    auto frame_output = std::make_shared<bnb::player_api::opengl_frame_output>([](const bnb::player_api::output_sptr& self, const bnb::player_api::pixel_buffer_sptr& pb) {
         std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format());
-        save_pixel_buffer_to_file(file_path, pb);
-    }, bnb::player_api::pixel_buffer_format::nv12_bt601_video);
-
+        run_async([file_path, pb]() {
+            save_pixel_buffer_to_file(file_path, pb);
+        });
+        self->deactive();
+    }, bnb::player_api::pixel_buffer_format::i420_bt601_full);
+    frame_output->set_orientation(bnb::player_api::orientation::left, true);
+    frame_output->deactive();
+    
     player->use(input, window_output);
     player->add_output(frame_output);
 
@@ -154,11 +170,13 @@ int main()
 
     gui->add_output_control(window_output, "Screen output");
 
-    main_window->set_glfw_events_callback([window_output, gui, player](const bnb::example::glfw_event& e) {
+    main_window->set_glfw_events_callback([window_output, gui, frame_output](const bnb::example::glfw_event& e) {
         if (e.type == bnb::example::glfw_event_t::framebuffer_resize) {
             window_output->set_frame_layout(0, 0, e.size_width, e.size_height);
         } else if (e.type == bnb::example::glfw_event_t::key_press && e.keyboard_key == GLFW_KEY_F1) {
             gui->switch_show_hide_gui();
+        } else if (e.type == bnb::example::glfw_event_t::key_press && e.keyboard_key == GLFW_KEY_S) {
+            frame_output->active();
         }
         gui->on_glfw_event(e);
     }); 

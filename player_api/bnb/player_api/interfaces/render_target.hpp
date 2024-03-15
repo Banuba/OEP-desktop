@@ -31,11 +31,18 @@ namespace bnb::player_api::interfaces
         virtual ~render_target() = default;
 
         /**
-         * Prepare render target to render
+         * Prepare render target to offscreen rendering of the player
          *  @param width rendering surface width
          *  @param height rendering surface height
          */
-        virtual void prepare_to_render(int32_t width, int32_t height) = 0;
+        virtual void prepare_to_offscreen_render(int32_t width, int32_t height) = 0;
+
+        /**
+         * Prepare render target to screen rendering
+         *  @param width rendering surface width
+         *  @param height rendering surface height
+         */
+        virtual void prepare_to_screen_render() = 0;
 
         /**
          * Set presentation frame time
@@ -74,16 +81,6 @@ namespace bnb::player_api::interfaces
          * @param mat4 texture matrix
          */
         virtual void present(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4) = 0;
-
-        /**
-         * Draw a frame on the screen
-         * @param left viewport x coord
-         * @param top viewport y coord
-         * @param width of the viewport
-         * @param height of the viewport
-         * @param mat4 texture matrix
-         */
-        virtual void present_to_screen(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4) = 0;
     }; /* class render_target */
 
 } /* namespace bnb::player_api::interfaces */

@@ -17,10 +17,10 @@ namespace
     // clang-format off
     constexpr float drawing_plane_coords[] = {
         /* X      Y     Z     U     V */
-        -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, /* vertex 0 bottom left */
-        1.0f,  -1.0f, 0.0f, 1.0f, 1.0f, /* vertex 1 bottom right */
-        -1.0f,  1.0f, 0.0f, 0.0f, 0.0f, /* vertex 2 top left */
-        1.0f,   1.0f, 0.0f, 1.0f, 0.0f, /* vertex 3 top right */
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* vertex 0 bottom left */
+        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, /* vertex 1 bottom right */
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* vertex 2 top left */
+        1.0f,   1.0f, 0.0f, 1.0f, 1.0f, /* vertex 3 top right */
     };
     // clang-format on
 }

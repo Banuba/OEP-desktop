@@ -17,7 +17,7 @@ namespace bnb::player_api
     }
 
     /* output_base::get_orientation_matrix */
-    const float* const output_base::get_orientation_matrix()
+    const float* const output_base::get_orientation_matrix(bool y_invert)
     {
         // clang-format off
         static const float matrices[] = {
@@ -27,8 +27,8 @@ namespace bnb::player_api
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
             // mirroring 0, 90 degrees
-            0.0f, 1.0f, 0.0f, 0.0f,
-            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
             // mirroring 0, 180 degrees
@@ -37,34 +37,76 @@ namespace bnb::player_api
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
             // mirroring 0, 270 degrees
+            0.0f, 1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+
+            // mirroring 1, 0 degrees
+            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            // mirroring 1, 90 degrees
+            0.0f, 1.0f, 0.0f, 0.0f,
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            // mirroring 1, 180 degrees
+            1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            // mirroring 1, 270 degrees
+            0.0f, -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+
+            // mirroring 0, 0 degrees, y invert
+            1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            // mirroring 0, 90 degrees, y invert
+            0.0f, -1.0f, 0.0f, 0.0f,
+            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            // mirroring 0, 180 degrees, y invert
+            -1.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 1.0f,
+            // mirroring 0, 270 degrees, y invert
+            0.0f, 1.0f, 0.0f, 0.0f,
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
 
-            // mirroring 0, 0 degrees
+            // mirroring 1, 0 degrees, y invert
             -1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, -1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
-            // mirroring 0, 90 degrees
+            // mirroring 1, 90 degrees, y invert
             0.0f, -1.0f, 0.0f, 0.0f,
             1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
-            // mirroring 0, 180 degrees
+            // mirroring 1, 180 degrees, y invert
             1.0f, 0.0f, 0.0f, 0.0f,
-            0.0f, -1.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 0.0f, 1.0f,
-            // mirroring 0, 270 degrees
+            // mirroring 1, 270 degrees, y invert
             0.0f, 1.0f, 0.0f, 0.0f,
             -1.0f, 0.0f, 0.0f, 0.0f,
             0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 1.0f,
+            0.0f, 0.0f, 0.0f, 1.0f
         };
         // clang-format on
-        return matrices + ((static_cast<int32_t>(m_orientation) / 90) + static_cast<int32_t>(m_mirroring) * 4) * 16;
+        return matrices + ((static_cast<int32_t>(m_orientation) / 90) + static_cast<int32_t>(m_mirroring) * 4) * 16 + static_cast<int32_t>(y_invert) * 16 * 8;
     }
 
     /* output_base::oriented_frame_size */

@@ -17,7 +17,7 @@ namespace bnb::player_api
         void set_orientation(orientation orient, bool mirroring = false);
 
     protected:
-        const float* const get_orientation_matrix();
+        const float* const get_orientation_matrix(bool y_invert = false);
 
         void oriented_frame_size(const render_target_sptr& render_target, int32_t& oriented_width, int32_t& oriented_height) const;
 

@@ -16,7 +16,9 @@ namespace bnb::player_api
 
         ~opengl_render_target() override;
 
-        void prepare_to_render(int32_t width, int32_t height) override;
+        void prepare_to_offscreen_render(int32_t width, int32_t height) override;
+
+        void prepare_to_screen_render() override;
 
         void set_frame_time_us(uint64_t time_us) noexcept override;
 
@@ -30,11 +32,10 @@ namespace bnb::player_api
 
         void present(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4) override;
 
-        void present_to_screen(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4) override;
-
     private:
         render_context_sptr m_context;
         std::unique_ptr<opengl_shader_program> m_shader;
+        std::unique_ptr<opengl_shader_program> m_shader_y_flip;
         std::unique_ptr<opengl_frame_surface_handler> m_frame_handler;
         std::unique_ptr<opengl_renderbuffer> m_renderbuffer;
 
@@ -42,6 +43,7 @@ namespace bnb::player_api
 
         int32_t m_uniform_texture {0};
         int32_t m_uniform_matrix {0};
+        int32_t m_uniform_invert_y {0};
     }; /* class opengl_render_target */
 
 } /* namespace bnb::player_api */

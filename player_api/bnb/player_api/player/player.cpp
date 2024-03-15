@@ -14,31 +14,34 @@ namespace bnb::player_api
         : m_render_target(render_target)
     {
         auto thread_func = [this]() {
-            auto run_tasks = [this]() {
-                std::unique_lock<std::mutex> lock(m_tasks_mutex);
-                if (!m_tasks.empty()) {
-                    m_render_target->prepare_to_render(0, 0); // activate context
-                }
-                while (!m_tasks.empty()) {
-                    m_tasks.front()();
-                    m_tasks.pop();
-                }
-            };
-
             while (m_thread_started) {
                 using namespace std::chrono_literals;
-                run_tasks();
+                std::unique_lock<std::mutex> lock(m_tasks_mutex);
+                if (!m_tasks.empty()) {
+                    m_render_target->prepare_to_offscreen_render(0, 0);
+                    do {
+                        m_tasks.front()();
+                        m_tasks.pop();
+                    } while (!m_tasks.empty());
+                }
                 draw();
                 std::this_thread::sleep_for(1ms);
             }
 
-            run_tasks();
+            std::unique_lock<std::mutex> lock(m_tasks_mutex);
+            if (!m_tasks.empty()) {
+                m_render_target->prepare_to_offscreen_render(0, 0);
+                do {
+                    m_tasks.front()();
+                    m_tasks.pop();
+                } while (!m_tasks.empty());
+            }
         };
 
         m_thread = std::thread(thread_func);
 
         enqueue([this] {
-            m_render_target->prepare_to_render(0, 0);
+            m_render_target->prepare_to_offscreen_render(0, 0);
             auto ep_conf = bnb::interfaces::effect_player_configuration::create(1, 1);
             m_effect_player = bnb::interfaces::effect_player::create(ep_conf);
             m_effect_player->surface_created(1, 1);
@@ -233,7 +236,7 @@ namespace bnb::player_api
 
         m_render_target->set_frame_time_us(m_input->get_frame_time_us());
         auto effect_manager = m_effect_player->effect_manager();
-        m_render_target->prepare_to_render(effect_manager->surface_size().width, effect_manager->surface_size().height);
+        m_render_target->prepare_to_offscreen_render(effect_manager->surface_size().width, effect_manager->surface_size().height);
         resize(processor_result.frame_data->get_full_img_format());
 
         auto frame_number = m_effect_player->draw_with_external_frame_data(processor_result.frame_data);
@@ -245,8 +248,9 @@ namespace bnb::player_api
         }
 
         for (const auto output : m_outputs) {
-            m_render_target->prepare_to_render(0, 0);
-            output->present(m_render_target);
+            if (output->is_active()) {
+                output->present(output, m_render_target);
+            }
         }
 
         if (rc != nullptr) {

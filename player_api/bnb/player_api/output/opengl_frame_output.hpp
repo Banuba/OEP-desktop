@@ -15,7 +15,7 @@ namespace bnb::player_api
     class opengl_frame_output : public bnb::player_api::interfaces::output, public output_base
     {
     public:
-        using pixel_buffer_callback = std::function<void(const pixel_buffer_sptr& pb)>;
+        using pixel_buffer_callback = std::function<void(const output_sptr& self, const pixel_buffer_sptr& pb)>;
 
     public:
         opengl_frame_output(const pixel_buffer_callback& callback, pixel_buffer_format format);
@@ -26,7 +26,7 @@ namespace bnb::player_api
 
         void detach() override;
 
-        void present(const render_target_sptr& render_target) override;
+        void present(const output_sptr& self, const render_target_sptr& render_target) override;
 
     private:
         pixel_buffer_callback m_pixel_buffer_callback;

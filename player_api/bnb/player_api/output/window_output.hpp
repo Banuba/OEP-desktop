@@ -13,7 +13,7 @@ namespace bnb::player_api
 
         ~window_output() = default;
 
-        void present(const render_target_sptr& render_target) override;
+        void present(const output_sptr&, const render_target_sptr& render_target) override;
 
         void set_frame_layout(int32_t left, int32_t top, int32_t width, int32_t height);
 
