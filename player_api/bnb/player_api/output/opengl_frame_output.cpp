@@ -67,14 +67,19 @@ namespace
         return (width + 15) &~ 15;
     }
 
+    int32_t align_by_32(int32_t width)
+    {
+        return (width + 31) &~ 31;
+    }
+
     uint8_t* alloc_pixels(size_t size)
     {
-        return new uint8_t[size];
+        return reinterpret_cast<uint8_t*>(std::aligned_alloc(32, size));
     }
 
     void dealloc_pixels(uint8_t* p)
     {
-        delete [] p;
+        std::free(p);
     }
 
     bnb::player_api::pixel_buffer_sptr allocate_pixel_buffer(bnb::player_api::pixel_buffer_format format, int32_t width, int32_t height)
@@ -104,7 +109,7 @@ namespace
             case t::nv12_bt709_full:
             case t::nv12_bt709_video:
                 {
-                    auto stride = align_by_16(width);
+                    auto stride = align_by_32(width);
                     auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height) + stride);
                     auto* uv_data = data + stride * height;
                     return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, uv_data, stride, format, width, height, dealloc_pixels, nullptr);
@@ -115,10 +120,10 @@ namespace
             case t::i420_bt709_full:
             case t::i420_bt709_video:
                 {
-                    auto stride = align_by_16(width);
+                    auto stride = align_by_32(width);
                     auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height));
                     auto* u_data = data + stride * height;
-                    auto* v_data = data + stride * height + align_by_8(bnb::player_api::uv_plane_width(width));
+                    auto* v_data = data + stride * height + align_by_16(bnb::player_api::uv_plane_width(width));
                     return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, u_data, stride, v_data, stride, format, width, height, dealloc_pixels, nullptr, nullptr);
                 }
                 break;
@@ -221,7 +226,7 @@ namespace bnb::player_api
         } else if (m_format_is_nv12 || m_format_is_i420) {
             auto uv_width = uv_plane_width(width);
             auto uv_height = uv_plane_height(height);
-            renderbuffer_width = align_by_16(width);
+            renderbuffer_width = align_by_32(width);
             renderbuffer_height = height + uv_height + static_cast<int32_t>(m_format_is_nv12);
             // for optimization so that when converting to nv12 there are no additional memory allocations
             auto height_indent_for_nv12 = static_cast<int32_t>(m_format_is_nv12);
@@ -239,7 +244,7 @@ namespace bnb::player_api
             m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_u_plane_convert_coefs);
             m_frame_handler->draw_surface();
 
-            GL_CALL(glViewport(align_by_8(uv_width), height + height_indent_for_nv12, uv_width, uv_height));
+            GL_CALL(glViewport(align_by_16(uv_width), height + height_indent_for_nv12, uv_width, uv_height));
             m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_v_plane_convert_coefs);
             m_frame_handler->draw_surface();
         }
@@ -248,12 +253,10 @@ namespace bnb::player_api
         GL_CALL(glReadPixels(0, 0, renderbuffer_width, renderbuffer_height, m_gl_read_pixels_format, GL_UNSIGNED_BYTE, pb->get_base_ptr()));
 
         if (m_format_is_nv12) {
-            auto u_plane_indent = pb->get_bytes_per_row_of_plane(1);
-            auto v_plane_indent = u_plane_indent + align_by_8(uv_plane_width(width));
             libyuv::MergeUVPlane(
-                pb->get_base_ptr_of_plane(1) + u_plane_indent,
+                pb->get_base_ptr_of_plane(1) + pb->get_bytes_per_row_of_plane(1),
                 pb->get_bytes_per_row_of_plane(1),
-                pb->get_base_ptr_of_plane(1) + v_plane_indent,
+                pb->get_base_ptr_of_plane(1) + pb->get_bytes_per_row_of_plane(1) + align_by_16(uv_plane_width(pb->get_width())),
                 pb->get_bytes_per_row_of_plane(1),
                 pb->get_base_ptr_of_plane(1),
                 pb->get_bytes_per_row_of_plane(1),
