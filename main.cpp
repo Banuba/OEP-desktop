@@ -86,7 +86,7 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
                     );
                     stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
                     delete [] raw_ptr;
-                    stbi_write_png((path + ".raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                    stbi_write_png((path + ".raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height_of_plane(1), 1, pb->get_base_ptr(), pb->get_bytes_per_row());
                 }
                 break;
             case t::i420_bt601_full:
@@ -111,7 +111,7 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
                     );
                     stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
                     delete [] raw_ptr;
-                    stbi_write_png((path + "raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height() / 2, 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                    stbi_write_png((path + "raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height_of_plane(1), 1, pb->get_base_ptr(), pb->get_bytes_per_row());
                 }
                 break;
         }
@@ -146,10 +146,10 @@ int main()
             save_pixel_buffer_to_file(file_path, pb);
         });
         self->deactive();
-    }, bnb::player_api::pixel_buffer_format::i420_bt601_full);
-    frame_output->set_orientation(bnb::player_api::orientation::left, true);
+    }, bnb::player_api::pixel_buffer_format::nv12_bt601_full);
+    frame_output->set_orientation(bnb::player_api::orientation::up, false);
     frame_output->deactive();
-    
+
     player->use(input, window_output);
     player->add_output(frame_output);
 
