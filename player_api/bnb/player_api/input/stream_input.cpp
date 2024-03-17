@@ -7,12 +7,12 @@
 namespace
 {
 
-    bnb::image_format make_bnb_image_format(const bnb::player_api::pixel_buffer_sptr& image, bnb::player_api::orientation orient, bool require_mirroring)
+    bnb::image_format make_bnb_image_format(const bnb::player_api::pixel_buffer_sptr& image)
     {
         bnb::camera_orientation camera_orient {bnb::camera_orientation::deg_0};
 
         using ns = bnb::player_api::orientation;
-        switch (orient) {
+        switch (image->get_orientation()) {
             case ns::up:
                 break;
             case ns::left:
@@ -26,7 +26,7 @@ namespace
                 break;
         }
 
-        return {static_cast<uint32_t>(image->get_width()), static_cast<uint32_t>(image->get_height()), camera_orient, require_mirroring, 0, std::nullopt};
+        return {static_cast<uint32_t>(image->get_width()), static_cast<uint32_t>(image->get_height()), camera_orient, image->get_mirroring(), 0, std::nullopt};
     }
 
     bnb::yuv_format_t make_bnb_yuv_format(const bnb::player_api::pixel_buffer_sptr& image)
@@ -140,10 +140,9 @@ namespace bnb::player_api
     }
     
     /* stream_input::push */
-    void stream_input::push(const pixel_buffer_sptr& image, uint64_t timestamp_us, orientation orient, bool require_mirroring)
+    void stream_input::push(const pixel_buffer_sptr& image, uint64_t timestamp_us)
     {
         using ns = bnb::player_api::pixel_buffer_format;
-        auto bnb_image_format = make_bnb_image_format(image, orient, require_mirroring);
         switch (image->get_format()) {
             case ns::bpc8_rgb:
             case ns::bpc8_bgr:
@@ -153,7 +152,7 @@ namespace bnb::player_api
                     full_image_t(bpc8_image_t(
                         color_plane(image->get_base_ptr()),
                         make_bnb_pixel_format(image),
-                        bnb_image_format)),
+                        make_bnb_image_format(image))),
                     timestamp_us);
                 break;
             case ns::nv12_bt601_full:
@@ -164,7 +163,7 @@ namespace bnb::player_api
                     full_image_t(yuv_image_t(
                         color_plane(image->get_base_ptr_of_plane(0)),
                         color_plane(image->get_base_ptr_of_plane(1)),
-                        bnb_image_format,
+                        make_bnb_image_format(image),
                         make_bnb_yuv_format(image))),
                     timestamp_us);
                 break;
@@ -177,7 +176,7 @@ namespace bnb::player_api
                         color_plane(image->get_base_ptr_of_plane(0)),
                         color_plane(image->get_base_ptr_of_plane(1)),
                         color_plane(image->get_base_ptr_of_plane(2)),
-                        bnb_image_format,
+                        make_bnb_image_format(image),
                         make_bnb_yuv_format(image))),
                     timestamp_us);
                 break;

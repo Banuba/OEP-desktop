@@ -15,9 +15,11 @@ namespace bnb::player_api
         pixel_buffer(
             const uint8_t* rgb_plane,
             int32_t rgb_stride,
-            pixel_buffer_format fmt,
             int32_t width,
             int32_t height,
+            pixel_buffer_format fmt,
+            orientation orient,
+            bool mirroring,
             plane_deleter deleter);
 
         pixel_buffer(
@@ -25,9 +27,11 @@ namespace bnb::player_api
             int32_t y_stride,
             const uint8_t* uv_plane,
             int32_t uv_stride,
-            pixel_buffer_format fmt,
             int32_t width,
             int32_t height,
+            pixel_buffer_format fmt,
+            orientation orient,
+            bool mirroring,
             plane_deleter y_deleter,
             plane_deleter uv_deleter);
 
@@ -38,9 +42,11 @@ namespace bnb::player_api
             int32_t u_stride,
             const uint8_t* v_plane,
             int32_t v_stride,
-            pixel_buffer_format fmt,
             int32_t width,
             int32_t height,
+            pixel_buffer_format fmt,
+            orientation orient,
+            bool mirroring,
             plane_deleter y_deleter,
             plane_deleter u_deleter,
             plane_deleter v_deleter);
@@ -50,6 +56,9 @@ namespace bnb::player_api
         pixel_buffer_format get_format() const noexcept override;
         
         int32_t get_number_of_planes() const noexcept override;
+
+        orientation get_orientation() const noexcept;
+        bool get_mirroring() const noexcept;
 
         uint8_t* get_base_ptr() const override;
         uint8_t* get_base_ptr_of_plane(int32_t plane_num) const override;
@@ -74,12 +83,16 @@ namespace bnb::player_api
             plane_deleter deleter {nullptr};
         }; /* struct plane_data_extended */
 
+        void set_plane_data(int32_t plane_num, const uint8_t* data, int32_t stride, int32_t pixel_size, int32_t width, int32_t height, plane_deleter deleter);
+
         void validate_plane_number(int32_t plane_num) const;
         
     private:
+        plane_data m_planes[3];
         pixel_buffer_format m_pixel_buffer_format;
         int32_t m_plane_count{0};
-        plane_data m_planes[3];
+        orientation m_orientation;
+        bool m_mirroring;
     }; /* class image_data  */
 
 

@@ -9,22 +9,24 @@ namespace bnb::player_api
     pixel_buffer::pixel_buffer(
         const uint8_t* rgb_plane,
         int32_t rgb_stride,
-        pixel_buffer_format fmt,
         int32_t width,
         int32_t height,
-        plane_deleter deleter)
+        pixel_buffer_format fmt,
+        orientation orient,
+        bool mirroring,
+        plane_deleter deleter
+    )
+        : m_pixel_buffer_format(fmt)
+        , m_plane_count(1)
+        , m_orientation(orient)
+        , m_mirroring(mirroring)
     {
         if (!pixel_buffer_format_is_bpc8(fmt)) {
             throw std::runtime_error("Format should be bpc8.");
         }
 
-        m_plane_count = 1;
-        m_planes[0].data = const_cast<uint8_t*>(rgb_plane);
-        m_planes[0].bytes_per_row = rgb_stride;
-        m_planes[0].width = width;
-        m_planes[0].height = height;
-        m_planes[0].pixel_size = fmt == pixel_buffer_format::bpc8_bgr || fmt == pixel_buffer_format::bpc8_rgb ? 3 : 4;
-        m_planes[0].deleter = deleter;
+        auto pixel_size = fmt == pixel_buffer_format::bpc8_bgr || fmt == pixel_buffer_format::bpc8_rgb ? 3 : 4;
+        set_plane_data(0, rgb_plane, rgb_stride, pixel_size, width, height, deleter);
     }
 
     /* pixel_buffer::pixel_buffer */
@@ -33,32 +35,25 @@ namespace bnb::player_api
         int32_t y_stride,
         const uint8_t* uv_plane,
         int32_t uv_stride,
-        pixel_buffer_format fmt,
         int32_t width,
         int32_t height,
+        pixel_buffer_format fmt,
+        orientation orient,
+        bool mirroring,
         plane_deleter y_deleter,
-        plane_deleter uv_delete)
+        plane_deleter uv_deleter
+    )
+        : m_pixel_buffer_format(fmt)
+        , m_plane_count(2)
+        , m_orientation(orient)
+        , m_mirroring(mirroring)
     {
         if (!pixel_buffer_format_is_nv12(fmt)) {
             throw std::runtime_error("Format should be nv12.");
         }
 
-        m_plane_count = 2;
-        m_pixel_buffer_format = fmt;
-
-        m_planes[0].data = const_cast<uint8_t*>(y_plane);
-        m_planes[0].bytes_per_row = y_stride;
-        m_planes[0].width = width;
-        m_planes[0].height = height;
-        m_planes[0].pixel_size = 1;
-        m_planes[0].deleter = y_deleter;
-
-        m_planes[1].data = const_cast<uint8_t*>(uv_plane);
-        m_planes[1].bytes_per_row = uv_stride;
-        m_planes[1].width = uv_plane_width(width);
-        m_planes[1].height = uv_plane_height(height);
-        m_planes[1].pixel_size = 2;
-        m_planes[1].deleter = uv_delete;
+        set_plane_data(0, y_plane, y_stride, 1, width, height, y_deleter);
+        set_plane_data(1, uv_plane, uv_stride, 2, uv_plane_width(width), uv_plane_height(height), uv_deleter);
     }
 
     pixel_buffer::pixel_buffer(
@@ -68,40 +63,27 @@ namespace bnb::player_api
         int32_t u_stride,
         const uint8_t* v_plane,
         int32_t v_stride,
-        pixel_buffer_format fmt,
         int32_t width,
         int32_t height,
+        pixel_buffer_format fmt,
+        orientation orient,
+        bool mirroring,
         plane_deleter y_deleter,
         plane_deleter u_deleter,
-        plane_deleter v_deleter)
+        plane_deleter v_deleter
+    )
+        : m_pixel_buffer_format(fmt)
+        , m_plane_count(3)
+        , m_orientation(orient)
+        , m_mirroring(mirroring)
     {
         if (!pixel_buffer_format_is_i420(fmt)) {
             throw std::runtime_error("Format should be i420.");
         }
 
-        m_plane_count = 3;
-        m_pixel_buffer_format = fmt;
-        
-        m_planes[0].data = const_cast<uint8_t*>(y_plane);
-        m_planes[0].bytes_per_row = y_stride;
-        m_planes[0].width = width;
-        m_planes[0].height = height;
-        m_planes[0].pixel_size = 1;
-        m_planes[0].deleter = y_deleter;
-
-        m_planes[1].data = const_cast<uint8_t*>(u_plane);
-        m_planes[1].bytes_per_row = u_stride;
-        m_planes[1].width = uv_plane_width(width);
-        m_planes[1].height = uv_plane_height(height);
-        m_planes[1].pixel_size = 1;
-        m_planes[1].deleter = u_deleter;
-
-        m_planes[2].data = const_cast<uint8_t*>(v_plane);
-        m_planes[2].bytes_per_row = v_stride;
-        m_planes[2].width = uv_plane_width(width);
-        m_planes[2].height = uv_plane_height(height);
-        m_planes[2].pixel_size = 1;
-        m_planes[2].deleter = v_deleter;
+        set_plane_data(0, y_plane, y_stride, 1, width, height, y_deleter);
+        set_plane_data(1, u_plane, u_stride, 1, uv_plane_width(width), uv_plane_height(height), u_deleter);
+        set_plane_data(2, v_plane, v_stride, 1, uv_plane_width(width), uv_plane_height(height), v_deleter);
     }
 
     /* pixel_buffer::~pixel_buffer */
@@ -112,6 +94,18 @@ namespace bnb::player_api
                 plane.deleter(plane.data);
             }
         }
+    }
+
+    /* pixel_buffer::get_orientation */
+    orientation pixel_buffer::get_orientation() const noexcept
+    {
+        return m_orientation;
+    }
+
+    /* pixel_buffer::get_mirroring */
+    bool pixel_buffer::get_mirroring() const noexcept
+    {
+        return m_mirroring;
     }
 
     /* pixel_buffer::get_image_format */
@@ -189,6 +183,18 @@ namespace bnb::player_api
     {
         validate_plane_number(plane_num);
         return m_planes[plane_num].height;
+    }
+
+    /* pixel_buffer::set_plane_data */
+    void pixel_buffer::set_plane_data(int32_t plane_num, const uint8_t* data, int32_t stride, int32_t pixel_size, int32_t width, int32_t height, plane_deleter deleter)
+    {
+        validate_plane_number(plane_num);
+        m_planes[plane_num].data = const_cast<uint8_t*>(data);
+        m_planes[plane_num].bytes_per_row = stride;
+        m_planes[plane_num].width = width;
+        m_planes[plane_num].height = height;
+        m_planes[plane_num].pixel_size = pixel_size;
+        m_planes[plane_num].deleter = deleter;
     }
 
     /* pixel_buffer::validate_plane_number */

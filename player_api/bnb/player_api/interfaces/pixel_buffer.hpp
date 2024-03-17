@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bnb/player_api/types/pixel_buffer_format.hpp>
+#include <bnb/player_api/types/orientation.hpp>
 
 #include <memory>
 
@@ -21,6 +22,18 @@ namespace bnb::player_api::interfaces
     {
     public:
         virtual ~pixel_buffer() = default;
+
+        /**
+         * Returns the orientation of the image
+         * @return orientation
+         */
+        virtual orientation get_orientation() const noexcept = 0;
+
+        /**
+         * Returns the mirroring of the image. Mirroring applied after orientation
+         * @return mirroring
+         */
+        virtual bool get_mirroring() const noexcept = 0;
 
         /**
          * Returns format of the current image

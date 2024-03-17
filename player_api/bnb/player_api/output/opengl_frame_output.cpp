@@ -82,7 +82,13 @@ namespace
         std::free(p);
     }
 
-    bnb::player_api::pixel_buffer_sptr allocate_pixel_buffer(bnb::player_api::pixel_buffer_format format, int32_t width, int32_t height)
+    bnb::player_api::pixel_buffer_sptr allocate_pixel_buffer(
+        bnb::player_api::pixel_buffer_format format,
+        int32_t width,
+        int32_t height,
+        bnb::player_api::orientation orient,
+        bool mirror
+    )
     {
         using pb_t = bnb::player_api::pixel_buffer;
         using t = bnb::player_api::pixel_buffer_format;
@@ -92,7 +98,7 @@ namespace
                 {
                     auto stride = align_by_8(width * 3);
                     auto* data = alloc_pixels(stride * height);
-                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, format, width, height, dealloc_pixels);
+                    return std::make_shared<pb_t>(data, stride, width, height, format, orient, mirror, dealloc_pixels);
                 }
                 break;
             case t::bpc8_rgba:
@@ -101,7 +107,7 @@ namespace
                 {
                     auto stride = align_by_8(width * 4);
                     auto* data = alloc_pixels(stride * height);
-                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, format, width, height, dealloc_pixels);
+                    return std::make_shared<pb_t>(data, stride, width, height, format, orient, mirror, dealloc_pixels);
                 }
                 break;
             case t::nv12_bt601_full:
@@ -112,7 +118,7 @@ namespace
                     auto stride = align_by_32(width);
                     auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height) + stride);
                     auto* uv_data = data + stride * height;
-                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, uv_data, stride, format, width, height, dealloc_pixels, nullptr);
+                    return std::make_shared<pb_t>(data, stride, uv_data, stride, width, height, format, orient, mirror, dealloc_pixels, nullptr);
                 }
                 break;
             case t::i420_bt601_full:
@@ -124,10 +130,11 @@ namespace
                     auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height));
                     auto* u_data = data + stride * height;
                     auto* v_data = data + stride * height + align_by_16(bnb::player_api::uv_plane_width(width));
-                    return std::make_shared<bnb::player_api::pixel_buffer>(data, stride, u_data, stride, v_data, stride, format, width, height, dealloc_pixels, nullptr, nullptr);
+                    return std::make_shared<pb_t>(data, stride, u_data, stride, v_data, stride, width, height, format, orient, mirror, dealloc_pixels, nullptr, nullptr);
                 }
                 break;
         }
+        return nullptr;
     }
 
 } /* namespace */
@@ -213,7 +220,7 @@ namespace bnb::player_api
         oriented_frame_size(render_target, width, height);
         auto renderbuffer_width = width;
         auto renderbuffer_height = height;
-        auto pb = allocate_pixel_buffer(m_format, width, height);
+        auto pb = allocate_pixel_buffer(m_format, width, height, m_orientation, m_mirroring);
 
         if (m_format_is_bpc8) {
             m_renderbuffer->prepare(renderbuffer_width, renderbuffer_height);
