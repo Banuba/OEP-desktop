@@ -55,6 +55,7 @@ set(APP_SOURCES
     glfw_window.hpp
     glfw_window.cpp
     glfw_context.hpp
+    camera_utils.hpp
     graphical_user_interface.hpp
     graphical_user_interface.cpp
     main.cpp
