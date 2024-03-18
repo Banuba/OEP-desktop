@@ -150,7 +150,7 @@ namespace bnb::player_api
             case ns::bpc8_argb:
                 push(
                     full_image_t(bpc8_image_t(
-                        color_plane(image->get_base_ptr()),
+                        std::shared_ptr<bnb::color_plane_data_t>(image->get_base_ptr(), [image](bnb::color_plane_data_t*) {}),
                         make_bnb_pixel_format(image),
                         make_bnb_image_format(image))),
                     timestamp_us);
@@ -161,8 +161,8 @@ namespace bnb::player_api
             case ns::nv12_bt709_video:
                 push(
                     full_image_t(yuv_image_t(
-                        color_plane(image->get_base_ptr_of_plane(0)),
-                        color_plane(image->get_base_ptr_of_plane(1)),
+                        std::shared_ptr<bnb::color_plane_data_t>(image->get_base_ptr_of_plane(0), [image](bnb::color_plane_data_t*) {}),
+                        std::shared_ptr<bnb::color_plane_data_t>(image->get_base_ptr_of_plane(1), [image](bnb::color_plane_data_t*) {}),
                         make_bnb_image_format(image),
                         make_bnb_yuv_format(image))),
                     timestamp_us);
@@ -173,9 +173,9 @@ namespace bnb::player_api
             case ns::i420_bt709_video:
                 push(
                     full_image_t(yuv_image_t(
-                        color_plane(image->get_base_ptr_of_plane(0)),
-                        color_plane(image->get_base_ptr_of_plane(1)),
-                        color_plane(image->get_base_ptr_of_plane(2)),
+                        std::shared_ptr<bnb::color_plane_data_t>(image->get_base_ptr_of_plane(0), [image](bnb::color_plane_data_t*) {}),
+                        std::shared_ptr<bnb::color_plane_data_t>(image->get_base_ptr_of_plane(1), [image](bnb::color_plane_data_t*) {}),
+                        std::shared_ptr<bnb::color_plane_data_t>(image->get_base_ptr_of_plane(2), [image](bnb::color_plane_data_t*) {}),
                         make_bnb_image_format(image),
                         make_bnb_yuv_format(image))),
                     timestamp_us);
