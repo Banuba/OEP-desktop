@@ -10,7 +10,15 @@ namespace bnb::player_api
     /* opengl_renderbuffer::opengl_renderbuffer */
     opengl_renderbuffer::opengl_renderbuffer()
     {
-         GL_CALL(glGenFramebuffers(1, &m_framebuffer));
+        GL_CALL(glGenFramebuffers(1, &m_framebuffer));
+
+        GL_CALL(glGenTextures(1, &m_texture));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+        GL_CALL(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
     }
 
     /* opengl_renderbuffer::~opengl_renderbuffer */
@@ -30,19 +38,9 @@ namespace bnb::player_api
     void opengl_renderbuffer::prepare(int32_t width, int32_t height)
     {
         if (m_width != width || m_height != height) {
-            if (m_texture != 0) {
-                GL_CALL(glDeleteTextures(1, &m_texture));
-                m_texture = 0;
-            }
-
-            GL_CALL(glGenTextures(1, &m_texture));
             GL_CALL(glBindTexture(GL_TEXTURE_2D, m_texture));
             GL_CALL(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
-
-            GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MIN_FILTER), GL_LINEAR));
-            GL_CALL(glTexParameteri(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_MAG_FILTER), GL_LINEAR));
-            GL_CALL(glTexParameterf(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_WRAP_S), GLfloat(GL_CLAMP_TO_EDGE)));
-            GL_CALL(glTexParameterf(GLenum(GL_TEXTURE_2D), GLenum(GL_TEXTURE_WRAP_T), GLfloat(GL_CLAMP_TO_EDGE)));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, 0));
 
             m_width = width;
             m_height = height;

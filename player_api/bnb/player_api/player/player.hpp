@@ -62,6 +62,8 @@ namespace bnb::player_api
 
         bool draw();
 
+        void run_tasks();
+
         void resize(const bnb::interfaces::full_image_format& format);
 
         void clear_outputs();
@@ -72,11 +74,13 @@ namespace bnb::player_api
 
         std::queue<std::function<void()>> m_tasks;
         std::mutex m_tasks_mutex;
-        //std::condition_variable m_condition;
+        std::mutex m_manual_render_mutex;
+        std::condition_variable m_condition;
 
         render_target_sptr m_render_target;
 
         effect_player_sptr m_effect_player;
+        bool m_player_initialized {false};
 
         input_sptr m_input;
         std::vector<output_sptr> m_outputs;
@@ -111,7 +115,7 @@ namespace bnb::player_api
 
             m_tasks.emplace([task]() { (*task)(); });
         }
-        //m_condition.notify_one();
+        m_condition.notify_one();
 
         return res;
     }

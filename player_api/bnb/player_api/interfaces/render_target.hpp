@@ -31,6 +31,11 @@ namespace bnb::player_api::interfaces
         virtual ~render_target() = default;
 
         /**
+         * Activate context
+         */
+        virtual void activate() = 0;
+
+        /**
          * Prepare render target to offscreen rendering of the player
          *  @param width rendering surface width
          *  @param height rendering surface height

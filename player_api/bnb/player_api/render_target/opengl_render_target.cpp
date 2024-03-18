@@ -66,16 +66,15 @@ namespace bnb::player_api
         m_context->deactivate();
     }
 
+    /* opengl_render_target::activate */
+    void opengl_render_target::activate()
+    {
+        m_context->activate();
+    }
+
     /* opengl_render_target::prepare_to_render */
     void opengl_render_target::prepare_to_offscreen_render(int32_t width, int32_t height)
     {
-        m_context->activate();
-
-        if (width == 0 || height == 0) {
-            // just activate context and return
-            return;
-        }
-
         m_renderbuffer->prepare(width, height);
 
         GL_CALL(glViewport(0, 0, width, height));
@@ -123,14 +122,18 @@ namespace bnb::player_api
     /* opengl_render_target::present */
     void opengl_render_target::present(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4)
     {
+        constexpr uint32_t texture_unit = 0;
+
         GL_CALL(glDisable(GL_BLEND));
         GL_CALL(glDisable(GL_CULL_FACE));
         GL_CALL(glDisable(GL_DEPTH_TEST));
         GL_CALL(glViewport(left, top, width, height));
 
         m_shader->use();
-        m_shader->set_uniform_texture(m_uniform_texture, m_renderbuffer->get_texture());
         m_shader->set_uniform_mat4(m_uniform_matrix, mat4, true);
+        m_shader->set_uniform_texture_unit(m_uniform_texture, texture_unit);
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
+        GL_CALL(glBindTexture(GL_TEXTURE_2D, m_renderbuffer->get_texture()));
         m_frame_handler->draw_surface();
         opengl_shader_program::unuse();
     }

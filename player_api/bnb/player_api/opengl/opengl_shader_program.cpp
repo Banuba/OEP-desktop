@@ -99,12 +99,11 @@ namespace bnb::player_api
         return glGetUniformLocation(m_program, uniform_name.data());
     }
 
-    /* opengl_shader_program::set_uniform_texture */
-    void opengl_shader_program::set_uniform_texture(int32_t uniform, uint32_t texture, uint32_t texture_index) const
+    /* opengl_shader_program::set_uniform_texture_unit */
+    void opengl_shader_program::set_uniform_texture_unit(int32_t uniform, uint32_t texture_unit_index) const
     {
-        GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_index));
-        GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
-        GL_CALL(glUniform1i(uniform, texture_index));
+        GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit_index));
+        GL_CALL(glUniform1i(uniform, texture_unit_index));
     }
 
     /* opengl_shader_program::set_uniform_vec2 */

@@ -213,7 +213,9 @@ namespace bnb::player_api
     void opengl_frame_output::present(const output_sptr& self, const render_target_sptr& render_target)
     {
         m_shader->use();
-        m_shader->set_uniform_texture(m_uniform_texture, static_cast<uint32_t>(render_target->get_output_texture()));
+        auto texture = static_cast<uint32_t>(render_target->get_output_texture());
+        constexpr uint32_t texture_unit = 0;
+        m_shader->set_uniform_texture_unit(m_uniform_texture, texture_unit);
         m_shader->set_uniform_mat4(m_uniform_matrix, get_orientation_matrix(true));
 
         int32_t width, height;
@@ -223,37 +225,26 @@ namespace bnb::player_api
         auto pb = allocate_pixel_buffer(m_format, width, height, m_orientation, m_mirroring);
 
         if (m_format_is_bpc8) {
-            m_renderbuffer->prepare(renderbuffer_width, renderbuffer_height);
-            GL_CALL(glDisable(GL_BLEND));
-            GL_CALL(glDisable(GL_CULL_FACE));
-            GL_CALL(glDisable(GL_DEPTH_TEST));
-
-            GL_CALL(glViewport(0, 0, width, height));
-            m_frame_handler->draw_surface();
+            prepare_to_render(renderbuffer_width, renderbuffer_height);
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
+            render(0, 0, width, height);
         } else if (m_format_is_nv12 || m_format_is_i420) {
             auto uv_width = uv_plane_width(width);
             auto uv_height = uv_plane_height(height);
             renderbuffer_width = align_by_32(width);
             renderbuffer_height = height + uv_height + static_cast<int32_t>(m_format_is_nv12);
-            // for optimization so that when converting to nv12 there are no additional memory allocations
             auto height_indent_for_nv12 = static_cast<int32_t>(m_format_is_nv12);
 
-            m_renderbuffer->prepare(renderbuffer_width, renderbuffer_height);
-            GL_CALL(glDisable(GL_BLEND));
-            GL_CALL(glDisable(GL_CULL_FACE));
-            GL_CALL(glDisable(GL_DEPTH_TEST));
-
-            GL_CALL(glViewport(0, 0, width, height));
+            prepare_to_render(renderbuffer_width, renderbuffer_height);
+            GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
+            GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
             m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_y_plane_convert_coefs);
-            m_frame_handler->draw_surface();
-
-            GL_CALL(glViewport(0, height + height_indent_for_nv12, uv_width, uv_height));
+            render(0, 0, width, height);
             m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_u_plane_convert_coefs);
-            m_frame_handler->draw_surface();
-
-            GL_CALL(glViewport(align_by_16(uv_width), height + height_indent_for_nv12, uv_width, uv_height));
+            render(0, height + height_indent_for_nv12, uv_width, uv_height);
             m_shader->set_uniform_vec4(m_uniform_yuv_plane_convert_coefs, m_v_plane_convert_coefs);
-            m_frame_handler->draw_surface();
+            render(align_by_16(uv_width), height + height_indent_for_nv12, uv_width, uv_height);
         }
 
         GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 8));
@@ -276,6 +267,22 @@ namespace bnb::player_api
         opengl_shader_program::unuse();
 
         m_pixel_buffer_callback(self, pb);
+    }
+
+    /* opengl_frame_output::prepare_to_render */
+    void opengl_frame_output::prepare_to_render(int32_t framebuffer_width, int32_t framebuffer_height)
+    {
+        m_renderbuffer->prepare(framebuffer_width, framebuffer_height);
+        GL_CALL(glDisable(GL_BLEND));
+        GL_CALL(glDisable(GL_CULL_FACE));
+        GL_CALL(glDisable(GL_DEPTH_TEST));
+    }
+
+    /* opengl_frame_output::render */
+    void opengl_frame_output::render(int32_t left, int32_t top, int32_t width, int32_t height)
+    {
+        GL_CALL(glViewport(left, top, width, height));
+        m_frame_handler->draw_surface();
     }
 
 } /* namespace bnb::player_api */

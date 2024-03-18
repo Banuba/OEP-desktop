@@ -29,6 +29,11 @@ namespace bnb::player_api
         void present(const output_sptr& self, const render_target_sptr& render_target) override;
 
     private:
+        void prepare_to_render(int32_t framebuffer_width, int32_t framebuffer_height);
+
+        void render(int32_t left, int32_t top, int32_t width, int32_t height);
+
+    private:
         pixel_buffer_callback m_pixel_buffer_callback;
         pixel_buffer_format m_format;
         std::unique_ptr<opengl_renderbuffer> m_renderbuffer;

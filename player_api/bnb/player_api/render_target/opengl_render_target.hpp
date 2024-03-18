@@ -16,6 +16,8 @@ namespace bnb::player_api
 
         ~opengl_render_target() override;
 
+        void activate() override;
+
         void prepare_to_offscreen_render(int32_t width, int32_t height) override;
 
         void prepare_to_screen_render() override;

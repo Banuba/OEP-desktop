@@ -15,33 +15,23 @@ namespace bnb::player_api
     {
         auto thread_func = [this]() {
             while (m_thread_started) {
-                using namespace std::chrono_literals;
-                std::unique_lock<std::mutex> lock(m_tasks_mutex);
-                if (!m_tasks.empty()) {
-                    m_render_target->prepare_to_offscreen_render(0, 0);
-                    do {
-                        m_tasks.front()();
-                        m_tasks.pop();
-                    } while (!m_tasks.empty());
+                run_tasks();
+                if (m_render_mode == render_mode::loop) {
+                    draw();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                } else { // render_mode::manual
+                    std::unique_lock<std::mutex> lock(m_manual_render_mutex);
+                    m_condition.wait(lock);
                 }
-                draw();
-                std::this_thread::sleep_for(1ms);
             }
 
-            std::unique_lock<std::mutex> lock(m_tasks_mutex);
-            if (!m_tasks.empty()) {
-                m_render_target->prepare_to_offscreen_render(0, 0);
-                do {
-                    m_tasks.front()();
-                    m_tasks.pop();
-                } while (!m_tasks.empty());
-            }
+            run_tasks();
         };
 
         m_thread = std::thread(thread_func);
 
         enqueue([this] {
-            m_render_target->prepare_to_offscreen_render(0, 0);
+            m_render_target->activate();
             auto ep_conf = bnb::interfaces::effect_player_configuration::create(1, 1);
             m_effect_player = bnb::interfaces::effect_player::create(ep_conf);
             m_effect_player->surface_created(1, 1);
@@ -56,19 +46,24 @@ namespace bnb::player_api
             m_effect_player->surface_destroyed();
         });
         m_thread_started = false;
+        m_condition.notify_all();
         m_thread.join();
     }
 
     /* player::set_render_mode */
     void player::set_render_mode(render_mode new_render_mode)
     {
-        m_render_mode = new_render_mode;
+        enqueue([this, new_render_mode]() {
+            m_render_mode = new_render_mode;
+        }).get();
     }
 
     /* player::set_render_status_callback */
     void player::set_render_status_callback(render_status_callback callback)
     {
-        m_render_callback = callback;
+        enqueue([this, &callback]() {
+            m_render_callback = callback;
+        }).get();
     }
 
     /* player::play */
@@ -206,21 +201,21 @@ namespace bnb::player_api
     /* player::render */
     bool player::render()
     {
-        enqueue([this]() {
-            if (m_render_mode == render_mode::manual) {
-                draw();
+        return enqueue([this]() -> bool {
+            if (m_render_mode == render_mode::loop) {
+                throw std::runtime_error("Cannot render manually in not `manual` render mode.");
             }
+            return draw();
         }).get();
     }
 
     /* player::draw( */
     bool player::draw() {
-        auto rc = m_render_callback;
         auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
-        auto is_drawing_forbidden = is_not_active || m_outputs.empty()|| m_input == nullptr;
+        auto is_drawing_forbidden = !m_thread_started || is_not_active || m_outputs.empty()|| m_input == nullptr;
         if (is_drawing_forbidden) {
-            if (rc != nullptr) {
-                rc(-1);
+            if (m_render_callback != nullptr) {
+                m_render_callback(-1);
             }
             return false;
         }
@@ -228,21 +223,22 @@ namespace bnb::player_api
         auto frame_processor = m_input->get_frame_processor();
         auto processor_result = frame_processor->pop();
         if (processor_result.frame_data == nullptr) {
-            if (rc != nullptr) {
-                rc(-1);
+            if (m_render_callback != nullptr) {
+                m_render_callback(-1);
             }
             return false;
         }
 
+        m_render_target->activate();
         m_render_target->set_frame_time_us(m_input->get_frame_time_us());
-        auto effect_manager = m_effect_player->effect_manager();
-        m_render_target->prepare_to_offscreen_render(effect_manager->surface_size().width, effect_manager->surface_size().height);
         resize(processor_result.frame_data->get_full_img_format());
+        auto old_size = m_effect_player->effect_manager()->surface_size();
+        m_render_target->prepare_to_offscreen_render(old_size.width, old_size.height);
 
         auto frame_number = m_effect_player->draw_with_external_frame_data(processor_result.frame_data);
         if (frame_number < 0) {
-            if (rc != nullptr) {
-                rc(-1);
+            if (m_render_callback != nullptr) {
+                m_render_callback(-1);
             }
             return false;
         }
@@ -253,10 +249,23 @@ namespace bnb::player_api
             }
         }
 
-        if (rc != nullptr) {
-            rc(frame_number);
+        if (m_render_callback != nullptr) {
+            m_render_callback(frame_number);
         }
         return true;
+    }
+
+    /* player::run_tasks */
+    void player::run_tasks()
+    {
+        std::unique_lock<std::mutex> lock(m_tasks_mutex);
+        if (!m_tasks.empty()) {
+            m_render_target->activate();
+            do {
+                m_tasks.front()();
+                m_tasks.pop();
+            } while (!m_tasks.empty());
+        }
     }
 
     /* player::resize */
@@ -266,8 +275,8 @@ namespace bnb::player_api
                 || format.orientation == bnb::interfaces::rotation::deg_180;
         const auto width = is_vertical ? format.width : format.height;
         const auto height = is_vertical ? format.height : format.width;
-        const auto size = m_effect_player->effect_manager()->surface_size();
 
+        const auto size = m_effect_player->effect_manager()->surface_size();
         if (size.width != width || size.height != height) {
             m_effect_player->surface_changed(width, height);
             m_effect_player->effect_manager()->set_effect_size(width, height);
