@@ -1,16 +1,33 @@
 #pragma once
 
+#include <bnb/player_api/interfaces/output.hpp>
 #include <bnb/player_api/interfaces/render_target.hpp>
 #include <bnb/player_api/types/content_mode.hpp>
 #include <bnb/player_api/types/orientation.hpp>
 
+#include <atomic>
+
 namespace bnb::player_api
 {
 
-    class output_base
+    class output_base : public bnb::player_api::interfaces::output
     {
     public:
         output_base() = default;
+
+        void active() override;
+
+        void deactive() override;
+
+        [[nodiscard]] bool is_active() override;
+        
+        void attach() override
+        {
+        }
+
+        void detach() override
+        {
+        }
 
         void set_content_mode(content_mode new_content_mode);
 
@@ -27,6 +44,7 @@ namespace bnb::player_api
         content_mode m_content_mode {content_mode::aspect_fit};
         orientation m_orientation {orientation::up};
         bool m_mirroring {false};
+        std::atomic_bool m_active {true};
     }; /* class output_base */
 
 } /* namespace bnb::player_api */

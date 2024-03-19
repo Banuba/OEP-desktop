@@ -8,6 +8,8 @@
 #include <bnb/player_api/opengl/opengl.hpp>
 #include <bnb/player_api/player/player.hpp>
 #include <bnb/player_api/input/stream_input.hpp>
+#include <bnb/player_api/input/live_input.hpp>
+#include <bnb/player_api/input/photo_input.hpp>
 #include <bnb/player_api/output/window_output.hpp>
 #include <bnb/player_api/output/texture_output.hpp>
 #include <bnb/player_api/output/opengl_frame_output.hpp>
@@ -139,7 +141,7 @@ int main()
     auto context = std::make_shared<bnb::example::glfw_context>(main_window);
     auto render_target = std::make_shared<bnb::player_api::opengl_render_target>(context);
     auto player = std::make_shared<bnb::player_api::player>(render_target);
-    auto input = std::make_shared<bnb::player_api::stream_input>();
+    auto input = std::make_shared<bnb::player_api::live_input>();
     auto window_output = std::make_shared<bnb::player_api::window_output>();
 
     auto frame_output = std::make_shared<bnb::player_api::opengl_frame_output>([player](const bnb::player_api::output_sptr& self, const bnb::player_api::pixel_buffer_sptr& pb) {

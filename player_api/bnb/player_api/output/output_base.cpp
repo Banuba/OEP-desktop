@@ -3,6 +3,24 @@
 namespace bnb::player_api
 {
 
+    /* output_base::active */
+    void output_base::active()
+    {
+        m_active = true;
+    }
+
+    /* output_base::deactive */
+    void output_base::deactive()
+    {
+        m_active = false;
+    }
+
+    /* output_base::is_active */
+    bool output_base::is_active()
+    {
+        return m_active;
+    }
+
     /* output_base::set_content_mode */
     void output_base::set_content_mode(content_mode new_content_mode)
     {

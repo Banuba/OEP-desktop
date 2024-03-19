@@ -1,4 +1,10 @@
 set(BNB_PLAYER_API_SOURCES
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/input_base.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/input_base.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/live_input.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/live_input.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/photo_input.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/photo_input.cpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/stream_input.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/stream_input.cpp
 
@@ -10,6 +16,7 @@ set(BNB_PLAYER_API_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/render_target.hpp
 
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/opengl/opengl.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/opengl/opengl.cpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/opengl/opengl_frame_surface_handler.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/opengl/opengl_frame_surface_handler.cpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/opengl/opengl_renderbuffer.hpp
@@ -35,10 +42,11 @@ set(BNB_PLAYER_API_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/render_target/opengl_render_target.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/render_target/opengl_render_target.cpp
 
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/base.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/content_mode.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/orientation.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/orientation.cpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/pixel_buffer_format.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/pixel_buffer_format.cpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/yuv_conversion.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/yuv_conversion.cpp
 )

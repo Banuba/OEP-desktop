@@ -57,8 +57,8 @@ namespace bnb::player_api
         
         int32_t get_number_of_planes() const noexcept override;
 
-        orientation get_orientation() const noexcept;
-        bool get_mirroring() const noexcept;
+        orientation get_orientation() const noexcept override;
+        bool get_mirroring() const noexcept override;
 
         uint8_t* get_base_ptr() const override;
         uint8_t* get_base_ptr_of_plane(int32_t plane_num) const override;

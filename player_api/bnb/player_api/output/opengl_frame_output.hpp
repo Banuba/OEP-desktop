@@ -3,7 +3,6 @@
 #include <bnb/player_api/opengl/opengl_renderbuffer.hpp>
 #include <bnb/player_api/opengl/opengl_shader_program.hpp>
 #include <bnb/player_api/opengl/opengl_frame_surface_handler.hpp>
-#include <bnb/player_api/interfaces/output.hpp>
 #include <bnb/player_api/output/output_base.hpp>
 #include <bnb/player_api/pixel_buffer/pixel_buffer.hpp>
 
@@ -12,7 +11,7 @@
 namespace bnb::player_api
 {
 
-    class opengl_frame_output : public bnb::player_api::interfaces::output, public output_base
+    class opengl_frame_output : public output_base
     {
     public:
         using pixel_buffer_callback = std::function<void(const output_sptr& self, const pixel_buffer_sptr& pb)>;

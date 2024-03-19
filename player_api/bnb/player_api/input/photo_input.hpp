@@ -5,12 +5,12 @@
 namespace bnb::player_api
 {
 
-    class stream_input : public bnb::player_api::input_base
+    class photo_input : public bnb::player_api::input_base
     {
     public:
-        stream_input();
+        photo_input();
 
-        ~stream_input() = default;
+        ~photo_input() = default;
 
         void push(const frame_data_sptr& fd);
 

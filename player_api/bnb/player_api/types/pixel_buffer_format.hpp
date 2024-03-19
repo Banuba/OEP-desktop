@@ -3,6 +3,18 @@
 #include <cstdint>
 #include <string>
 
+namespace bnb
+{
+    enum class yuv_format;
+    enum class color_std;
+    enum class color_range;
+} /* namespace bnb */
+
+namespace bnb::interfaces
+{
+    enum class pixel_format : int;
+} /* namespace bnb::interfaces */
+
 namespace bnb::player_api
 {
 
@@ -28,55 +40,18 @@ namespace bnb::player_api
 
 
 
-    inline bool pixel_buffer_format_is_bpc8(pixel_buffer_format f)
-    {
-        using t = bnb::player_api::pixel_buffer_format;
-        return f == t::bpc8_rgb || f == t::bpc8_bgr || f == t::bpc8_rgba || f == t::bpc8_bgra || f == t::bpc8_argb;
-    }
+    bool pixel_buffer_format_is_bpc8(pixel_buffer_format format);
 
-    inline bool pixel_buffer_format_is_nv12(pixel_buffer_format f)
-    {
-        using t = bnb::player_api::pixel_buffer_format;
-        return f == t::nv12_bt601_full || f == t::nv12_bt601_video || f == t::nv12_bt709_full || f == t::nv12_bt709_video;
-    }
+    bool pixel_buffer_format_is_nv12(pixel_buffer_format format);
 
-    inline bool pixel_buffer_format_is_i420(pixel_buffer_format f)
-    {
-        using t = bnb::player_api::pixel_buffer_format;
-        return f == t::i420_bt601_full || f == t::i420_bt601_video || f == t::i420_bt709_full || f == t::i420_bt709_video;
-    }
+    bool pixel_buffer_format_is_i420(pixel_buffer_format format);
 
-    inline std::string pixel_buffer_format_to_str(pixel_buffer_format f)
-    {
-        using t = bnb::player_api::pixel_buffer_format;
-        switch (f) {
-            case t::bpc8_rgb:
-                return "bpc8_rgb";
-            case t::bpc8_bgr:
-                return "bpc8_bgr";
-            case t::bpc8_rgba:
-                return "bpc8_rgba";
-            case t::bpc8_bgra:
-                return "bpc8_bgra";
-            case t::bpc8_argb:
-                return "bpc8_argb";
-            case t::nv12_bt601_full:
-                return "nv12_bt601_full";
-            case t::nv12_bt601_video:
-                return "nv12_bt601_video";
-            case t::nv12_bt709_full:
-                return "nv12_bt709_full";
-            case t::nv12_bt709_video:
-                return "nv12_bt709_video";
-            case t::i420_bt601_full:
-                return "i420_bt601_full";
-            case t::i420_bt601_video:
-                return "i420_bt601_video";
-            case t::i420_bt709_full:
-                return "i420_bt709_full";
-            case t::i420_bt709_video:
-                return "i420_bt709_video";
-        }
-    }
+    bool pixel_buffer_format_is_yuv(pixel_buffer_format format);
+
+    std::string pixel_buffer_format_to_str(pixel_buffer_format format);
+
+    pixel_buffer_format yuv_format_to_pixel_buffer_format(bnb::yuv_format format, bnb::color_std standard, bnb::color_range range);
+
+    pixel_buffer_format pixel_format_to_pixel_buffer_format(bnb::interfaces::pixel_format format);
 
 } /* namespace bnb::player_api */

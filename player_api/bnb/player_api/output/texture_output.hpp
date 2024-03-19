@@ -1,12 +1,11 @@
 #pragma once
 
-#include <bnb/player_api/interfaces/output.hpp>
 #include <bnb/player_api/output/output_base.hpp>
 
 namespace bnb::player_api
 {
 
-    class texture_output : public output_base, public bnb::player_api::interfaces::output
+    class texture_output : public output_base
     {
     public:
         using texture_ready_callback = std::function<void(const texture_t pb)>;

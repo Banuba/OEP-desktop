@@ -4,8 +4,6 @@
 
 #include <bnb/player_api/render_target/opengl_render_target.hpp>
 
-#include <iostream>
-
 namespace bnb::player_api
 {
 
@@ -55,7 +53,7 @@ namespace bnb::player_api
     {
         enqueue([this, new_render_mode]() {
             m_render_mode = new_render_mode;
-        }).get();
+        });
     }
 
     /* player::set_render_status_callback */
@@ -63,7 +61,7 @@ namespace bnb::player_api
     {
         enqueue([this, &callback]() {
             m_render_callback = callback;
-        }).get();
+        });
     }
 
     /* player::play */

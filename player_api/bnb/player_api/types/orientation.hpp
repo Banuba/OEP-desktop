@@ -1,11 +1,15 @@
 #pragma once
 
 #include <cstdint>
-#include <stdexcept>
+
+namespace bnb
+{
+    enum class camera_orientation : unsigned int;
+} /* namespace bnb */
 
 namespace bnb::player_api
 {
-    
+
     enum class orientation : int32_t
     {
         up = 0,     /* 0 degrees */
@@ -14,19 +18,8 @@ namespace bnb::player_api
         right = 270 /* 270 degrees */
     }; /* enum class orientation */
 
-    inline const orientation degrees_to_orientation(int32_t degrees)
-    {
-        degrees = degrees % 360;
-        if (degrees == 0) {
-            return orientation::up;
-        } else if (degrees == 90) {
-            return orientation::left;
-        } else if (degrees == 180) {
-            return orientation::down;
-        } else if (degrees == 270) {
-            return orientation::right;
-        }
-        throw std::invalid_argument("Unknown degrees value");
-    }
+    orientation degrees_to_orientation(int32_t degrees);
+
+    orientation camera_orientation_to_orientation(bnb::camera_orientation orient);
 
 } /* namespace bnb::player_api */

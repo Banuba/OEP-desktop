@@ -1,7 +1,6 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/pixel_buffer.hpp>
-#include <bnb/player_api/types/base.hpp>
 
 #include <memory>
 
@@ -13,6 +12,7 @@ namespace bnb::player_api::interfaces
 namespace bnb::player_api
 {
     using render_target_sptr = std::shared_ptr<bnb::player_api::interfaces::render_target>;
+    using texture_t = uint64_t;
 } /* namespace bnb::player_api */
 
 namespace bnb::player_api::interfaces

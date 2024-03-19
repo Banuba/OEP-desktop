@@ -1,12 +1,11 @@
 #pragma once
 
-#include <bnb/player_api/interfaces/output.hpp>
 #include <bnb/player_api/output/output_base.hpp>
 
 namespace bnb::player_api
 {
 
-    class window_output : public bnb::player_api::interfaces::output, public output_base
+    class window_output : public output_base
     {
     public:
         window_output() = default;
