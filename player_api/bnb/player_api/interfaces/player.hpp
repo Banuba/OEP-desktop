@@ -11,7 +11,7 @@
 namespace bnb::player_api::interfaces
 {
     class player;
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces
 
 namespace bnb::player_api
 {
@@ -19,7 +19,7 @@ namespace bnb::player_api
     using effect_sptr = std::shared_ptr<bnb::interfaces::effect>;
     using js_callback_sptr = std::shared_ptr<bnb::interfaces::js_callback>;
     using effect_player_sptr = std::shared_ptr<bnb::interfaces::effect_player>;
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api
 
 namespace bnb::player_api::interfaces
 {
@@ -59,7 +59,7 @@ namespace bnb::player_api::interfaces
          * Set rendering callback status
          * @param callback render callback
          */
-        virtual void set_render_status_callback(render_status_callback callback) = 0;
+        virtual void set_render_status_callback(const render_status_callback& callback) = 0;
 
         /**
          * Resume the playback of the effect.
@@ -124,13 +124,13 @@ namespace bnb::player_api::interfaces
          * Synchronous loading of an effect by name
          * @param url path to the effect or effect name
          */
-        virtual effect_sptr load(const std::string & url) = 0;
+        virtual effect_sptr load(const std::string& url) = 0;
 
         /**
          * Load effect asynchronously by name
          * @param url path to the effect or effect name
          */
-        virtual effect_sptr load_async(const std::string & url) = 0;
+        virtual effect_sptr load_async(const std::string& url) = 0;
 
         /**
          * Evaluate the `script` in effect
@@ -144,6 +144,6 @@ namespace bnb::player_api::interfaces
          * @return `false` when no new data in the `input`, `input` or `outputs` is null
          */
         virtual bool render() = 0;
-    };
+    }; // class player
 
-} /* bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces

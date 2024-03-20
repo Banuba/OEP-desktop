@@ -61,36 +61,60 @@ namespace bnb::player_api
         }
     }
 
-    pixel_buffer_format yuv_format_to_pixel_buffer_format(bnb::yuv_format format, bnb::color_std standard, bnb::color_range range)
+    pixel_buffer_format yuv_format_to_pixel_buffer_format(const bnb::yuv_format_t& yuv_format)
     {
-        if (format == bnb::yuv_format::yuv_nv12) {
-            if (standard == bnb::color_std::bt601) {
-                if (range == bnb::color_range::full) {
+        if (yuv_format.format == bnb::yuv_format::yuv_nv12) {
+            if (yuv_format.standard == bnb::color_std::bt601) {
+                if (yuv_format.range == bnb::color_range::full) {
                     return pixel_buffer_format::nv12_bt601_full;
                 } else { // bnb::color_range::video
                     return pixel_buffer_format::nv12_bt601_video;
                 }
             } else { // bnb::color_std::bt709
-                if (range == bnb::color_range::full) {
+                if (yuv_format.range == bnb::color_range::full) {
                     return pixel_buffer_format::nv12_bt709_full;
                 } else { // bnb::color_range::video
                     return pixel_buffer_format::nv12_bt709_video;
                 }
             }
         } else { // bnb::yuv_format::yuv_i420
-            if (standard == bnb::color_std::bt601) {
-                if (range == bnb::color_range::full) {
+            if (yuv_format.standard == bnb::color_std::bt601) {
+                if (yuv_format.range == bnb::color_range::full) {
                     return pixel_buffer_format::i420_bt601_full;
                 } else { // bnb::color_range::video
                     return pixel_buffer_format::i420_bt601_video;
                 }
             } else { // bnb::color_std::bt709
-                if (range == bnb::color_range::full) {
+                if (yuv_format.range == bnb::color_range::full) {
                     return pixel_buffer_format::i420_bt709_full;
                 } else { // bnb::color_range::video
                     return pixel_buffer_format::i420_bt709_video;
                 }
             }
+        }
+    }
+
+    bnb::yuv_format_t pixel_buffer_format_to_yuv_format(pixel_buffer_format format)
+    {
+        switch (format) {
+            case pixel_buffer_format::nv12_bt601_full:
+                return {bnb::color_range::full, bnb::color_std::bt601, bnb::yuv_format::yuv_nv12};
+            case pixel_buffer_format::nv12_bt601_video:
+                return {bnb::color_range::video, bnb::color_std::bt601, bnb::yuv_format::yuv_nv12};
+            case pixel_buffer_format::nv12_bt709_full:
+                return {bnb::color_range::full, bnb::color_std::bt709, bnb::yuv_format::yuv_nv12};
+            case pixel_buffer_format::nv12_bt709_video:
+                return {bnb::color_range::video, bnb::color_std::bt709, bnb::yuv_format::yuv_nv12};
+            case pixel_buffer_format::i420_bt601_full:
+                return {bnb::color_range::full, bnb::color_std::bt601, bnb::yuv_format::yuv_i420};
+            case pixel_buffer_format::i420_bt601_video:
+                return {bnb::color_range::video, bnb::color_std::bt601, bnb::yuv_format::yuv_i420};
+            case pixel_buffer_format::i420_bt709_full:
+                return {bnb::color_range::full, bnb::color_std::bt709, bnb::yuv_format::yuv_i420};
+            case pixel_buffer_format::i420_bt709_video:
+                return {bnb::color_range::video, bnb::color_std::bt709, bnb::yuv_format::yuv_i420};
+            default:
+                throw std::runtime_error("Incorrect pixel buffer format, only nv12 and i420 formats available.");
         }
     }
 
@@ -108,9 +132,26 @@ namespace bnb::player_api
             case bnb::interfaces::pixel_format::argb:
                 return pixel_buffer_format::bpc8_argb;
             default:
-                break;
+                throw std::runtime_error("Unknown pixel format.");
         }
-        throw std::runtime_error("Unknown pixel format.");
     }
 
-} /* namespace bnb::player_api */
+    bnb::interfaces::pixel_format pixel_buffer_format_to_pixel_format(pixel_buffer_format format)
+    {
+        switch (format) {
+            case pixel_buffer_format::bpc8_rgb:
+                return bnb::interfaces::pixel_format::rgb;
+            case pixel_buffer_format::bpc8_rgba:
+                return bnb::interfaces::pixel_format::rgba;
+            case pixel_buffer_format::bpc8_bgr:
+                return bnb::interfaces::pixel_format::bgr;
+            case pixel_buffer_format::bpc8_bgra:
+                return bnb::interfaces::pixel_format::bgra;
+            case pixel_buffer_format::bpc8_argb:
+                return bnb::interfaces::pixel_format::argb;
+            default:
+                throw std::runtime_error("Incorrect pixel buffer format, only bpc8 format available.");
+        }
+    }
+
+} // namespace bnb::player_api

@@ -20,7 +20,8 @@ namespace bnb::player_api
             pixel_buffer_format fmt,
             orientation orient,
             bool mirroring,
-            plane_deleter deleter);
+            plane_deleter deleter
+        );
 
         pixel_buffer(
             const uint8_t* y_plane,
@@ -33,7 +34,8 @@ namespace bnb::player_api
             orientation orient,
             bool mirroring,
             plane_deleter y_deleter,
-            plane_deleter uv_deleter);
+            plane_deleter uv_deleter
+        );
 
         pixel_buffer(
             const uint8_t* y_plane,
@@ -49,12 +51,13 @@ namespace bnb::player_api
             bool mirroring,
             plane_deleter y_deleter,
             plane_deleter u_deleter,
-            plane_deleter v_deleter);
+            plane_deleter v_deleter
+        );
 
         ~pixel_buffer();
 
         pixel_buffer_format get_format() const noexcept override;
-        
+
         int32_t get_number_of_planes() const noexcept override;
 
         orientation get_orientation() const noexcept override;
@@ -75,18 +78,18 @@ namespace bnb::player_api
     private:
         struct plane_data
         {
-            uint8_t* data {0};
-            int32_t bytes_per_row {0};
-            int32_t width {0};
-            int32_t height {0};
-            int32_t pixel_size {0};
-            plane_deleter deleter {nullptr};
+            uint8_t* data{0};
+            int32_t bytes_per_row{0};
+            int32_t width{0};
+            int32_t height{0};
+            int32_t pixel_size{0};
+            plane_deleter deleter{nullptr};
         }; /* struct plane_data_extended */
 
         void set_plane_data(int32_t plane_num, const uint8_t* data, int32_t stride, int32_t pixel_size, int32_t width, int32_t height, plane_deleter deleter);
 
         void validate_plane_number(int32_t plane_num) const;
-        
+
     private:
         plane_data m_planes[3];
         pixel_buffer_format m_pixel_buffer_format;
@@ -96,4 +99,4 @@ namespace bnb::player_api
     }; /* class image_data  */
 
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

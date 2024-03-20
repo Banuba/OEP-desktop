@@ -15,4 +15,4 @@ namespace bnb::player_api
         m_callback(render_target->get_output_texture());
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

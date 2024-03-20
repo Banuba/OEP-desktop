@@ -27,4 +27,4 @@ namespace bnb::player_api
         return (height + 1) / 2;
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

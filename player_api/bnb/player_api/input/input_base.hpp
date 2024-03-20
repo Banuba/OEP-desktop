@@ -21,8 +21,8 @@ namespace bnb::player_api
         void push_pixel_buffer(const pixel_buffer_sptr& image, uint64_t timestamp_us);
 
     protected:
-        frame_processor_sptr m_frame_processor {nullptr};
-        uint64_t m_timestamp {0};
-    }; /* class input_base */
+        frame_processor_sptr m_frame_processor{nullptr};
+        uint64_t m_timestamp{0};
+    }; // class input_base
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

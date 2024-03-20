@@ -4,7 +4,7 @@
 
 namespace bnb::player_api
 {
-    
+
     class opengl_frame_surface_handler
     {
     public:
@@ -14,8 +14,8 @@ namespace bnb::player_api
         void draw_surface();
 
     private:
-        uint32_t m_vbo {0};
-        uint32_t m_vao {0};
-    }; /* class opengl_frame_surface_handler */
+        uint32_t m_vbo{0};
+        uint32_t m_vao{0};
+    }; // class opengl_frame_surface_handler
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

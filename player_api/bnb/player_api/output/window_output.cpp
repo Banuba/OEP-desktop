@@ -23,4 +23,4 @@ namespace bnb::player_api
         render_target->present(x + m_frame_left, y + m_frame_top, w, h, get_orientation_matrix());
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

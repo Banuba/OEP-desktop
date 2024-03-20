@@ -7,6 +7,7 @@
 namespace
 {
 
+    // clang-format off
     constexpr std::string_view vertex_shader_source =
         "precision highp float;\n "
         "layout (location = 0) in vec3 aPos;\n"
@@ -26,8 +27,9 @@ namespace
         "void main() {\n"
         "  FragColor = texture(uTexture, vTexCoord);\n"
         "}\n";
+    // clang-format on
 
-} /* namespace */
+} // namespace
 
 namespace bnb::player_api
 {
@@ -138,4 +140,4 @@ namespace bnb::player_api
         opengl_shader_program::unuse();
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

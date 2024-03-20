@@ -1,9 +1,9 @@
 [submodule "third/nanogui"]
 	path = third/nanogui
 	url = https://github.com/wjakob/nanogui.git
-[submodule "player_api/bnb/player_api/third/libyuv"]
-	path = player_api/bnb/player_api/third/libyuv
-	url = https://chromium.googlesource.com/libyuv/libyuv
 [submodule "third/stb"]
 	path = third/stb
 	url = https://github.com/nothings/stb.git
+[submodule "third/libyuv"]
+	path = third/libyuv
+	url = https://chromium.googlesource.com/libyuv/libyuv

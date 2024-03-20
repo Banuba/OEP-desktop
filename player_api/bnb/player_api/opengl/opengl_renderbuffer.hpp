@@ -20,11 +20,11 @@ namespace bnb::player_api
         uint32_t get_texture() const noexcept;
 
     private:
-        uint32_t m_framebuffer {0};
-        uint32_t m_texture {0};
+        uint32_t m_framebuffer{0};
+        uint32_t m_texture{0};
 
-        int32_t m_width {0};
-        int32_t m_height {0};
-    }; /* class opengl_renderbuffer */
+        int32_t m_width{0};
+        int32_t m_height{0};
+    }; // class opengl_renderbuffer
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

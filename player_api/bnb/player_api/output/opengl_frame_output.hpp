@@ -39,19 +39,19 @@ namespace bnb::player_api
         std::unique_ptr<opengl_shader_program> m_shader;
         std::unique_ptr<opengl_frame_surface_handler> m_frame_handler;
 
-        const float* m_y_plane_convert_coefs {nullptr};
-        const float* m_u_plane_convert_coefs {nullptr};
-        const float* m_v_plane_convert_coefs {nullptr};
+        const float* m_y_plane_convert_coefs{nullptr};
+        const float* m_u_plane_convert_coefs{nullptr};
+        const float* m_v_plane_convert_coefs{nullptr};
 
-        bool m_format_is_bpc8 {false};
-        bool m_format_is_nv12 {false};
-        bool m_format_is_i420 {false};
+        bool m_format_is_bpc8{false};
+        bool m_format_is_nv12{false};
+        bool m_format_is_i420{false};
 
-        uint32_t m_gl_read_pixels_format {0};
+        uint32_t m_gl_read_pixels_format{0};
 
-        int32_t m_uniform_texture {0};
-        int32_t m_uniform_matrix {0};
-        int32_t m_uniform_yuv_plane_convert_coefs {0};
+        int32_t m_uniform_texture{0};
+        int32_t m_uniform_matrix{0};
+        int32_t m_uniform_yuv_plane_convert_coefs{0};
     }; /* class opengl_frame_output */
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

@@ -11,7 +11,7 @@ namespace bnb::player_api
     {
         int success;
         char info_log[512];
-        
+
         const char* const vertex_full_shader_source[] = {BNB_GLSL_VERSION_STRING, vertex_shader_source.data()};
         int32_t vertex_shader = glCreateShader(GL_VERTEX_SHADER);
         GL_CALL(glShaderSource(vertex_shader, 2, vertex_full_shader_source, NULL));
@@ -130,4 +130,4 @@ namespace bnb::player_api
         GL_CALL(glUniform1i(uniform, val));
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

@@ -26,7 +26,7 @@ namespace bnb::player_api
         void set_uniform_int(int32_t uniform, int32_t val) const;
 
     private:
-        uint32_t m_program {0};
-    }; /* class bnb::player_api::opengl_shader_program */
+        uint32_t m_program{0};
+    }; // class bnb::player_api::opengl_shader_program
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

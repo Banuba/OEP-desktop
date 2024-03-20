@@ -21,4 +21,4 @@ namespace bnb::player_api
         texture_ready_callback m_callback;
     }; /* class texture_output */
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

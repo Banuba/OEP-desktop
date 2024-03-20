@@ -57,10 +57,10 @@ namespace bnb::player_api
     }
 
     /* player::set_render_status_callback */
-    void player::set_render_status_callback(render_status_callback callback)
+    void player::set_render_status_callback(const render_status_callback& callback)
     {
-        enqueue([this, &callback]() {
-            m_render_callback = callback;
+        enqueue([this, cb = std::move(callback)]() {
+            m_render_callback = std::move(cb);
         });
     }
 
@@ -155,6 +155,7 @@ namespace bnb::player_api
     /* player::remove_output */
     void player::remove_output(const output_sptr output)
     {
+        // clang-format off
         enqueue([this, output]() {
             m_outputs.erase(std::remove_if(m_outputs.begin(), m_outputs.end(), [output](const output_sptr& o) {
                 auto ret = o.get() == output.get();
@@ -162,23 +163,27 @@ namespace bnb::player_api
                     o->detach();
                 }
                 return ret;
-            }), m_outputs.end());
+            }),
+            m_outputs.end());
         });
+        // clang-format on
     }
 
     /* player::load */
-    effect_sptr player::load(const std::string & url)
+    effect_sptr player::load(const std::string& url)
     {
-        return enqueue([this](const std::string & url) {
+        // clang-format off
+        return enqueue([this](const std::string& url) {
             if (auto effect_manager = m_effect_player->effect_manager()) {
                 return m_current_effect = effect_manager->load(url);
             }
             return m_current_effect = nullptr;
         }, url).get();
+        // clang-format on
     }
 
     /* player::load_async */
-    effect_sptr player::load_async(const std::string & url)
+    effect_sptr player::load_async(const std::string& url)
     {
         if (auto effect_manager = m_effect_player->effect_manager()) {
             return m_current_effect = effect_manager->load_async(url);
@@ -199,18 +204,21 @@ namespace bnb::player_api
     /* player::render */
     bool player::render()
     {
+        // clang-format off
         return enqueue([this]() -> bool {
             if (m_render_mode == render_mode::loop) {
                 throw std::runtime_error("Cannot render manually in not `manual` render mode.");
             }
             return draw();
         }).get();
+        // clang-format on
     }
 
     /* player::draw( */
-    bool player::draw() {
+    bool player::draw()
+    {
         auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
-        auto is_drawing_forbidden = !m_thread_started || is_not_active || m_outputs.empty()|| m_input == nullptr;
+        auto is_drawing_forbidden = !m_thread_started || is_not_active || m_outputs.empty() || m_input == nullptr;
         if (is_drawing_forbidden) {
             if (m_render_callback != nullptr) {
                 m_render_callback(-1);
@@ -269,8 +277,8 @@ namespace bnb::player_api
     /* player::resize */
     void player::resize(const bnb::interfaces::full_image_format& format)
     {
-        const auto is_vertical = format.orientation == bnb::interfaces::rotation::deg_0 
-                || format.orientation == bnb::interfaces::rotation::deg_180;
+        const auto is_vertical = format.orientation == bnb::interfaces::rotation::deg_0
+                                 || format.orientation == bnb::interfaces::rotation::deg_180;
         const auto width = is_vertical ? format.width : format.height;
         const auto height = is_vertical ? format.height : format.width;
 
@@ -290,4 +298,4 @@ namespace bnb::player_api
         m_outputs.clear();
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

@@ -35,4 +35,18 @@ namespace bnb::player_api
         }
     }
 
-} /* namespace bnb::player_api */
+    bnb::camera_orientation orientation_to_camera_orientation(orientation orient)
+    {
+        switch (orient) {
+            case orientation::up:
+                return bnb::camera_orientation::deg_0;
+            case orientation::left:
+                return bnb::camera_orientation::deg_90;
+            case orientation::down:
+                return bnb::camera_orientation::deg_180;
+            case orientation::right:
+                return bnb::camera_orientation::deg_270;
+        }
+    }
+
+} // namespace bnb::player_api

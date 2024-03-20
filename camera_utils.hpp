@@ -18,8 +18,7 @@ namespace bnb::example
 
         if (image.has_data<bnb::yuv_image_t>()) {
             auto yuv_image = image.get_data<bnb::yuv_image_t>();
-            auto yuv_format = yuv_image.get_yuv_format();
-            auto format = bnb::player_api::yuv_format_to_pixel_buffer_format(yuv_format.format, yuv_format.standard, yuv_format.range);
+            auto format = bnb::player_api::yuv_format_to_pixel_buffer_format(yuv_image.get_yuv_format());
 
             auto data_first_plane = yuv_image.get_plane<0>();
             auto deleter_first_plane = [data_first_plane](uint8_t*) { /* DO NOTHING */ };

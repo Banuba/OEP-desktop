@@ -17,6 +17,6 @@ namespace bnb::player_api
         void push(const full_image_t& image, uint64_t timestamp_us = 0);
 
         void push(const pixel_buffer_sptr& image, uint64_t timestamp_us = 0);
-    }; /* class stream_input */
+    }; // class stream_input
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

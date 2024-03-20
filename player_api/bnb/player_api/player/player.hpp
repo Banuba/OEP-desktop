@@ -18,14 +18,13 @@ namespace bnb::player_api
     class player : public bnb::player_api::interfaces::player
     {
     public:
-
         player(const render_target_sptr& render_target);
 
         ~player();
 
         void set_render_mode(render_mode new_render_mode) override;
 
-        void set_render_status_callback(render_status_callback callback) override;
+        void set_render_status_callback(const render_status_callback& callback) override;
 
         void play() override;
 
@@ -47,9 +46,9 @@ namespace bnb::player_api
 
         void remove_output(const output_sptr output) override;
 
-        effect_sptr load(const std::string & url) override;
+        effect_sptr load(const std::string& url) override;
 
-        effect_sptr load_async(const std::string & url) override;
+        effect_sptr load_async(const std::string& url) override;
 
         void eval_js(const std::string& script, js_callback_sptr callback) override;
 
@@ -70,7 +69,7 @@ namespace bnb::player_api
 
     private:
         std::thread m_thread;
-        std::atomic_bool m_thread_started {true};
+        std::atomic_bool m_thread_started{true};
 
         std::queue<std::function<void()>> m_tasks;
         std::mutex m_tasks_mutex;
@@ -80,18 +79,17 @@ namespace bnb::player_api
         render_target_sptr m_render_target;
 
         effect_player_sptr m_effect_player;
-        bool m_player_initialized {false};
+        bool m_player_initialized{false};
 
         input_sptr m_input;
         std::vector<output_sptr> m_outputs;
 
         effect_sptr m_current_effect;
-        
-        render_mode m_render_mode {render_mode::loop};
+
+        render_mode m_render_mode{render_mode::loop};
 
         render_status_callback m_render_callback;
     };
-
 
 
     // add new work item to the pool
@@ -102,7 +100,8 @@ namespace bnb::player_api
         using return_type = typename std::invoke_result<F, Args...>::type;
 
         auto task = std::make_shared<std::packaged_task<return_type()>>(
-            std::bind(std::forward<F>(f), std::forward<Args>(args)...));
+            std::bind(std::forward<F>(f), std::forward<Args>(args)...)
+        );
 
         std::future<return_type> res = task->get_future();
         {
@@ -120,4 +119,4 @@ namespace bnb::player_api
         return res;
     }
 
-} /* bnb::player_api */
+} // namespace bnb::player_api

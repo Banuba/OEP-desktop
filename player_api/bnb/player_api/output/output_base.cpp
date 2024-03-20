@@ -148,12 +148,12 @@ namespace bnb::player_api
         auto width_scale = static_cast<float>(surface_width) / static_cast<float>(oriented_width);
         auto height_scale = static_cast<float>(surface_height) / static_cast<float>(oriented_height);
         auto scale = m_content_mode == content_mode::aspect_fill
-                ? (width_scale > height_scale ? width_scale : height_scale) // max
-                : (width_scale < height_scale ? width_scale : height_scale); // min
+                         ? (width_scale > height_scale ? width_scale : height_scale)  // max
+                         : (width_scale < height_scale ? width_scale : height_scale); // min
         width = static_cast<int32_t>(static_cast<float>(oriented_width) * scale);
         height = static_cast<int32_t>(static_cast<float>(oriented_height) * scale);
         left = (surface_width - width) / 2;
         top = (surface_height - height) / 2;
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

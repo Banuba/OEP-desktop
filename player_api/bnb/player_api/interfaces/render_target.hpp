@@ -7,13 +7,13 @@
 namespace bnb::player_api::interfaces
 {
     class render_target;
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces
 
 namespace bnb::player_api
 {
     using render_target_sptr = std::shared_ptr<bnb::player_api::interfaces::render_target>;
     using texture_t = uint64_t;
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api
 
 namespace bnb::player_api::interfaces
 {
@@ -86,6 +86,6 @@ namespace bnb::player_api::interfaces
          * @param mat4 texture matrix
          */
         virtual void present(int32_t left, int32_t top, int32_t width, int32_t height, const float* const mat4) = 0;
-    }; /* class render_target */
+    }; // class render_target
 
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces

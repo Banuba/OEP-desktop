@@ -7,12 +7,12 @@
 namespace bnb::player_api::interfaces
 {
     class output;
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces
 
 namespace bnb::player_api
 {
     using output_sptr = std::shared_ptr<bnb::player_api::interfaces::output>;
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api
 
 namespace bnb::player_api::interfaces
 {
@@ -56,6 +56,6 @@ namespace bnb::player_api::interfaces
          * Present the drawn frame by the player to the output
          */
         virtual void present(const output_sptr& self, const render_target_sptr& render_target) = 0;
-    };
+    }; // class output
 
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces

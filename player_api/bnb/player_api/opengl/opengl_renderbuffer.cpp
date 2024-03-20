@@ -81,4 +81,4 @@ namespace bnb::player_api
         return m_texture;
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

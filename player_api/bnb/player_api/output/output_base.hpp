@@ -20,7 +20,7 @@ namespace bnb::player_api
         void deactive() override;
 
         [[nodiscard]] bool is_active() override;
-        
+
         void attach() override
         {
         }
@@ -41,10 +41,10 @@ namespace bnb::player_api
         void oriented_frame_layout(const render_target_sptr& rt, int32_t surface_width, int32_t surface_height, int32_t& left, int32_t& top, int32_t& width, int32_t& height) const;
 
     protected:
-        content_mode m_content_mode {content_mode::aspect_fit};
-        orientation m_orientation {orientation::up};
-        bool m_mirroring {false};
-        std::atomic_bool m_active {true};
+        content_mode m_content_mode{content_mode::aspect_fit};
+        orientation m_orientation{orientation::up};
+        bool m_mirroring{false};
+        std::atomic_bool m_active{true};
     }; /* class output_base */
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

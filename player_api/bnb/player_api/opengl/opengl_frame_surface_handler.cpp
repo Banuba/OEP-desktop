@@ -4,7 +4,7 @@
 
 namespace
 {
-    
+
     constexpr int32_t drawing_plane_xyz_length = 3;
     constexpr int32_t drawing_plane_xyz_offset = 0;
     constexpr int32_t drawing_plane_uv_length = 2;
@@ -16,18 +16,19 @@ namespace
 
     // clang-format off
     constexpr float drawing_plane_coords[] = {
-        /* X      Y     Z     U     V */
-        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, /* vertex 0 bottom left */
-        1.0f,  -1.0f, 0.0f, 1.0f, 0.0f, /* vertex 1 bottom right */
-        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, /* vertex 2 top left */
-        1.0f,   1.0f, 0.0f, 1.0f, 1.0f, /* vertex 3 top right */
+        // X      Y     Z     U     V
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, // vertex 0 bottom left
+         1.0f, -1.0f, 0.0f, 1.0f, 0.0f, // vertex 1 bottom right
+        -1.0f,  1.0f, 0.0f, 0.0f, 1.0f, // vertex 2 top left
+         1.0f,  1.0f, 0.0f, 1.0f, 1.0f, // vertex 3 top right
     };
     // clang-format on
-}
+
+} // namespace
 
 namespace bnb::player_api
 {
-    
+
     /* opengl_frame_surface_handler::opengl_frame_surface_handler */
     opengl_frame_surface_handler::opengl_frame_surface_handler()
     {
@@ -66,4 +67,4 @@ namespace bnb::player_api
         GL_CALL(glBindVertexArray(0));
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

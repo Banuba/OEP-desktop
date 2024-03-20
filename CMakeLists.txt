@@ -27,6 +27,11 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/copy_libs.cmake)
 
+add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/libyuv)
+# default CMakeLists.txt in libyuv doesn't provide includes path property,
+# so let's set it manually here, because everything required is known already
+target_include_directories(yuv PUBLIC ${CMAKE_CURRENT_LIST_DIR}/third/libyuv/include)
+
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/bnb_sdk)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/third/glad)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/player_api)

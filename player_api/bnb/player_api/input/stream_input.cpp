@@ -34,4 +34,4 @@ namespace bnb::player_api
         push_pixel_buffer(image, timestamp_us);
     }
 
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api

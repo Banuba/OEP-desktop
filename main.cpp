@@ -123,10 +123,7 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
 
 void run_async(std::function<void()> f)
 {
-    auto thread_func = [f]() {
-        f();
-    };
-    auto thread = std::thread(thread_func);
+    auto thread = std::thread(f);
     thread.detach();
 }
 
@@ -151,6 +148,7 @@ int main()
         });
         self->deactive();
     }, bnb::player_api::pixel_buffer_format::nv12_bt709_full);
+
     frame_output->set_orientation(bnb::player_api::orientation::up, false);
     frame_output->deactive();
 

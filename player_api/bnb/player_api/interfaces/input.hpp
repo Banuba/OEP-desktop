@@ -7,7 +7,7 @@
 namespace bnb::player_api::interfaces
 {
     class input;
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces
 
 namespace bnb::player_api
 {
@@ -15,7 +15,7 @@ namespace bnb::player_api
     using full_image_sptr = std::shared_ptr<bnb::full_image_t>;
     using input_sptr = std::shared_ptr<bnb::player_api::interfaces::input>;
     using frame_processor_sptr = std::shared_ptr<bnb::interfaces::frame_processor>;
-} /* namespace bnb::player_api */
+} // namespace bnb::player_api
 
 namespace bnb::player_api::interfaces
 {
@@ -40,6 +40,6 @@ namespace bnb::player_api::interfaces
          * @return timestamp
          */
         virtual uint64_t get_frame_time_us() const noexcept = 0;
-    };
+    }; // class input
 
-} /* namespace bnb::player_api::interfaces */
+} // namespace bnb::player_api::interfaces
