@@ -1,0 +1,16 @@
+#pragma once
+
+#include <bnb/player_api/interfaces/player.hpp>
+#include <bnb/player_api/interfaces/render_target.hpp>
+
+namespace bnb::player_api
+{
+
+    class BNB_EXPORT player
+        : public bnb::player_api::interfaces::player
+    {
+    public:
+        static std::shared_ptr<player> create(const render_target_sptr& render_target);
+    }; // class player
+
+} // namespace bnb::player_api

@@ -1,9 +1,25 @@
 
 set(BNB_PLAYER_API_PUBLIC_HEADERS
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/live_input.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/photo_input.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/pixels_provider.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/input/stream_input.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/input/live_input.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/input/photo_input.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/input/pixels_provider.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/input/stream_input.hpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/output/opengl_frame_output.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/output/orientable.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/output/scalable.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/output/texture_output.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/output/window_output.hpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/pixel_buffer/pixel_buffer.hpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/player/player.hpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/render_target/opengl_render_target.hpp
+
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/types/content_mode.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/types/orientation.hpp
+    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/types/pixel_buffer_format.hpp
 
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/input.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/output.hpp
@@ -11,20 +27,4 @@ set(BNB_PLAYER_API_PUBLIC_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/player.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/render_context.hpp
     ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/interfaces/render_target.hpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/output/opengl_frame_output.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/output/orientable.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/output/scalable.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/output/texture_output.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/output/window_output.hpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/pixel_buffer/pixel_buffer.hpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/player/player.hpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/render_target/opengl_render_target.hpp
-
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/content_mode.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/orientation.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/bnb/player_api/types/pixel_buffer_format.hpp
 )

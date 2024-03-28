@@ -6,15 +6,15 @@
 #include <bnb/effect_player/utility.hpp>
 
 #include <bnb/player_api/opengl/opengl.hpp>
-#include <bnb/player_api/player/player.hpp>
-#include <bnb/player_api/input/stream_input.hpp>
-#include <bnb/player_api/input/live_input.hpp>
-#include <bnb/player_api/input/photo_input.hpp>
-#include <bnb/player_api/output/window_output.hpp>
-#include <bnb/player_api/output/texture_output.hpp>
-#include <bnb/player_api/output/opengl_frame_output.hpp>
-#include <bnb/player_api/render_target/opengl_render_target.hpp>
-#include <bnb/player_api/types/pixel_buffer_format.hpp>
+#include <bnb/player_api/interfaces/player/player.hpp>
+#include <bnb/player_api/interfaces/input/stream_input.hpp>
+#include <bnb/player_api/interfaces/input/live_input.hpp>
+#include <bnb/player_api/interfaces/input/photo_input.hpp>
+#include <bnb/player_api/interfaces/output/window_output.hpp>
+#include <bnb/player_api/interfaces/output/texture_output.hpp>
+#include <bnb/player_api/interfaces/output/opengl_frame_output.hpp>
+#include <bnb/player_api/interfaces/render_target/opengl_render_target.hpp>
+#include <bnb/player_api/interfaces/types/pixel_buffer_format.hpp>
 
 #include <bnb/spal/camera/base.hpp>
 #include "glfw_window.hpp"

@@ -8,8 +8,8 @@
 #include <filesystem>
 
 #include <bnb/player_api/interfaces/player.hpp>
-#include <bnb/player_api/output/window_output.hpp>
-#include <bnb/player_api/output/texture_output.hpp>
+#include <bnb/player_api/interfaces/output/window_output.hpp>
+#include <bnb/player_api/interfaces/output/texture_output.hpp>
 
 namespace bnb::example
 {

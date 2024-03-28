@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/render_target.hpp>
+#include <bnb/utils/defs.hpp>
 
 #include <memory>
 

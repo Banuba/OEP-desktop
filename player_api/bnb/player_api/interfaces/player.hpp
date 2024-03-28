@@ -4,6 +4,7 @@
 #include <bnb/player_api/interfaces/output.hpp>
 #include <bnb/effect_player/interfaces/effect_player.hpp>
 #include <bnb/effect_player/interfaces/effect.hpp>
+#include <bnb/utils/defs.hpp>
 
 #include <memory>
 #include <functional>

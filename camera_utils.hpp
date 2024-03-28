@@ -1,6 +1,6 @@
 #pragma once
 
-#include <bnb/player_api/pixel_buffer/pixel_buffer.hpp>
+#include <bnb/player_api/interfaces/pixel_buffer/pixel_buffer.hpp>
 #include <bnb/spal/camera/base.hpp>
 
 #include <exception>

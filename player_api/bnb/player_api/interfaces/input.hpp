@@ -3,6 +3,7 @@
 #include <bnb/effect_player/interfaces/frame_processor.hpp>
 #include <bnb/types/interfaces/frame_data.hpp>
 #include <bnb/types/full_image.hpp>
+#include <bnb/utils/defs.hpp>
 
 namespace bnb::player_api::interfaces
 {

@@ -1,7 +1,8 @@
 #pragma once
 
-#include <bnb/player_api/types/pixel_buffer_format.hpp>
-#include <bnb/player_api/types/orientation.hpp>
+#include <bnb/player_api/interfaces/types/pixel_buffer_format.hpp>
+#include <bnb/player_api/interfaces/types/orientation.hpp>
+#include <bnb/utils/defs.hpp>
 
 #include <memory>
 

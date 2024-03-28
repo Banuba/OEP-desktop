@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bnb/utils/defs.hpp>
+
 #include <memory>
 
 namespace bnb::player_api::interfaces
