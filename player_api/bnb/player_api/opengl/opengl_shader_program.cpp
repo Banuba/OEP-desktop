@@ -12,7 +12,7 @@ namespace bnb::player_api
         int success;
         char info_log[512];
 
-        const char* const vertex_full_shader_source[] = {BNB_GLSL_VERSION_STRING, vertex_shader_source.data()};
+        const char* const vertex_full_shader_source[] = {BNB_GLSL_VERSION, vertex_shader_source.data()};
         int32_t vertex_shader = glCreateShader(GL_VERTEX_SHADER);
         GL_CALL(glShaderSource(vertex_shader, 2, vertex_full_shader_source, NULL));
         GL_CALL(glCompileShader(vertex_shader));
@@ -25,7 +25,7 @@ namespace bnb::player_api
         }
 
         // fragment shader
-        const char* const fragment_full_shader_source[] = {BNB_GLSL_VERSION_STRING, fragmant_shader_source.data()};
+        const char* const fragment_full_shader_source[] = {BNB_GLSL_VERSION, fragmant_shader_source.data()};
         int fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
         GL_CALL(glShaderSource(fragment_shader, 2, fragment_full_shader_source, NULL));
         GL_CALL(glCompileShader(fragment_shader));
