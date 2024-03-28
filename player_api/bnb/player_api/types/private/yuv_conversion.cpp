@@ -1,4 +1,4 @@
-#include <bnb/player_api/types/yuv_conversion.hpp>
+#include <bnb/player_api/types/private/yuv_conversion.hpp>
 
 #include <exception>
 

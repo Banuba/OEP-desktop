@@ -1,26 +1,21 @@
 #pragma once
 
-#include <bnb/player_api/output/output_base.hpp>
+#include <bnb/player_api/interfaces/output.hpp>
+#include <bnb/player_api/output/orientable.hpp>
+#include <bnb/player_api/output/scalable.hpp>
 
 namespace bnb::player_api
 {
 
-    class window_output : public output_base
+    class window_output
+        : public bnb::player_api::interfaces::output
+        , public bnb::player_api::orientable
+        , public bnb::player_api::scalable
     {
     public:
-        window_output() = default;
+        static std::shared_ptr<window_output> create();
 
-        ~window_output() = default;
-
-        void present(const output_sptr&, const render_target_sptr& render_target) override;
-
-        void set_frame_layout(int32_t left, int32_t top, int32_t width, int32_t height);
-
-    protected:
-        int32_t m_frame_left{0};
-        int32_t m_frame_top{0};
-        int32_t m_frame_width{0};
-        int32_t m_frame_height{0};
-    }; /* class window_output */
+        virtual void set_frame_layout(int32_t left, int32_t top, int32_t width, int32_t height) = 0;
+    }; // class window_output
 
 } // namespace bnb::player_api

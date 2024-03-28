@@ -27,6 +27,7 @@
 #include <libyuv.h>
 
 #include <thread>
+#include <type_traits>
 
 #include "camera_utils.hpp"
 
@@ -136,12 +137,12 @@ int main()
     auto gui = std::make_shared<bnb::example::graphical_user_interface>(main_window);
 
     auto context = std::make_shared<bnb::example::glfw_context>(main_window);
-    auto render_target = std::make_shared<bnb::player_api::opengl_render_target>(context);
-    auto player = std::make_shared<bnb::player_api::player>(render_target);
-    auto input = std::make_shared<bnb::player_api::live_input>();
-    auto window_output = std::make_shared<bnb::player_api::window_output>();
+    auto render_target = bnb::player_api::opengl_render_target::create(context);
+    auto player = bnb::player_api::player::create(render_target);
+    auto input = bnb::player_api::live_input::create();
+    auto window_output = bnb::player_api::window_output::create();
 
-    auto frame_output = std::make_shared<bnb::player_api::opengl_frame_output>([player](const bnb::player_api::output_sptr& self, const bnb::player_api::pixel_buffer_sptr& pb) {
+    auto frame_output = bnb::player_api::opengl_frame_output::create([player](const bnb::player_api::output_sptr& self, const bnb::player_api::pixel_buffer_sptr& pb) {
         std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format());
         run_async([file_path, pb]() {
             save_pixel_buffer_to_file(file_path, pb);

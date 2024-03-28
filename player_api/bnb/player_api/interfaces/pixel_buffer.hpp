@@ -44,7 +44,7 @@ namespace bnb::player_api::interfaces
         /**
          * Returns count of the planes
          */
-        virtual int32_t get_number_of_planes() const noexcept = 0;
+        virtual uint32_t get_number_of_planes() const noexcept = 0;
 
         /**
          * Returns the shared pointer of the first plane
@@ -55,7 +55,7 @@ namespace bnb::player_api::interfaces
          * Returns the shared pointer to pixel data of the specified plane
          * @param plane_num plane number. Must be 0 for bpc8, [0..1] for nv12 and [0..2] for i420 images
          */
-        virtual uint8_t* get_base_ptr_of_plane(int32_t plane_num) const = 0;
+        virtual uint8_t* get_base_ptr_of_plane(uint32_t plane_num) const = 0;
 
         /**
          * Returns the pixel size of the first plane
@@ -66,7 +66,7 @@ namespace bnb::player_api::interfaces
          * Returns the pixel size of the specified plane
          * @param plane_num plane number. Must be 0 for bpc8, [0..1] for nv12 and [0..2] for i420 images
          */
-        virtual int32_t get_bytes_per_pixel_of_plane(int32_t plane_num) const = 0;
+        virtual int32_t get_bytes_per_pixel_of_plane(uint32_t plane_num) const = 0;
 
         /**
          * Returns the stride of the first plane
@@ -77,7 +77,7 @@ namespace bnb::player_api::interfaces
          * Returns the stride of the specified plane
          * @param plane_num plane number. Must be 0 for bpc8, [0..1] for nv12 and [0..2] for i420 images
          */
-        virtual int32_t get_bytes_per_row_of_plane(int32_t plane_num) const = 0;
+        virtual int32_t get_bytes_per_row_of_plane(uint32_t plane_num) const = 0;
 
         /**
          * Returns the width of the first plane
@@ -88,7 +88,7 @@ namespace bnb::player_api::interfaces
          * Returns the width of the specified plane
          * @param plane_num plane number. Must be 0 for bpc8, [0..1] for nv12 and [0..2] for i420 images
          */
-        virtual int32_t get_width_of_plane(int32_t plane_num) const = 0;
+        virtual int32_t get_width_of_plane(uint32_t plane_num) const = 0;
 
         /**
          * Returns the height of the first plane
@@ -99,7 +99,7 @@ namespace bnb::player_api::interfaces
          * Returns the height of the specified plane
          * @param plane_num plane number. Must be 0 for bpc8, [0..1] for nv12 and [0..2] for i420 images
          */
-        virtual int32_t get_height_of_plane(int32_t plane_num) const = 0;
+        virtual int32_t get_height_of_plane(uint32_t plane_num) const = 0;
     }; // class pixel_buffer
 
 } // namespace bnb::player_api::interfaces

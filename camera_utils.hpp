@@ -26,7 +26,7 @@ namespace bnb::example
             auto deleter_second_plane = [data_second_plane](uint8_t*) { /* DO NOTHING */ };
 
             if (bnb::player_api::pixel_buffer_format_is_nv12(format)) { // i420 - 2 planes
-                return std::make_shared<bnb::player_api::pixel_buffer>(
+                return bnb::player_api::pixel_buffer::create(
                     data_first_plane.get(), stride,
                     data_second_plane.get(), stride,
                     width, height, format, orient, mirror,
@@ -35,7 +35,7 @@ namespace bnb::example
                 auto data_third_plane = yuv_image.get_plane<2>();
                 auto deleter_third_plane = [data_third_plane](uint8_t*) { /* DO NOTHING */ };
 
-                return std::make_shared<bnb::player_api::pixel_buffer>(
+                return bnb::player_api::pixel_buffer::create(
                     data_first_plane.get(), stride,
                     data_second_plane.get(), stride,
                     data_third_plane.get(), stride,
@@ -49,7 +49,7 @@ namespace bnb::example
             auto* data = bpc8_image.get_data(); // TODO: check whether data needs to be copied
             auto deleter = [](uint8_t*) { /* DO NOTHING */ };
 
-            return std::make_shared<bnb::player_api::pixel_buffer>(
+            return bnb::player_api::pixel_buffer::create(
                 data, stride,
                 width, height, format, orient, mirror,
                 deleter);

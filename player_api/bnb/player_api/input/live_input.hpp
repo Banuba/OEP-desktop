@@ -1,22 +1,17 @@
 #pragma once
 
-#include <bnb/player_api/input/input_base.hpp>
+#include <bnb/player_api/interfaces/input.hpp>
+#include <bnb/player_api/input/pixels_provider.hpp>
 
 namespace bnb::player_api
 {
 
-    class live_input : public bnb::player_api::input_base
+    class live_input
+        : public virtual bnb::player_api::interfaces::input
+        , public virtual bnb::player_api::pixels_provider
     {
     public:
-        live_input();
-
-        ~live_input() = default;
-
-        void push(const frame_data_sptr& fd);
-
-        void push(const full_image_t& image, uint64_t timestamp_us = 0);
-
-        void push(const pixel_buffer_sptr& image, uint64_t timestamp_us = 0);
-    }; // class stream_input
+        static std::shared_ptr<live_input> create();
+    }; // class live_input
 
 } // namespace bnb::player_api

@@ -1,41 +1,23 @@
-#include <bnb/player_api/output/output_base.hpp>
+#include <bnb/player_api/output/private/orientable_scalable_base.hpp>
 
 namespace bnb::player_api
 {
 
-    /* output_base::active */
-    void output_base::active()
-    {
-        m_active = true;
-    }
-
-    /* output_base::deactive */
-    void output_base::deactive()
-    {
-        m_active = false;
-    }
-
-    /* output_base::is_active */
-    bool output_base::is_active()
-    {
-        return m_active;
-    }
-
-    /* output_base::set_content_mode */
-    void output_base::set_content_mode(content_mode new_content_mode)
+    /* orientable_scalable_base::update_content_mode */
+    void orientable_scalable_base::update_content_mode(content_mode new_content_mode)
     {
         m_content_mode = new_content_mode;
     }
 
-    /* output_base::set_orientation */
-    void output_base::set_orientation(orientation orient, bool mirroring)
+    /* orientable_scalable_base::update_orientation */
+    void orientable_scalable_base::update_orientation(orientation orient, bool mirroring)
     {
         m_orientation = orient;
         m_mirroring = mirroring;
     }
 
-    /* output_base::get_orientation_matrix */
-    const float* const output_base::get_orientation_matrix(bool y_invert)
+    /* orientable_scalable_base::get_orientation_matrix */
+    const float* const orientable_scalable_base::get_orientation_matrix(bool y_invert)
     {
         // clang-format off
         static const float matrices[] = {
@@ -127,8 +109,8 @@ namespace bnb::player_api
         return matrices + ((static_cast<int32_t>(m_orientation) / 90) + static_cast<int32_t>(m_mirroring) * 4) * 16 + static_cast<int32_t>(y_invert) * 16 * 8;
     }
 
-    /* output_base::oriented_frame_size */
-    void output_base::oriented_frame_size(const render_target_sptr& rt, int32_t& oriented_width, int32_t& oriented_height) const
+    /* orientable_scalable_base::oriented_frame_size */
+    void orientable_scalable_base::oriented_frame_size(const render_target_sptr& rt, int32_t& oriented_width, int32_t& oriented_height) const
     {
         auto swap_sizes = m_orientation == orientation::left || m_orientation == orientation::right;
         if (swap_sizes) {
@@ -140,8 +122,8 @@ namespace bnb::player_api
         }
     }
 
-    /* output_base::oriented_frame_layout */
-    void output_base::oriented_frame_layout(const render_target_sptr& rt, int32_t surface_width, int32_t surface_height, int32_t& left, int32_t& top, int32_t& width, int32_t& height) const
+    /* orientable_scalable_base::oriented_frame_layout */
+    void orientable_scalable_base::oriented_frame_layout(const render_target_sptr& rt, int32_t surface_width, int32_t surface_height, int32_t& left, int32_t& top, int32_t& width, int32_t& height) const
     {
         int32_t oriented_width, oriented_height;
         oriented_frame_size(rt, oriented_width, oriented_height);
