@@ -6,6 +6,12 @@
 
 #include <memory>
 
+namespace bnb
+{
+    enum class color_range;
+    enum class color_std;
+}
+
 namespace bnb::player_api::interfaces
 {
     class pixel_buffer;
@@ -37,10 +43,22 @@ namespace bnb::player_api::interfaces
         virtual bool get_mirroring() const noexcept = 0;
 
         /**
-         * Returns format of the current image
+         * Returns format of the image
          * @return fortmat of the pixel_buffer
          */
         virtual pixel_buffer_format get_format() const noexcept = 0;
+
+        /**
+         * Returns yuv color standard of the image
+         * @return color standard
+         */
+        virtual bnb::color_std get_color_standard() const noexcept = 0;
+
+        /**
+         * Returns yuv color range of the image
+         * @return color range
+         */
+        virtual bnb::color_range get_color_range() const noexcept = 0;
 
         /**
          * Returns count of the planes

@@ -71,10 +71,7 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
                     pb->get_bytes_per_row()
                 );
                 break;
-            case t::nv12_bt601_full:
-            case t::nv12_bt601_video:
-            case t::nv12_bt709_full:
-            case t::nv12_bt709_video:
+            case t::nv12:
                 {
                     int rgb_stride = pb->get_width() * 3;
                     size_t size = rgb_stride * pb->get_height();
@@ -94,10 +91,7 @@ void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_bu
                     stbi_write_png((path + ".raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height_of_plane(1), 1, pb->get_base_ptr(), pb->get_bytes_per_row());
                 }
                 break;
-            case t::i420_bt601_full:
-            case t::i420_bt601_video:
-            case t::i420_bt709_full:
-            case t::i420_bt709_video:
+            case t::i420:
                 {
                     int rgb_stride = pb->get_width() * 3;
                     size_t size = rgb_stride * pb->get_height();
@@ -147,7 +141,8 @@ int main()
         run_async([file_path, pb]() {
             save_pixel_buffer_to_file(file_path, pb);
         });
-    }, bnb::player_api::pixel_buffer_format::nv12_bt709_full);
+    }, bnb::player_api::pixel_buffer_format::nv12);
+    frame_output->set_yuv_format_params(bnb::color_std::bt709, bnb::color_range::full);
     frame_output->set_orientation(bnb::player_api::orientation::up, false);
 
     player->in(input).out(window_output);

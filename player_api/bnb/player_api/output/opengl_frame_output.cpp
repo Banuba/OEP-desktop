@@ -9,6 +9,7 @@
 #include <bnb/player_api/opengl/opengl_renderbuffer.hpp>
 #include <bnb/player_api/opengl/opengl_shader_program.hpp>
 #include <bnb/player_api/opengl/opengl_frame_surface_handler.hpp>
+#include <bnb/types/full_image.hpp>
 
 #include <libyuv.h>
 
@@ -94,6 +95,8 @@ namespace
 
     bnb::player_api::pixel_buffer_sptr allocate_pixel_buffer(
         bnb::player_api::pixel_buffer_format format,
+        bnb::color_std std,
+        bnb::color_range rng,
         int32_t width,
         int32_t height,
         bnb::player_api::orientation orient,
@@ -116,24 +119,18 @@ namespace
                 auto* data = alloc_pixels(stride * height);
                 return pb_t::create(data, stride, width, height, format, orient, mirror, dealloc_pixels);
             } break;
-            case t::nv12_bt601_full:
-            case t::nv12_bt601_video:
-            case t::nv12_bt709_full:
-            case t::nv12_bt709_video: {
+            case t::nv12: {
                 auto stride = align_by_32(width);
                 auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height) + stride);
                 auto* uv_data = data + stride * height;
-                return pb_t::create(data, stride, uv_data, stride, width, height, format, orient, mirror, dealloc_pixels, nullptr);
+                return pb_t::create(data, stride, uv_data, stride, width, height, format, std, rng, orient, mirror, dealloc_pixels, nullptr);
             } break;
-            case t::i420_bt601_full:
-            case t::i420_bt601_video:
-            case t::i420_bt709_full:
-            case t::i420_bt709_video: {
+            case t::i420: {
                 auto stride = align_by_32(width);
                 auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height));
                 auto* u_data = data + stride * height;
                 auto* v_data = data + stride * height + align_by_16(bnb::player_api::uv_plane_width(width));
-                return pb_t::create(data, stride, u_data, stride, v_data, stride, width, height, format, orient, mirror, dealloc_pixels, nullptr, nullptr);
+                return pb_t::create(data, stride, u_data, stride, v_data, stride, width, height, format, std, rng, orient, mirror, dealloc_pixels, nullptr, nullptr);
             } break;
         }
         return nullptr;
@@ -154,6 +151,8 @@ namespace
             , m_format_is_bpc8(pixel_buffer_format_is_bpc8(format))
             , m_format_is_nv12(pixel_buffer_format_is_nv12(format))
             , m_format_is_i420(pixel_buffer_format_is_i420(format))
+            , m_color_standard(bnb::color_std::bt709)
+            , m_color_range(bnb::color_range::full)
         {
             validate_not_null(callback);
             using t = bnb::player_api::pixel_buffer_format;
@@ -161,10 +160,7 @@ namespace
                 m_gl_read_pixels_format = format == t::bpc8_rgb || format == t::bpc8_bgr ? GL_RGB : GL_RGBA;
             } else if (m_format_is_nv12 || m_format_is_i420) {
                 m_gl_read_pixels_format = GL_RED;
-                const auto* const mat = get_conversion_matrix_from_rgb_to_yuv(m_format);
-                m_y_plane_convert_coefs = mat + yuv_offset_to_y_coeffs;
-                m_u_plane_convert_coefs = mat + yuv_offset_to_u_coeffs;
-                m_v_plane_convert_coefs = mat + yuv_offset_to_v_coeffs;
+                set_yuv_format_params(m_color_standard, m_color_range);
             }
         }
 
@@ -193,14 +189,8 @@ namespace
                 case t::bpc8_argb:
                     m_shader = std::make_unique<opengl_shader_program>(vertex_shader_source, fragment_shader_argb_source);
                     break;
-                case t::nv12_bt601_full:
-                case t::nv12_bt601_video:
-                case t::nv12_bt709_full:
-                case t::nv12_bt709_video:
-                case t::i420_bt601_full:
-                case t::i420_bt601_video:
-                case t::i420_bt709_full:
-                case t::i420_bt709_video:
+                case t::nv12:
+                case t::i420:
                     m_shader = std::make_unique<opengl_shader_program>(vertex_shader_source, fragment_shader_i420_source);
                     m_shader->use();
                     m_uniform_yuv_plane_convert_coefs = m_shader->get_uniform_location("uPlaneConversionCoefs");
@@ -232,7 +222,7 @@ namespace
             oriented_frame_size(render_target, width, height);
             auto renderbuffer_width = width;
             auto renderbuffer_height = height;
-            auto pb = allocate_pixel_buffer(m_format, width, height, m_orientation, m_mirroring);
+            auto pb = allocate_pixel_buffer(m_format, m_color_standard, m_color_range, width, height, m_orientation, m_mirroring);
 
             if (m_format_is_bpc8) {
                 prepare_to_render(renderbuffer_width, renderbuffer_height);
@@ -279,6 +269,16 @@ namespace
             m_pixel_buffer_callback(pb);
         }
 
+        void set_yuv_format_params(bnb::color_std std, bnb::color_range rng)
+        {
+            m_color_standard = std;
+            m_color_range = rng;
+            const auto* const mat = get_conversion_matrix_from_rgb_to_yuv(m_format, std, rng);
+            m_y_plane_convert_coefs = mat + yuv_offset_to_y_coeffs;
+            m_u_plane_convert_coefs = mat + yuv_offset_to_u_coeffs;
+            m_v_plane_convert_coefs = mat + yuv_offset_to_v_coeffs;
+        }
+
     private:
         void prepare_to_render(int32_t framebuffer_width, int32_t framebuffer_height)
         {
@@ -297,6 +297,8 @@ namespace
     private:
         pixel_buffer_callback m_pixel_buffer_callback;
         pixel_buffer_format m_format;
+        bnb::color_std m_color_standard;
+        bnb::color_range m_color_range;
         std::unique_ptr<opengl_renderbuffer> m_renderbuffer;
         std::unique_ptr<opengl_shader_program> m_shader;
         std::unique_ptr<opengl_frame_surface_handler> m_frame_handler;

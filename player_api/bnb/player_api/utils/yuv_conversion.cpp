@@ -1,11 +1,13 @@
 #include <bnb/player_api/utils/yuv_conversion.hpp>
 
+#include <bnb/types/full_image.hpp>
+
 #include <exception>
 
 namespace bnb::player_api
 {
 
-    const float* const get_conversion_matrix_from_rgb_to_yuv(bnb::player_api::pixel_buffer_format to_yuv_format)
+    const float* const get_conversion_matrix_from_rgb_to_yuv(bnb::player_api::pixel_buffer_format format, bnb::color_std std, bnb::color_range rng)
     {
         // The base values for calculating coefficients were taken from the corresponding standard.
         // See link to WIKI: https://en.wikipedia.org/wiki/YUV
@@ -33,25 +35,25 @@ namespace bnb::player_api
         // clang-format on
 
         using t = bnb::player_api::pixel_buffer_format;
-        switch (to_yuv_format) {
-            case t::nv12_bt601_full:
-            case t::i420_bt601_full:
-                return mat_cvt_from_rgb_to_bt601_full_range;
-            case t::nv12_bt601_video:
-            case t::i420_bt601_video:
-                return mat_cvt_from_rgb_to_bt601_video_range;
-            case t::nv12_bt709_full:
-            case t::i420_bt709_full:
-                return mat_cvt_from_rgb_to_bt709_full_range;
-            case t::nv12_bt709_video:
-            case t::i420_bt709_video:
-                return mat_cvt_from_rgb_to_bt709_video_range;
-            default:
-                throw std::logic_error("there is no conversion matrix for this type.");
+        if (format == t::nv12 || format == t::i420) {
+            if (std == bnb::color_std::bt601) {
+                if (rng == bnb::color_range::full) {
+                    return mat_cvt_from_rgb_to_bt601_full_range;
+                } else { // video
+                    return mat_cvt_from_rgb_to_bt601_video_range;
+                }
+            } else { // bt709
+                if (rng == bnb::color_range::full) {
+                    return mat_cvt_from_rgb_to_bt709_full_range;
+                } else { // video
+                    return mat_cvt_from_rgb_to_bt709_video_range;
+                }
+            }
         }
+        throw std::logic_error("There is no conversion matrix for this type.");
     }
 
-    const float* const get_conversion_matrix_from_yuv_to_rgb(bnb::player_api::pixel_buffer_format from_yuv_format)
+    const float* const get_conversion_matrix_from_yuv_to_rgb(bnb::player_api::pixel_buffer_format format, bnb::color_std std, bnb::color_range rng)
     {
         // The base values for calculating coefficients were taken from the corresponding standard.
         // See link to WIKI: https://en.wikipedia.org/wiki/YUV
@@ -79,22 +81,22 @@ namespace bnb::player_api
         // clang-format on
 
         using t = bnb::player_api::pixel_buffer_format;
-        switch (from_yuv_format) {
-            case t::nv12_bt601_full:
-            case t::i420_bt601_full:
-                return mat_cvt_from_bt601_full_range_to_rgb;
-            case t::nv12_bt601_video:
-            case t::i420_bt601_video:
-                return mat_cvt_from_bt601_video_range_to_rgb;
-            case t::nv12_bt709_full:
-            case t::i420_bt709_full:
-                return mat_cvt_from_bt709_full_range_to_rgb;
-            case t::nv12_bt709_video:
-            case t::i420_bt709_video:
-                return mat_cvt_from_bt709_video_range_to_rgb;
-            default:
-                throw std::logic_error("there is no conversion matrix for this type.");
+        if (format == t::nv12 || format == t::i420) {
+            if (std == bnb::color_std::bt601) {
+                if (rng == bnb::color_range::full) {
+                    return mat_cvt_from_bt601_full_range_to_rgb;
+                } else { // video
+                    return mat_cvt_from_bt601_video_range_to_rgb;
+                }
+            } else { // bt709
+                if (rng == bnb::color_range::full) {
+                    return mat_cvt_from_bt709_full_range_to_rgb;
+                } else { // video
+                    return mat_cvt_from_bt709_video_range_to_rgb;
+                }
+            }
         }
+        throw std::logic_error("there is no conversion matrix for this type.");
     }
 
 } // namespace bnb::player_api

@@ -1,5 +1,6 @@
 #include <bnb/player_api/interfaces/pixel_buffer/pixel_buffer.hpp>
 
+#include <bnb/types/full_image.hpp>
 #include <bnb/player_api/utils/yuv_conversion.hpp>
 
 namespace
@@ -41,6 +42,8 @@ namespace
             int32_t width,
             int32_t height,
             pixel_buffer_format fmt,
+            bnb::color_std std,
+            bnb::color_range rng,
             orientation orient,
             bool mirroring,
             plane_deleter y_deleter,
@@ -50,6 +53,8 @@ namespace
             , m_plane_count(2)
             , m_orientation(orient)
             , m_mirroring(mirroring)
+            , m_color_standard(std)
+            , m_color_range(rng)
         {
             if (!pixel_buffer_format_is_nv12(fmt)) {
                 throw std::runtime_error("Format should be nv12.");
@@ -69,6 +74,8 @@ namespace
             int32_t width,
             int32_t height,
             pixel_buffer_format fmt,
+            bnb::color_std std,
+            bnb::color_range rng,
             orientation orient,
             bool mirroring,
             plane_deleter y_deleter,
@@ -79,6 +86,8 @@ namespace
             , m_plane_count(3)
             , m_orientation(orient)
             , m_mirroring(mirroring)
+            , m_color_standard(std)
+            , m_color_range(rng)
         {
             if (!pixel_buffer_format_is_i420(fmt)) {
                 throw std::runtime_error("Format should be i420.");
@@ -111,6 +120,16 @@ namespace
         pixel_buffer_format get_format() const noexcept override
         {
             return m_pixel_buffer_format;
+        }
+
+        bnb::color_std get_color_standard() const noexcept override
+        {
+            return m_color_standard;
+        }
+
+        bnb::color_range get_color_range() const noexcept override
+        {
+            return m_color_range;
         }
 
         uint32_t get_number_of_planes() const noexcept override
@@ -208,6 +227,8 @@ namespace
         uint32_t m_plane_count{0};
         orientation m_orientation;
         bool m_mirroring;
+        bnb::color_std m_color_standard {bnb::color_std::bt709};
+        bnb::color_range m_color_range {bnb::color_range::full};
     }; // class pixel_buffer_impl
 
 } // namespace
@@ -246,6 +267,8 @@ namespace bnb::player_api
         int32_t width,
         int32_t height,
         pixel_buffer_format fmt,
+        bnb::color_std std,
+        bnb::color_range rng,
         orientation orient,
         bool mirroring,
         plane_deleter y_deleter,
@@ -260,6 +283,8 @@ namespace bnb::player_api
             width,
             height,
             fmt,
+            std,
+            rng,
             orient,
             mirroring,
             y_deleter,
@@ -277,6 +302,8 @@ namespace bnb::player_api
         int32_t width,
         int32_t height,
         pixel_buffer_format fmt,
+        bnb::color_std std,
+        bnb::color_range rng,
         orientation orient,
         bool mirroring,
         plane_deleter y_deleter,
@@ -294,6 +321,8 @@ namespace bnb::player_api
             width,
             height,
             fmt,
+            std,
+            rng,
             orient,
             mirroring,
             y_deleter,
