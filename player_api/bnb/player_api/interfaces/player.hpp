@@ -78,48 +78,28 @@ namespace bnb::player_api::interfaces
         virtual effect_player_sptr get_effect_player() = 0;
 
         /**
-         * Use new input
+         * Use the new input to replace the old one
          * @param input frames will be receive from it
          */
-        virtual void use(const input_sptr input) = 0;
+        virtual player& in(const input_sptr input) = 0;
 
         /**
-         * Use single new output and remove old
+         * Add a new one output to output list
          * @param output processed frames will be push to it
          */
-        virtual void use(const output_sptr output) = 0;
+        virtual player& out(const output_sptr output) = 0;
 
         /**
-         * Use single new Output and remove old
-         * @param output processed frames will be push to it
+         * Use output for one frame and remove it
+         * @param outputs single processed frames will be push to these outputs
          */
-        virtual void use(const std::vector<output_sptr> outputs) = 0;
+        virtual player& out_once(const output_sptr output) = 0;
 
         /**
-         * Use single input and single output.
-         * @param input frames will be receive from it
-         * @param output processed frames will be push to it
-         */
-        virtual void use(const input_sptr input, const output_sptr output) = 0;
-
-        /**
-         * Use single Input and multiple Outputs.
-         * @param input frames will be receive from it
-         * @param outputs processed frames will be push to these outputs
-         */
-        virtual void use(const input_sptr input, const std::vector<output_sptr> outputs) = 0;
-
-        /**
-         * Add a new one output to output list.
-         * @param output processed frames will be push to it
-         */
-        virtual void add_output(const output_sptr output) = 0;
-
-        /**
-         * Remove one output from output list.
+         * Remove one output. If the output `nullptr` is passed as an output, then all outputs are removed.
          * @param output delete this output from outputs
          */
-        virtual void remove_output(const output_sptr output) = 0;
+        virtual player& remove_out(output_sptr output = nullptr) = 0;
 
         /**
          * Synchronous loading of an effect by name

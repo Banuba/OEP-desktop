@@ -1,7 +1,6 @@
 #include <bnb/player_api/interfaces/output/window_output.hpp>
 #include <bnb/player_api/output/orientable_scalable_base.hpp>
 
-#include <atomic>
 #include <cmath>
 
 namespace
@@ -28,21 +27,6 @@ namespace
             update_orientation(orient, mirroring);
         }
 
-        void active() override
-        {
-            m_active = true;
-        }
-
-        void deactive() override
-        {
-            m_active = false;
-        }
-
-        [[nodiscard]] bool is_active() override
-        {
-            return m_active;
-        }
-
         void attach() override
         {
         }
@@ -51,7 +35,7 @@ namespace
         {
         }
 
-        void present(const output_sptr&, const render_target_sptr& render_target) override
+        void present(const render_target_sptr& render_target) override
         {
             int32_t x, y, w, h;
             oriented_frame_layout(render_target, m_frame_width, m_frame_height, x, y, w, h);
@@ -72,7 +56,6 @@ namespace
         int32_t m_frame_top{0};
         int32_t m_frame_width{0};
         int32_t m_frame_height{0};
-        std::atomic_bool m_active{true};
     }; // class window_output_impl
 
 } // namespace

@@ -3,7 +3,8 @@
 #include <bnb/player_api/output/orientable_scalable_base.hpp>
 
 #include <bnb/player_api/interfaces/pixel_buffer/pixel_buffer.hpp>
-#include <bnb/player_api/types/yuv_conversion.hpp>
+#include <bnb/player_api/utils/yuv_conversion.hpp>
+#include <bnb/player_api/utils/common.hpp>
 #include <bnb/player_api/opengl/opengl.hpp>
 #include <bnb/player_api/opengl/opengl_renderbuffer.hpp>
 #include <bnb/player_api/opengl/opengl_shader_program.hpp>
@@ -154,6 +155,7 @@ namespace
             , m_format_is_nv12(pixel_buffer_format_is_nv12(format))
             , m_format_is_i420(pixel_buffer_format_is_i420(format))
         {
+            validate_not_null(callback);
             using t = bnb::player_api::pixel_buffer_format;
             if (m_format_is_bpc8) {
                 m_gl_read_pixels_format = format == t::bpc8_rgb || format == t::bpc8_bgr ? GL_RGB : GL_RGBA;
@@ -171,21 +173,6 @@ namespace
         void set_orientation(orientation orient, bool mirroring = false) override
         {
             update_orientation(orient, mirroring);
-        }
-
-        void active() override
-        {
-            m_active = true;
-        }
-
-        void deactive() override
-        {
-            m_active = false;
-        }
-
-        [[nodiscard]] bool is_active() override
-        {
-            return m_active;
         }
 
         void attach() override
@@ -233,7 +220,7 @@ namespace
             m_shader = nullptr;
         }
 
-        void present(const output_sptr& self, const render_target_sptr& render_target) override
+        void present(const render_target_sptr& render_target) override
         {
             m_shader->use();
             auto texture = static_cast<uint32_t>(render_target->get_output_texture());
@@ -289,7 +276,7 @@ namespace
             opengl_renderbuffer::unbind();
             opengl_shader_program::unuse();
 
-            m_pixel_buffer_callback(self, pb);
+            m_pixel_buffer_callback(pb);
         }
 
     private:
@@ -327,7 +314,6 @@ namespace
         int32_t m_uniform_texture{0};
         int32_t m_uniform_matrix{0};
         int32_t m_uniform_yuv_plane_convert_coefs{0};
-        std::atomic_bool m_active{true};
     }; // class opengl_frame_output_impl
 
 } // namespace

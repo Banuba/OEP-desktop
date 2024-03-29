@@ -1,6 +1,6 @@
 #include <bnb/player_api/interfaces/pixel_buffer/pixel_buffer.hpp>
 
-#include <bnb/player_api/types/yuv_conversion.hpp>
+#include <bnb/player_api/utils/yuv_conversion.hpp>
 
 namespace
 {

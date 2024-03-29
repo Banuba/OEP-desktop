@@ -19,7 +19,7 @@ namespace
             auto config = bnb::interfaces::processor_configuration::create();
             config->set_use_offline_mode(false);
             config->set_use_future_interpolate(false);
-            config->set_use_future_filter(false);
+            config->set_use_future_filter(true);
             auto processor_mode = bnb::interfaces::realtime_processor_mode::async_when_effect_loaded;
             m_frame_processor = bnb::interfaces::frame_processor::create_realtime_processor(processor_mode, config);
         }

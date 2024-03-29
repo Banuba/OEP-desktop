@@ -1,4 +1,6 @@
 #include <bnb/player_api/interfaces/player/player.hpp>
+
+#include <bnb/player_api/utils/common.hpp>
 #include <bnb/effect_player/interfaces/all.hpp>
 #include <bnb/types/interfaces/all.hpp>
 
@@ -16,12 +18,14 @@ namespace
 
     using namespace bnb::player_api;
 
-    class player_impl : public bnb::player_api::player
+    class player_impl
+        : public bnb::player_api::player
     {
     public:
         player_impl(const render_target_sptr& render_target)
             : m_render_target(render_target)
         {
+            validate_not_null(render_target);
             auto thread_func = [this]() {
                 while (m_thread_started) {
                     run_tasks();
@@ -88,74 +92,63 @@ namespace
                 m_effect_player->playback_pause();
             });
         }
-        
+
         effect_player_sptr get_effect_player() override
         {
             return m_effect_player;
         }
         
-        void use(const input_sptr input) override
+        player& in(const input_sptr input) override
         {
             enqueue([this, input]() {
                 m_input = input;
-                m_effect_player->set_frame_processor(m_input->get_frame_processor());
+                m_effect_player->set_frame_processor(m_input == nullptr ? nullptr : m_input->get_frame_processor());
             });
+            return *this;
         }
 
-        void use(const output_sptr output) override
+        player& out(const output_sptr output) override
         {
-            std::vector<output_sptr> outputs {output};
-            use(outputs);
-        }
-
-        void use(const std::vector<output_sptr> outputs) override
-        {
-            enqueue([this, outputs]() {
-                for (auto& o : m_outputs) {
-                    o->detach();
-                }
-                m_outputs = outputs;
-                for (auto& o : outputs) {
-                    o->attach();
-                }
-            });
-        }
-
-        void use(const input_sptr input, const output_sptr output) override
-        {
-            std::vector<output_sptr> outputs {output};
-            use(input);
-            use(outputs);
-        }
-
-        void use(const input_sptr input, const std::vector<output_sptr> outputs) override
-        {
-            use(input);
-            use(outputs);
-        }
-
-        void add_output(const output_sptr output) override
-        {
+            validate_not_null(output);
             enqueue([this, output]() {
-                m_outputs.push_back(output);
                 output->attach();
+                m_outputs.push_back(output);
             });
+            return *this;
         }
 
-        void remove_output(const output_sptr output) override
+        player& out_once(const output_sptr output) override
         {
-            // clang-format off
+            validate_not_null(output);
             enqueue([this, output]() {
-                m_outputs.erase(std::remove_if(m_outputs.begin(), m_outputs.end(), [output](const output_sptr& o) {
-                    auto ret = o.get() == output.get();
-                    if (ret) {
-                        o->detach();
-                    }
-                    return ret;
-                }),
-                m_outputs.end());
+                output->attach();
+                m_once_outputs.push_back(output);
             });
-            // clang-format on
+            return *this;
+        }
+
+        player& remove_out(output_sptr output) override
+        {
+            enqueue([this, output]() {
+                if (output == nullptr) {
+                    // remove all outputs
+                    for (const auto output : m_outputs) {
+                        output->detach();
+                    }
+                    m_outputs.clear();
+                } else {
+                    // remove only the specified output
+                    auto compare = [output](const output_sptr& o) -> bool {
+                        auto ret = o.get() == output.get();
+                        if (ret) {
+                            o->detach();
+                        }
+                        return ret;
+                    };
+                    m_outputs.erase(std::remove_if(m_outputs.begin(), m_outputs.end(), compare), m_outputs.end());
+                }
+            });
+            return *this;
         }
 
         effect_sptr load(const std::string& url) override
@@ -229,7 +222,7 @@ namespace
         bool draw()
         {
             auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
-            auto is_drawing_forbidden = !m_thread_started || is_not_active || m_outputs.empty() || m_input == nullptr;
+            auto is_drawing_forbidden = !m_thread_started || is_not_active || (m_outputs.empty() && m_once_outputs.empty()) || m_input == nullptr;
             if (is_drawing_forbidden) {
                 if (m_render_callback != nullptr) {
                     m_render_callback(-1);
@@ -261,10 +254,13 @@ namespace
             }
 
             for (const auto output : m_outputs) {
-                if (output->is_active()) {
-                    output->present(output, m_render_target);
-                }
+                output->present(m_render_target);
             }
+
+            for (const auto output : m_once_outputs) {
+                output->present(m_render_target);
+            }
+            m_once_outputs.clear();
 
             if (m_render_callback != nullptr) {
                 m_render_callback(frame_number);
@@ -309,6 +305,7 @@ namespace
         effect_player_sptr m_effect_player;
         input_sptr m_input;
         std::vector<output_sptr> m_outputs;
+        std::vector<output_sptr> m_once_outputs;
         effect_sptr m_current_effect;
         render_mode m_render_mode{render_mode::loop};
         render_status_callback m_render_callback;
