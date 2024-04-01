@@ -7,8 +7,8 @@ namespace bnb::player_api
 {
 
     class BNB_EXPORT stream_input
-        : public virtual bnb::player_api::interfaces::input
-        , public virtual bnb::player_api::pixels_provider
+        : public virtual interfaces::input
+        , public virtual pixels_provider
     {
     public:
         static std::shared_ptr<stream_input> create();

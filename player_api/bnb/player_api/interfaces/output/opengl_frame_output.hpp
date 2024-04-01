@@ -10,8 +10,8 @@ namespace bnb::player_api
 {
 
     class BNB_EXPORT opengl_frame_output
-        : public bnb::player_api::interfaces::output
-        , public bnb::player_api::orientable
+        : public interfaces::output
+        , public orientable
     {
     public:
         using pixel_buffer_callback = std::function<void(const pixel_buffer_sptr& pb)>;

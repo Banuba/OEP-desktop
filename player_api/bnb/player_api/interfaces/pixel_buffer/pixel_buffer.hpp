@@ -7,7 +7,7 @@ namespace bnb::player_api
 {
 
     class BNB_EXPORT pixel_buffer
-        : public bnb::player_api::interfaces::pixel_buffer
+        : public interfaces::pixel_buffer
     {
     public:
         using plane_deleter = std::function<void(uint8_t*)>;

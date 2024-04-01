@@ -8,9 +8,9 @@ namespace bnb::player_api
 {
 
     class BNB_EXPORT window_output
-        : public bnb::player_api::interfaces::output
-        , public bnb::player_api::orientable
-        , public bnb::player_api::scalable
+        : public interfaces::output
+        , public orientable
+        , public scalable
     {
     public:
         static std::shared_ptr<window_output> create();

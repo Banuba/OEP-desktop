@@ -6,7 +6,7 @@ namespace bnb::player_api
 {
 
     class BNB_EXPORT texture_output
-        : public bnb::player_api::interfaces::output
+        : public interfaces::output
     {
     public:
         using texture_ready_callback = std::function<void(const texture_t pb)>;

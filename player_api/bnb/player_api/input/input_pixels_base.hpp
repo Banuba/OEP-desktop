@@ -8,8 +8,8 @@ namespace bnb::player_api
 {
 
     class input_pixels_base
-        : public virtual bnb::player_api::interfaces::input
-        , public virtual bnb::player_api::pixels_provider
+        : public virtual interfaces::input
+        , public virtual pixels_provider
     {
     public:
         frame_processor_sptr get_frame_processor() const noexcept override;
