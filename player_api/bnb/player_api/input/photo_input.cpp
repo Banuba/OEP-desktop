@@ -24,6 +24,12 @@ namespace
         }
 
         ~photo_input_impl() = default;
+
+        void load(const std::string& path) override
+        {
+            auto image = bnb::full_image_t::load(path);
+            push(std::move(image));
+        }
     }; // class photo_input_impl
 
 } // namespace

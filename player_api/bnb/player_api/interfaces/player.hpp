@@ -7,7 +7,6 @@
 #include <bnb/utils/defs.hpp>
 
 #include <memory>
-#include <functional>
 
 namespace bnb::player_api::interfaces
 {
@@ -45,7 +44,17 @@ namespace bnb::player_api::interfaces
             manual
         };
 
-        using render_status_callback = std::function<void(int64_t)>;
+        class rendering_process
+        {
+        public:
+            virtual ~rendering_process() = default;
+
+            virtual void started() = 0;
+
+            virtual void frame_rendered(int64_t frame_number) = 0;
+
+            virtual void finished() = 0;
+        }; // class rendering_pipeline
 
     public:
         virtual ~player() = default;
@@ -60,7 +69,7 @@ namespace bnb::player_api::interfaces
          * Set rendering callback status
          * @param callback render callback
          */
-        virtual void set_render_status_callback(const render_status_callback& callback) = 0;
+        virtual void set_rendering_process_callback(const std::shared_ptr<rendering_process>& callback) = 0;
 
         /**
          * Resume the playback of the effect.
@@ -81,25 +90,25 @@ namespace bnb::player_api::interfaces
          * Use the new input to replace the old one
          * @param input frames will be receive from it
          */
-        virtual player& in(const input_sptr input) = 0;
+        virtual player& in(const input_sptr& input) = 0;
 
         /**
          * Add a new one output to output list
          * @param output processed frames will be push to it
          */
-        virtual player& out(const output_sptr output) = 0;
+        virtual player& out(const output_sptr& output) = 0;
 
         /**
          * Use output for one frame and remove it
          * @param outputs single processed frames will be push to these outputs
          */
-        virtual player& out_once(const output_sptr output) = 0;
+        virtual player& out_once(const output_sptr& output) = 0;
 
         /**
          * Remove one output. If the output `nullptr` is passed as an output, then all outputs are removed.
          * @param output delete this output from outputs
          */
-        virtual player& remove_out(output_sptr output = nullptr) = 0;
+        virtual player& remove_out(const output_sptr& output = nullptr) = 0;
 
         /**
          * Synchronous loading of an effect by name
@@ -122,9 +131,9 @@ namespace bnb::player_api::interfaces
 
         /**
          * Draw and present rendered result synchronously, can be used only in `manual` rendering mode.
-         * @return `false` when no new data in the `input`, `input` or `outputs` is null
+         * @return returns the number of the drawn frame, or -1 if nothing could be drawn.
          */
-        virtual bool render() = 0;
+        virtual int64_t render() = 0;
     }; // class player
 
 } // namespace bnb::player_api::interfaces

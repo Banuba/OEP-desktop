@@ -12,6 +12,8 @@ namespace bnb::player_api
     {
     public:
         static std::shared_ptr<photo_input> create();
+
+        virtual void load(const std::string& path) = 0;
     }; // class photo_input
 
 } // namespace bnb::player_api

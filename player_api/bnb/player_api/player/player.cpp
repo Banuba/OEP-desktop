@@ -72,9 +72,9 @@ namespace
             });
         }
 
-        void set_render_status_callback(const render_status_callback& callback) override
+        void set_rendering_process_callback(const std::shared_ptr<rendering_process>& callback) override
         {
-            enqueue([this, cb = std::move(callback)]() {
+            enqueue([this, cb = callback]() {
                 m_render_callback = std::move(cb);
             });
         }
@@ -98,7 +98,7 @@ namespace
             return m_effect_player;
         }
         
-        player& in(const input_sptr input) override
+        player& in(const input_sptr& input) override
         {
             enqueue([this, input]() {
                 m_input = input;
@@ -107,7 +107,7 @@ namespace
             return *this;
         }
 
-        player& out(const output_sptr output) override
+        player& out(const output_sptr& output) override
         {
             validate_not_null(output);
             enqueue([this, output]() {
@@ -117,7 +117,7 @@ namespace
             return *this;
         }
 
-        player& out_once(const output_sptr output) override
+        player& out_once(const output_sptr& output) override
         {
             validate_not_null(output);
             enqueue([this, output]() {
@@ -127,7 +127,7 @@ namespace
             return *this;
         }
 
-        player& remove_out(output_sptr output) override
+        player& remove_out(const output_sptr& output) override
         {
             enqueue([this, output]() {
                 if (output == nullptr) {
@@ -180,7 +180,7 @@ namespace
             }
         }
 
-        bool render() override
+        int64_t render() override
         {
             // clang-format off
             return enqueue([this]() -> bool {
@@ -219,27 +219,34 @@ namespace
             return res;
         }
 
-        bool draw()
+        int64_t draw()
+        {
+            m_render_target->activate();
+            if (auto cb = m_render_callback; cb) {
+                cb->started();
+                auto frame_number = draw_without_notifications();
+                m_render_callback->frame_rendered(frame_number);
+                cb->finished();
+                return frame_number;
+            } else {
+                return draw_without_notifications();
+            }
+        }
+
+        int64_t draw_without_notifications()
         {
             auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
             auto is_drawing_forbidden = !m_thread_started || is_not_active || (m_outputs.empty() && m_once_outputs.empty()) || m_input == nullptr;
             if (is_drawing_forbidden) {
-                if (m_render_callback != nullptr) {
-                    m_render_callback(-1);
-                }
-                return false;
+                return -1;
             }
 
             auto frame_processor = m_input->get_frame_processor();
             auto processor_result = frame_processor->pop();
             if (processor_result.frame_data == nullptr) {
-                if (m_render_callback != nullptr) {
-                    m_render_callback(-1);
-                }
-                return false;
+                return -1;
             }
 
-            m_render_target->activate();
             m_render_target->set_frame_time_us(m_input->get_frame_time_us());
             resize(processor_result.frame_data->get_full_img_format());
             auto old_size = m_effect_player->effect_manager()->surface_size();
@@ -247,10 +254,7 @@ namespace
 
             auto frame_number = m_effect_player->draw_with_external_frame_data(processor_result.frame_data);
             if (frame_number < 0) {
-                if (m_render_callback != nullptr) {
-                    m_render_callback(-1);
-                }
-                return false;
+                return -1;
             }
 
             for (const auto output : m_outputs) {
@@ -262,10 +266,7 @@ namespace
             }
             m_once_outputs.clear();
 
-            if (m_render_callback != nullptr) {
-                m_render_callback(frame_number);
-            }
-            return true;
+            return frame_number;
         }
 
         void run_tasks()
@@ -308,7 +309,7 @@ namespace
         std::vector<output_sptr> m_once_outputs;
         effect_sptr m_current_effect;
         render_mode m_render_mode{render_mode::loop};
-        render_status_callback m_render_callback;
+        std::shared_ptr<rendering_process> m_render_callback;
     }; // class player_impl
 
 } // namespace

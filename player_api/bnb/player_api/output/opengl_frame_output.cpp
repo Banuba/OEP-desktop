@@ -68,29 +68,14 @@ namespace
         "}\n";
     // clang-format on
 
-    int32_t align_by_8(int32_t x)
-    {
-        return (x + 7) & ~7;
-    }
-
-    int32_t align_by_16(int32_t width)
-    {
-        return (width + 15) & ~15;
-    }
-
-    int32_t align_by_32(int32_t width)
-    {
-        return (width + 31) & ~31;
-    }
-
     uint8_t* alloc_pixels(size_t size)
     {
-        return reinterpret_cast<uint8_t*>(std::aligned_alloc(64, size));
+        return bnb::player_api::aligned_alloc<64>(size);
     }
 
     void dealloc_pixels(uint8_t* p)
     {
-        std::free(p);
+        bnb::player_api::aligned_dealloc(p);
     }
 
     bnb::player_api::pixel_buffer_sptr allocate_pixel_buffer(
@@ -108,28 +93,28 @@ namespace
         switch (format) {
             case t::bpc8_rgb:
             case t::bpc8_bgr: {
-                auto stride = align_by_8(width * 3);
+                auto stride = bnb::player_api::align_by_8(width * 3);
                 auto* data = alloc_pixels(stride * height);
                 return pb_t::create(data, stride, width, height, format, orient, mirror, dealloc_pixels);
             } break;
             case t::bpc8_rgba:
             case t::bpc8_bgra:
             case t::bpc8_argb: {
-                auto stride = align_by_8(width * 4);
+                auto stride = bnb::player_api::align_by_8(width * 4);
                 auto* data = alloc_pixels(stride * height);
                 return pb_t::create(data, stride, width, height, format, orient, mirror, dealloc_pixels);
             } break;
             case t::nv12: {
-                auto stride = align_by_32(width);
+                auto stride = bnb::player_api::align_by_32(width);
                 auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height) + stride);
                 auto* uv_data = data + stride * height;
                 return pb_t::create(data, stride, uv_data, stride, width, height, format, std, rng, orient, mirror, dealloc_pixels, nullptr);
             } break;
             case t::i420: {
-                auto stride = align_by_32(width);
+                auto stride = bnb::player_api::align_by_32(width);
                 auto* data = alloc_pixels(stride * height + stride * bnb::player_api::uv_plane_height(height));
                 auto* u_data = data + stride * height;
-                auto* v_data = data + stride * height + align_by_16(bnb::player_api::uv_plane_width(width));
+                auto* v_data = data + stride * height + bnb::player_api::align_by_16(bnb::player_api::uv_plane_width(width));
                 return pb_t::create(data, stride, u_data, stride, v_data, stride, width, height, format, std, rng, orient, mirror, dealloc_pixels, nullptr, nullptr);
             } break;
         }
@@ -269,7 +254,7 @@ namespace
             m_pixel_buffer_callback(pb);
         }
 
-        void set_yuv_format_params(bnb::color_std std, bnb::color_range rng)
+        void set_yuv_format_params(bnb::color_std std, bnb::color_range rng) override
         {
             m_color_standard = std;
             m_color_range = rng;
