@@ -34,19 +34,22 @@ namespace
         "}\n";
     // clang-format on
 
-    class opengl_render_target_impl : public bnb::player_api::opengl_render_target
+    class opengl_render_target_impl
+        : public bnb::player_api::opengl_render_target
     {
     public:
-        opengl_render_target_impl(const render_context_sptr& context)
-            : m_context(context)
+        opengl_render_target_impl()
         {
             // This particular example relies on OpenGL, so it should be explicitly requested
             bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
 
             bnb::utility::load_gl_functions();
+        }
 
-            m_context->activate();
+        ~opengl_render_target_impl() = default;
 
+        void attach() override
+        {
             m_shader = std::make_unique<opengl_shader_program>(vertex_shader_source, fragment_shader_source);
             m_frame_handler = std::make_unique<opengl_frame_surface_handler>();
 
@@ -56,22 +59,13 @@ namespace
             opengl_shader_program::unuse();
 
             m_renderbuffer = std::make_unique<opengl_renderbuffer>();
-
-            m_context->deactivate();
         }
 
-        ~opengl_render_target_impl() override
+        void detach() override
         {
-            m_context->activate();
             m_shader = nullptr;
             m_frame_handler = nullptr;
             m_renderbuffer = nullptr;
-            m_context->deactivate();
-        }
-
-        void activate() override
-        {
-            m_context->activate();
         }
 
         void prepare_to_offscreen_render(int32_t width, int32_t height) override
@@ -133,9 +127,7 @@ namespace
         }
 
     private:
-        render_context_sptr m_context;
         std::unique_ptr<opengl_shader_program> m_shader;
-        std::unique_ptr<opengl_shader_program> m_shader_y_flip;
         std::unique_ptr<opengl_frame_surface_handler> m_frame_handler;
         std::unique_ptr<opengl_renderbuffer> m_renderbuffer;
 
@@ -148,7 +140,7 @@ namespace
 
 } // namespace
 
-std::shared_ptr<bnb::player_api::opengl_render_target> bnb::player_api::opengl_render_target::create(const bnb::player_api::render_context_sptr& context)
+std::shared_ptr<bnb::player_api::opengl_render_target> bnb::player_api::opengl_render_target::create()
 {
-    return std::make_shared<opengl_render_target_impl>(context);
+    return std::make_shared<opengl_render_target_impl>();
 }

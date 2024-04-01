@@ -32,9 +32,14 @@ namespace bnb::player_api::interfaces
         virtual ~render_target() = default;
 
         /**
-         * Activate context
+         * Attach render_target to the player. Called by the player on the render thread.
          */
-        virtual void activate() = 0;
+        virtual void attach() = 0;
+
+        /**
+         * Detach render_target from the player. Called by the player on the render thread.
+         */
+        virtual void detach() = 0;
 
         /**
          * Prepare render target to offscreen rendering of the player

@@ -22,12 +22,20 @@ namespace
         : public bnb::player_api::player
     {
     public:
-        player_impl(const render_target_sptr& render_target)
+        player_impl(const render_target_sptr& render_target, const rendering_process_sptr& rendering_process)
             : m_render_target(render_target)
+            , m_rendering_process(rendering_process)
         {
             validate_not_null(render_target);
             auto thread_func = [this]() {
+                if (m_rendering_process) {
+                    m_rendering_process->activate();
+                }
+                m_render_target->attach();
                 while (m_thread_started) {
+                    if (m_rendering_process) {
+                        m_rendering_process->activate();
+                    }
                     run_tasks();
                     if (m_render_mode == render_mode::loop) {
                         draw();
@@ -39,12 +47,12 @@ namespace
                 }
 
                 run_tasks();
+                m_render_target->detach();
             };
 
             m_thread = std::thread(thread_func);
 
             enqueue([this] {
-                m_render_target->activate();
                 auto ep_conf = bnb::interfaces::effect_player_configuration::create(1, 1);
                 m_effect_player = bnb::interfaces::effect_player::create(ep_conf);
                 m_effect_player->surface_created(1, 1);
@@ -69,13 +77,6 @@ namespace
         {
             enqueue([this, new_render_mode]() {
                 m_render_mode = new_render_mode;
-            });
-        }
-
-        void set_rendering_process_callback(const std::shared_ptr<rendering_process>& callback) override
-        {
-            enqueue([this, cb = callback]() {
-                m_render_callback = std::move(cb);
             });
         }
 
@@ -221,12 +222,10 @@ namespace
 
         int64_t draw()
         {
-            m_render_target->activate();
-            if (auto cb = m_render_callback; cb) {
-                cb->started();
+            if (m_rendering_process) {
+                m_rendering_process->started();
                 auto frame_number = draw_without_notifications();
-                m_render_callback->frame_rendered(frame_number);
-                cb->finished();
+                m_rendering_process->finished(frame_number);
                 return frame_number;
             } else {
                 return draw_without_notifications();
@@ -273,7 +272,6 @@ namespace
         {
             std::unique_lock<std::mutex> lock(m_tasks_mutex);
             if (!m_tasks.empty()) {
-                m_render_target->activate();
                 do {
                     m_tasks.front()();
                     m_tasks.pop();
@@ -309,12 +307,13 @@ namespace
         std::vector<output_sptr> m_once_outputs;
         effect_sptr m_current_effect;
         render_mode m_render_mode{render_mode::loop};
-        std::shared_ptr<rendering_process> m_render_callback;
+        rendering_process_sptr m_rendering_process;
     }; // class player_impl
 
 } // namespace
 
-std::shared_ptr<bnb::player_api::player> bnb::player_api::player::create(const bnb::player_api::render_target_sptr& render_target)
+using namespace bnb::player_api;
+std::shared_ptr<player> player::create(const render_target_sptr& render_target, const rendering_process_sptr& rendering_process)
 {
-    return std::make_shared<player_impl>(render_target);
+    return std::make_shared<player_impl>(render_target, rendering_process);
 }

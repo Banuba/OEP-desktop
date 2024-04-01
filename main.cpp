@@ -122,8 +122,7 @@ void run_async(std::function<void()> f)
 }
 
 class glfw_renderer
-    : public bnb::player_api::interfaces::player::rendering_process
-    , public bnb::player_api::interfaces::render_context
+    : public bnb::player_api::interfaces::rendering_process
 {
 public:
     glfw_renderer()
@@ -131,9 +130,9 @@ public:
         m_window = std::make_shared<bnb::example::glfw_window>("Player API Example");
         m_gui = std::make_shared<bnb::example::graphical_user_interface>(m_window);
         m_window->make_context_current();
-        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-        m_window->swap_buffers();
+        started();
+        finished(0);
+        m_window->make_nothing_current();
     }
 
     ~glfw_renderer() = default;
@@ -153,34 +152,22 @@ public:
         m_window->make_context_current();
     }
 
-    void deactivate() override
-    {
-        m_window->make_nothing_current();
-    }
-
     void started() override
     {
         glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
         glClear(GL_COLOR_BUFFER_BIT);
     }
 
-    void frame_rendered(int64_t frame_number) override
+    void finished(int64_t frame_number) override
     {
-        m_last_frame = frame_number;
-        if (frame_number >= 0) {
+        if (frame_number != -1) {
             m_gui->draw();
-        }
-    }
-
-    void finished() override
-    {
-        if (m_last_frame != -1) {
             m_window->swap_buffers();
         }
+        m_window->make_nothing_current();
     }
 
 private:
-    int64_t m_last_frame = -1;
     std::shared_ptr<bnb::example::glfw_window> m_window;
     std::shared_ptr<bnb::example::graphical_user_interface> m_gui;
 }; // render_process
@@ -192,8 +179,8 @@ int main()
 
     auto renderer = std::make_shared<glfw_renderer>();
 
-    auto render_target = bnb::player_api::opengl_render_target::create(renderer);
-    auto player = bnb::player_api::player::create(render_target);
+    auto render_target = bnb::player_api::opengl_render_target::create();
+    auto player = bnb::player_api::player::create(render_target, renderer);
     auto input = bnb::player_api::live_input::create();
     auto window_output = bnb::player_api::window_output::create();
 
@@ -207,7 +194,6 @@ int main()
 
     player->in(input).out(window_output);
     player->load_async("effects/DebugFRX");
-    player->set_rendering_process_callback(renderer);
 
     auto camera = bnb::create_camera_device([input](bnb::full_image_t image) {
         auto pb = bnb::example::full_image_to_pixel_buffer(image);

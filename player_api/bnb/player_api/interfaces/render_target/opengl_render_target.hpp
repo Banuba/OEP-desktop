@@ -1,7 +1,6 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/render_target.hpp>
-#include <bnb/player_api/interfaces/render_context.hpp>
 
 namespace bnb::player_api
 {
@@ -10,7 +9,7 @@ namespace bnb::player_api
         : public bnb::player_api::interfaces::render_target
     {
     public:
-        static std::shared_ptr<opengl_render_target> create(const render_context_sptr& context);
+        static std::shared_ptr<opengl_render_target> create();
     }; // class opengl_render_target
 
 } // namespace bnb::player_api

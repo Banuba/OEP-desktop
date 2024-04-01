@@ -11,6 +11,7 @@
 namespace bnb::player_api::interfaces
 {
     class player;
+    class rendering_process;
 } // namespace bnb::player_api::interfaces
 
 namespace bnb::player_api
@@ -19,10 +20,33 @@ namespace bnb::player_api
     using effect_sptr = std::shared_ptr<bnb::interfaces::effect>;
     using js_callback_sptr = std::shared_ptr<bnb::interfaces::js_callback>;
     using effect_player_sptr = std::shared_ptr<bnb::interfaces::effect_player>;
+    using rendering_process_sptr = std::shared_ptr<bnb::player_api::interfaces::rendering_process>;
 } // namespace bnb::player_api
 
 namespace bnb::player_api::interfaces
 {
+
+    class rendering_process
+    {
+    public:
+        virtual ~rendering_process() = default;
+
+        /**
+         * Activate rendering context.
+         */
+        virtual void activate() = 0;
+
+        /**
+         * Called every time rendering of the next frame starts.
+         */
+        virtual void started() = 0;
+
+        /**
+         * Called every time frame rendering is complete.
+         * @param frame_number the frame number that was rendered. If rendering the frame failed, the parameter will be equal to -1.
+         */
+        virtual void finished(int64_t frame_number) = 0;
+    }; // class rendering_process
 
     /**
      * Class manages the lifecycle of the EffectPlayer and is responsible for drawing FrameData
@@ -44,18 +68,6 @@ namespace bnb::player_api::interfaces
             manual
         };
 
-        class rendering_process
-        {
-        public:
-            virtual ~rendering_process() = default;
-
-            virtual void started() = 0;
-
-            virtual void frame_rendered(int64_t frame_number) = 0;
-
-            virtual void finished() = 0;
-        }; // class rendering_pipeline
-
     public:
         virtual ~player() = default;
 
@@ -64,12 +76,6 @@ namespace bnb::player_api::interfaces
          * @param new_render_mode new rendering mode
          */
         virtual void set_render_mode(render_mode new_render_mode) = 0;
-
-        /**
-         * Set rendering callback status
-         * @param callback render callback
-         */
-        virtual void set_rendering_process_callback(const std::shared_ptr<rendering_process>& callback) = 0;
 
         /**
          * Resume the playback of the effect.

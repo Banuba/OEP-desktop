@@ -10,7 +10,7 @@ namespace bnb::player_api
         : public bnb::player_api::interfaces::player
     {
     public:
-        static std::shared_ptr<player> create(const render_target_sptr& render_target);
+        static std::shared_ptr<player> create(const render_target_sptr& render_target, const rendering_process_sptr& rendering_process);
     }; // class player
 
 } // namespace bnb::player_api

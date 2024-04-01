@@ -206,8 +206,6 @@ namespace bnb::example
         while (!glfwWindowShouldClose(m_window)) {
             glfwWaitEvents();
         }
-
-        glfwTerminate();
     }
 
     /* glfw_window::track_events */
