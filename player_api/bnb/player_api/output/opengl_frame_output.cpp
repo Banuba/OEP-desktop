@@ -13,6 +13,8 @@
 
 #include <libyuv.h>
 
+#include <exception>
+
 namespace
 {
 
@@ -133,19 +135,18 @@ namespace
         opengl_frame_output_impl(const pixel_buffer_callback& callback, pixel_buffer_format format)
             : m_pixel_buffer_callback(callback)
             , m_format(format)
-            , m_format_is_bpc8(pixel_buffer_format_is_bpc8(format))
-            , m_format_is_nv12(pixel_buffer_format_is_nv12(format))
-            , m_format_is_i420(pixel_buffer_format_is_i420(format))
             , m_color_standard(bnb::color_std::bt709)
             , m_color_range(bnb::color_range::full)
         {
             validate_not_null(callback);
             using t = bnb::player_api::pixel_buffer_format;
-            if (m_format_is_bpc8) {
+            if (pixel_buffer_format_is_bpc8(m_format)) {
                 m_gl_read_pixels_format = format == t::bpc8_rgb || format == t::bpc8_bgr ? GL_RGB : GL_RGBA;
-            } else if (m_format_is_nv12 || m_format_is_i420) {
+            } else if (pixel_buffer_format_is_yuv(m_format)) {
                 m_gl_read_pixels_format = GL_RED;
                 set_yuv_format_params(m_color_standard, m_color_range);
+            } else {
+                throw std::logic_error("Unsupported format.");
             }
         }
 
@@ -208,18 +209,19 @@ namespace
             auto renderbuffer_width = width;
             auto renderbuffer_height = height;
             auto pb = allocate_pixel_buffer(m_format, m_color_standard, m_color_range, width, height, m_orientation, m_mirroring);
+            auto is_nv12 = pixel_buffer_format_is_nv12(m_format);
 
-            if (m_format_is_bpc8) {
+            if (pixel_buffer_format_is_bpc8(m_format)) {
                 prepare_to_render(renderbuffer_width, renderbuffer_height);
                 GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
                 GL_CALL(glBindTexture(GL_TEXTURE_2D, texture));
                 render(0, 0, width, height);
-            } else if (m_format_is_nv12 || m_format_is_i420) {
+            } else if (pixel_buffer_format_is_yuv(m_format)) {
                 auto uv_width = uv_plane_width(width);
                 auto uv_height = uv_plane_height(height);
                 renderbuffer_width = align_by_32(width);
-                renderbuffer_height = height + uv_height + static_cast<int32_t>(m_format_is_nv12);
-                auto height_indent_for_nv12 = static_cast<int32_t>(m_format_is_nv12);
+                renderbuffer_height = height + uv_height + static_cast<int32_t>(is_nv12);
+                auto height_indent_for_nv12 = static_cast<int32_t>(is_nv12);
 
                 prepare_to_render(renderbuffer_width, renderbuffer_height);
                 GL_CALL(glActiveTexture(GL_TEXTURE0 + texture_unit));
@@ -235,7 +237,7 @@ namespace
             GL_CALL(glPixelStorei(GL_PACK_ALIGNMENT, 8));
             GL_CALL(glReadPixels(0, 0, renderbuffer_width, renderbuffer_height, m_gl_read_pixels_format, GL_UNSIGNED_BYTE, pb->get_base_ptr()));
 
-            if (m_format_is_nv12) {
+            if (is_nv12) {
                 libyuv::MergeUVPlane(
                     pb->get_base_ptr_of_plane(1) + pb->get_bytes_per_row_of_plane(1),
                     pb->get_bytes_per_row_of_plane(1),
@@ -292,10 +294,6 @@ namespace
         const float* m_u_plane_convert_coefs{nullptr};
         const float* m_v_plane_convert_coefs{nullptr};
 
-        bool m_format_is_bpc8{false};
-        bool m_format_is_nv12{false};
-        bool m_format_is_i420{false};
-
         uint32_t m_gl_read_pixels_format{0};
 
         int32_t m_uniform_texture{0};
@@ -305,8 +303,8 @@ namespace
 
 } // namespace
 
-using t = bnb::player_api::opengl_frame_output;
-std::shared_ptr<t> t::create(const t::pixel_buffer_callback& callback, bnb::player_api::pixel_buffer_format format)
+using namespace bnb::player_api;
+std::shared_ptr<opengl_frame_output> opengl_frame_output::create(const opengl_frame_output::pixel_buffer_callback& callback, pixel_buffer_format format)
 {
     return std::make_shared<opengl_frame_output_impl>(callback, format);
 }

@@ -185,7 +185,7 @@ int main()
     auto window_output = bnb::player_api::window_output::create();
 
     auto frame_output = bnb::player_api::opengl_frame_output::create([player](const bnb::player_api::pixel_buffer_sptr& pb) {
-        std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format());
+        std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format()).data();
         run_async([file_path, pb]() {
             save_pixel_buffer_to_file(file_path, pb);
         });
