@@ -14,6 +14,7 @@
 #include <libyuv.h>
 
 #include <exception>
+#include <atomic>
 
 namespace
 {
@@ -132,11 +133,12 @@ namespace
         , public orientable_scalable_base
     {
     public:
-        opengl_frame_output_impl(const pixel_buffer_callback& callback, pixel_buffer_format format)
+        opengl_frame_output_impl(const pixel_buffer_callback& callback, pixel_buffer_format format, bool start_receiving_frames)
             : m_pixel_buffer_callback(callback)
             , m_format(format)
             , m_color_standard(bnb::color_std::bt709)
             , m_color_range(bnb::color_range::full)
+            , m_loop_mode(start_receiving_frames)
         {
             validate_not_null(callback);
             using t = bnb::player_api::pixel_buffer_format;
@@ -198,6 +200,10 @@ namespace
 
         void present(const render_target_sptr& render_target) override
         {
+            if (is_present_forbidden()) {
+                return;
+            }
+
             m_shader->use();
             auto texture = static_cast<uint32_t>(render_target->get_output_texture());
             constexpr uint32_t texture_unit = 0;
@@ -266,6 +272,33 @@ namespace
             m_v_plane_convert_coefs = mat + yuv_offset_to_v_coeffs;
         }
 
+        bool is_present_forbidden()
+        {
+            if (m_loop_mode) {
+                return false;
+            }
+            if (m_frame_counter > 0) {
+                --m_frame_counter;
+                return false;
+            }
+            return true;
+        }
+
+        void once() override
+        {
+            if (m_loop_mode) {
+                m_loop_mode = false;
+            } else {
+                ++m_frame_counter;
+            }
+        }
+
+        void loop() override
+        {
+            m_frame_counter = 0;
+            m_loop_mode = true;
+        }
+
     private:
         void prepare_to_render(int32_t framebuffer_width, int32_t framebuffer_height)
         {
@@ -299,12 +332,16 @@ namespace
         int32_t m_uniform_texture{0};
         int32_t m_uniform_matrix{0};
         int32_t m_uniform_yuv_plane_convert_coefs{0};
+
+        std::atomic_bool m_loop_mode{true};
+        std::atomic_uint64_t m_frame_counter{0};
     }; // class opengl_frame_output_impl
 
 } // namespace
 
 using namespace bnb::player_api;
-std::shared_ptr<opengl_frame_output> opengl_frame_output::create(const opengl_frame_output::pixel_buffer_callback& callback, pixel_buffer_format format)
+using t = bnb::player_api::opengl_frame_output;
+std::shared_ptr<t> t::create(const t::pixel_buffer_callback& callback, pixel_buffer_format format, bool start_receiving_frames)
 {
-    return std::make_shared<opengl_frame_output_impl>(callback, format);
+    return std::make_shared<opengl_frame_output_impl>(callback, format, start_receiving_frames);
 }

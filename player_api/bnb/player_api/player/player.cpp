@@ -12,6 +12,7 @@
 #include <condition_variable>
 #include <future>
 #include <stdexcept>
+#include <chrono>
 
 namespace
 {
@@ -22,25 +23,33 @@ namespace
         : public bnb::player_api::player
     {
     public:
-        player_impl(const render_target_sptr& render_target, const rendering_process_sptr& rendering_process)
+        player_impl(uint32_t fps, const render_target_sptr& render_target, const render_delegate_sptr& render_delegate)
             : m_render_target(render_target)
-            , m_rendering_process(rendering_process)
+            , m_render_delegate(render_delegate)
         {
-            validate_not_null(render_target);
-            auto thread_func = [this]() {
-                if (m_rendering_process) {
-                    m_rendering_process->activate();
-                }
+            if (fps <= 0) {
+                throw std::logic_error("FPS must be greater than zero.");
+            }
+            validate_not_null(m_render_target);
+            validate_not_null(m_render_delegate);
+
+            constexpr auto ns = std::chrono::nanoseconds(std::chrono::seconds(1)).count();
+            const auto interval = std::chrono::nanoseconds(static_cast<uint64_t>(static_cast<double>(ns) * 1.1 / static_cast<double>(fps)));
+
+            auto thread_func = [this, interval]() {
+                m_render_delegate->activate();
                 m_render_target->attach();
+
                 while (m_thread_started) {
-                    if (m_rendering_process) {
-                        m_rendering_process->activate();
-                    }
-                    run_tasks();
                     if (m_render_mode == render_mode::loop) {
+                        const auto next_frame_time = std::chrono::steady_clock::now() + interval;
+                        m_render_delegate->activate();
+                        run_tasks();
                         draw();
-                        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                        std::this_thread::sleep_until(next_frame_time);
                     } else { // render_mode::manual
+                        m_render_delegate->activate();
+                        run_tasks();
                         std::unique_lock<std::mutex> lock(m_manual_render_mutex);
                         m_condition.wait(lock);
                     }
@@ -98,8 +107,8 @@ namespace
         {
             return m_effect_player;
         }
-        
-        player& in(const input_sptr& input) override
+
+        player& use(const input_sptr& input) override
         {
             enqueue([this, input]() {
                 m_input = input;
@@ -108,7 +117,7 @@ namespace
             return *this;
         }
 
-        player& out(const output_sptr& output) override
+        player& use(const output_sptr& output) override
         {
             validate_not_null(output);
             enqueue([this, output]() {
@@ -118,17 +127,7 @@ namespace
             return *this;
         }
 
-        player& out_once(const output_sptr& output) override
-        {
-            validate_not_null(output);
-            enqueue([this, output]() {
-                output->attach();
-                m_once_outputs.push_back(output);
-            });
-            return *this;
-        }
-
-        player& remove_out(const output_sptr& output) override
+        player& unuse(const output_sptr& output) override
         {
             enqueue([this, output]() {
                 if (output == nullptr) {
@@ -222,20 +221,16 @@ namespace
 
         int64_t draw()
         {
-            if (m_rendering_process) {
-                m_rendering_process->started();
-                auto frame_number = draw_without_notifications();
-                m_rendering_process->finished(frame_number);
-                return frame_number;
-            } else {
-                return draw_without_notifications();
-            }
+            m_render_delegate->started();
+            auto frame_number = draw_without_notifications();
+            m_render_delegate->finished(frame_number);
+            return frame_number;
         }
 
         int64_t draw_without_notifications()
         {
             auto is_not_active = m_effect_player == nullptr || m_effect_player->get_playback_state() != bnb::interfaces::effect_player_playback_state::active;
-            auto is_drawing_forbidden = !m_thread_started || is_not_active || (m_outputs.empty() && m_once_outputs.empty()) || m_input == nullptr;
+            auto is_drawing_forbidden = !m_thread_started || is_not_active || m_outputs.empty() || m_input == nullptr;
             if (is_drawing_forbidden) {
                 return -1;
             }
@@ -259,11 +254,6 @@ namespace
             for (const auto output : m_outputs) {
                 output->present(m_render_target);
             }
-
-            for (const auto output : m_once_outputs) {
-                output->present(m_render_target);
-            }
-            m_once_outputs.clear();
 
             return frame_number;
         }
@@ -304,16 +294,15 @@ namespace
         effect_player_sptr m_effect_player;
         input_sptr m_input;
         std::vector<output_sptr> m_outputs;
-        std::vector<output_sptr> m_once_outputs;
         effect_sptr m_current_effect;
         render_mode m_render_mode{render_mode::loop};
-        rendering_process_sptr m_rendering_process;
+        render_delegate_sptr m_render_delegate;
     }; // class player_impl
 
 } // namespace
 
 using namespace bnb::player_api;
-std::shared_ptr<player> player::create(const render_target_sptr& render_target, const rendering_process_sptr& rendering_process)
+std::shared_ptr<player> player::create(uint32_t fps, const render_target_sptr& render_target, const render_delegate_sptr& render_delegate)
 {
-    return std::make_shared<player_impl>(render_target, rendering_process);
+    return std::make_shared<player_impl>(fps, render_target, render_delegate);
 }

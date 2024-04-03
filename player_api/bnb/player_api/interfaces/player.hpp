@@ -2,6 +2,7 @@
 
 #include <bnb/player_api/interfaces/input.hpp>
 #include <bnb/player_api/interfaces/output.hpp>
+#include <bnb/player_api/interfaces/render_delegate.hpp>
 #include <bnb/effect_player/interfaces/effect_player.hpp>
 #include <bnb/effect_player/interfaces/effect.hpp>
 #include <bnb/utils/defs.hpp>
@@ -11,7 +12,6 @@
 namespace bnb::player_api::interfaces
 {
     class player;
-    class rendering_process;
 } // namespace bnb::player_api::interfaces
 
 namespace bnb::player_api
@@ -20,33 +20,10 @@ namespace bnb::player_api
     using effect_sptr = std::shared_ptr<bnb::interfaces::effect>;
     using js_callback_sptr = std::shared_ptr<bnb::interfaces::js_callback>;
     using effect_player_sptr = std::shared_ptr<bnb::interfaces::effect_player>;
-    using rendering_process_sptr = std::shared_ptr<bnb::player_api::interfaces::rendering_process>;
 } // namespace bnb::player_api
 
 namespace bnb::player_api::interfaces
 {
-
-    class rendering_process
-    {
-    public:
-        virtual ~rendering_process() = default;
-
-        /**
-         * Activate rendering context.
-         */
-        virtual void activate() = 0;
-
-        /**
-         * Called every time rendering of the next frame starts.
-         */
-        virtual void started() = 0;
-
-        /**
-         * Called every time frame rendering is complete.
-         * @param frame_number the frame number that was rendered. If rendering the frame failed, the parameter will be equal to -1.
-         */
-        virtual void finished(int64_t frame_number) = 0;
-    }; // class rendering_process
 
     /**
      * Class manages the lifecycle of the EffectPlayer and is responsible for drawing FrameData
@@ -96,25 +73,19 @@ namespace bnb::player_api::interfaces
          * Use the new input to replace the old one
          * @param input frames will be receive from it
          */
-        virtual player& in(const input_sptr& input) = 0;
+        virtual player& use(const input_sptr& input) = 0;
 
         /**
          * Add a new one output to output list
          * @param output processed frames will be push to it
          */
-        virtual player& out(const output_sptr& output) = 0;
-
-        /**
-         * Use output for one frame and remove it
-         * @param outputs single processed frames will be push to these outputs
-         */
-        virtual player& out_once(const output_sptr& output) = 0;
+        virtual player& use(const output_sptr& output) = 0;
 
         /**
          * Remove one output. If the output `nullptr` is passed as an output, then all outputs are removed.
          * @param output delete this output from outputs
          */
-        virtual player& remove_out(const output_sptr& output = nullptr) = 0;
+        virtual player& unuse(const output_sptr& output = nullptr) = 0;
 
         /**
          * Synchronous loading of an effect by name

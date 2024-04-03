@@ -15,8 +15,8 @@ namespace
 
     bnb::yuv_format_t pixel_buffer_format_to_yuv_format(const bnb::player_api::pixel_buffer_sptr& image)
     {
-        auto fmt = image->get_format() == bnb::player_api::pixel_buffer_format::i420 ? bnb::yuv_format::yuv_i420 : bnb::yuv_format::yuv_nv12;
-        return {image->get_color_range(), image->get_color_standard(), };
+        auto format = image->get_format() == bnb::player_api::pixel_buffer_format::i420 ? bnb::yuv_format::yuv_i420 : bnb::yuv_format::yuv_nv12;
+        return {image->get_color_range(), image->get_color_standard(), format};
     }
 
     bnb::interfaces::pixel_format pixel_buffer_format_to_pixel_format(const bnb::player_api::pixel_buffer_sptr& image)

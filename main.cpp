@@ -122,7 +122,7 @@ void run_async(std::function<void()> f)
 }
 
 class glfw_renderer
-    : public bnb::player_api::interfaces::rendering_process
+    : public bnb::player_api::interfaces::render_delegate
 {
 public:
     glfw_renderer()
@@ -180,19 +180,19 @@ int main()
     auto renderer = std::make_shared<glfw_renderer>();
 
     auto render_target = bnb::player_api::opengl_render_target::create();
-    auto player = bnb::player_api::player::create(render_target, renderer);
+    auto player = bnb::player_api::player::create(30, render_target, renderer);
     auto input = bnb::player_api::live_input::create();
     auto window_output = bnb::player_api::window_output::create();
 
     auto frame_output = bnb::player_api::opengl_frame_output::create([player](const bnb::player_api::pixel_buffer_sptr& pb) {
-        std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format()).data();
+        std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/_/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format()).data();
         run_async([file_path, pb]() {
             save_pixel_buffer_to_file(file_path, pb);
         });
-    }, bnb::player_api::pixel_buffer_format::i420);
+    }, bnb::player_api::pixel_buffer_format::i420, false);
     frame_output->set_yuv_format_params(bnb::color_std::bt709, bnb::color_range::full);
 
-    player->in(input).out(window_output);
+    player->use(input).use(window_output).use(frame_output);
     player->load_async("effects/DebugFRX");
 
     auto camera = bnb::create_camera_device([input](bnb::full_image_t image) {
@@ -202,13 +202,13 @@ int main()
 
     renderer->get_gui()->add_output_control(window_output, "Screen output");
 
-    renderer->get_window()->set_glfw_events_callback([renderer, player, window_output, frame_output](const bnb::example::glfw_event& e) {
+    renderer->get_window()->set_glfw_events_callback([renderer, window_output, frame_output](const bnb::example::glfw_event& e) {
         if (e.type == bnb::example::glfw_event_t::framebuffer_resize) {
             window_output->set_frame_layout(0, 0, e.size_width, e.size_height);
         } else if (e.type == bnb::example::glfw_event_t::key_press && e.keyboard_key == GLFW_KEY_F1) {
             renderer->get_gui()->switch_show_hide_gui();
         } else if (e.type == bnb::example::glfw_event_t::key_press && e.keyboard_key == GLFW_KEY_S) {
-            player->out_once(frame_output);
+            frame_output->once();
         }
         renderer->get_gui()->on_glfw_event(e);
     });
