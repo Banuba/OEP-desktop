@@ -17,11 +17,9 @@ function(copy_sdk target)
         add_custom_command(TARGET ${target}
             POST_BUILD                     
             COMMAND 
-                rm -rf $<TARGET_FILE_DIR:${target}>/../Frameworks
-                &&
                 mkdir -p $<TARGET_FILE_DIR:${target}>/../Frameworks
                 &&    
-                cp -rfP 
+                cp -Rf 
                     ${CMAKE_SOURCE_DIR}/bnb_sdk/mac/BanubaEffectPlayer.framework  
                     $<TARGET_FILE_DIR:${target}>/../Frameworks
         )
