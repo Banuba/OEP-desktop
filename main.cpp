@@ -1,29 +1,39 @@
-#include <interfaces/offscreen_effect_player.hpp>
-
-#include "render_context.hpp"
-#include "effect_player.hpp"
-#include "camera_utils.hpp"
-#include "glfw_user_data.hpp"
-
-#include <bnb/effect_player/utility.hpp>
-
 #if defined(__APPLE__)
 #include <mach-o/dyld.h>
 #include "CoreFoundation/CoreFoundation.h"
 #endif
 
-#define BNB_CLIENT_TOKEN <#Place your token here#>
+#include <bnb/effect_player/utility.hpp>
 
-int main()
+#include <glad/glad.h>
+#include <bnb/player_api/interfaces/player/player.hpp>
+#include <bnb/player_api/interfaces/input/stream_input.hpp>
+#include <bnb/player_api/interfaces/input/live_input.hpp>
+#include <bnb/player_api/interfaces/input/photo_input.hpp>
+#include <bnb/player_api/interfaces/output/window_output.hpp>
+#include <bnb/player_api/interfaces/output/texture_output.hpp>
+#include <bnb/player_api/interfaces/output/opengl_frame_output.hpp>
+#include <bnb/player_api/interfaces/render_target/opengl_render_target.hpp>
+#include <bnb/player_api/interfaces/types/pixel_buffer_format.hpp>
+
+#include <bnb/spal/camera/base.hpp>
+#include "glfw_window.hpp"
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "third/stb/stb_image_write.h"
+
+#include "graphical_user_interface.hpp"
+#include <libyuv.h>
+
+#include <thread>
+#include <type_traits>
+
+#include "camera_utils.hpp"
+
+#define BNB_CLIENT_TOKEN <#TOKEN#>
+
+std::vector<std::string> get_resources_folders()
 {
-    // Frame size
-    constexpr int32_t oep_width = 1280;
-    constexpr int32_t oep_height = 720;
-
-    std::shared_ptr<bnb::gl::glfw_window> window = nullptr; // Should be declared here to destroy in the last turn
-                                               
-    // Create an instance of effect_player implementation with cpp api, pass path to location of
-    // effects and client token
     std::vector<std::string> dirs;
 #if defined(__APPLE__)
     // The BNB SDK framework includes BNB resources if not compiled with option to separate resources.
@@ -39,126 +49,171 @@ int main()
 #else
     dirs.push_back(BNB_RESOURCES_FOLDER);
 #endif
+    return dirs;
+}
 
-    // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
-    bnb::utility m_utility(dirs, BNB_CLIENT_TOKEN);
-
-    // Create instance of render_context.
-    // NOTE: each instance of Offscreen Render Target should have its own instance of Render Context
-    auto rc = bnb::oep::interfaces::render_context::create();
-
-    // Create an instance of our offscreen_render_target implementation, you can use your own.
-    // NOTE: each instance of OEP should have its own instance of Offscreen Render Target
-    // pass render_context
-    auto ort = bnb::oep::interfaces::offscreen_render_target::create(rc);
-
-    // Create our implementation of effect_player, pass effect player frame buffer sizes
-    auto ep = bnb::oep::interfaces::effect_player::create(oep_width, oep_height);
-
-    // Create instance of offscreen_effect_player, pass effect_player, offscreen_render_target
-    // and dimensions of the processing frame (for the best performance it is better that they will coincide
-    // with camera frame dimensions)
-    auto oep = bnb::oep::interfaces::offscreen_effect_player::create(ep, ort, oep_width, oep_height);
-
-    // Make glfw_window and render_thread only for show result of OEP
-    // We want to share resources between context, we know that render_context is based on
-    // GLFW and returned context is GLFWwindow
-    window = std::make_shared<bnb::gl::glfw_window>("OEP Example", reinterpret_cast<GLFWwindow*>(rc->get_sharing_context()));
-    auto render_t = std::make_shared<bnb::render::renderer>();
-
-    oep->load_effect(<#Place the effect name here, e.g. effects/test_BG#>);
-
-    // Callback for received frame from the camera
-    auto camera_callback = [weak_oep = std::weak_ptr<decltype(oep)::element_type>(oep),
-        weak_render_t = std::weak_ptr<decltype(render_t)::element_type>(render_t)](bnb::full_image_t image) {
-        auto oep = weak_oep.lock();
-        auto render_t = weak_render_t.lock();
-        if (!oep || !render_t) {
-            return;
-        }
-        // Callback for received pixel buffer from the offscreen effect player
-        auto get_pixel_buffer_callback = [render_t](image_processing_result_sptr result) {
-            if (result != nullptr) {
-                // Callback for update data in render thread
-                auto render_callback = [render_t](std::optional<rendered_texture_t> texture_id) {
-                    if (texture_id.has_value()) {
-                        auto gl_texture = static_cast<GLuint>(reinterpret_cast<int64_t>(*texture_id));
-                        render_t->update_texture(gl_texture);
-                    }
-                };
-                // Get texture id from shared context and render it
-                result->get_texture(render_callback);
-            }
-        };
-
-        // Convert bnb full_image_t to OEP pixel_buffer
-        // This function just wraps data from one type to another, without doing any manipulations with
-        // the data itself, and without copying it
-        auto pb_image = bnb::camera_utils::full_image_to_pixel_buffer(image);
-        // Start image processing
-        oep->process_image_async(pb_image, bnb::oep::interfaces::rotation::deg0, true, get_pixel_buffer_callback, bnb::oep::interfaces::rotation::deg0);
-    };
-    // Create and run instance of camera, pass callback for frames
-    auto camera_ptr = bnb::create_camera_device(camera_callback, 0);
-
-    bnb::glfw_user_data ud(oep, render_t, camera_ptr, camera_callback);
-
-    glfwSetWindowUserPointer(window->get_window(), &ud);
-
-    // Demonstration of key press processing.
-    // The method demonstrates how to initiate application close by pressing the escape key and 
-    // how to start/stop the camera via camera destruction/construction.
-    auto key_func = [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        auto ud = static_cast<::bnb::glfw_user_data*>(glfwGetWindowUserPointer(window));
-        if (!ud) {
-            return;
-        }
-
-        if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-            if (auto renderer = ud->render_target()) {
-                renderer->stop_auto_rendering();
-            }
-            glfwSetWindowShouldClose(window, GLFW_TRUE);
-        } else if (key == GLFW_KEY_P && action == GLFW_PRESS) {
-            if (auto oep = ud->oep()) {
-                oep->stop();
-                ud->camera_ptr().reset();
-            }
-        } else if (key == GLFW_KEY_S && action == GLFW_PRESS) {
-            if (auto oep = ud->oep()) {
-                // If key pressed when oep unstopped
-                if (ud->camera_ptr().get() == nullptr) {
-                    ud->camera_ptr() = bnb::create_camera_device(ud->push_frame_cb(), 0);
-                    oep->resume();
+void save_pixel_buffer_to_file(std::string path, const bnb::player_api::pixel_buffer_sptr& pb)
+{
+    using t = bnb::player_api::pixel_buffer_format;
+    switch (pb->get_format()) {
+            case t::bpc8_rgb:
+            case t::bpc8_bgr:
+            case t::bpc8_rgba:
+            case t::bpc8_bgra:
+            case t::bpc8_argb:
+                stbi_write_png(
+                    (path + ".png").c_str(),
+                    pb->get_width(),
+                    pb->get_height(),
+                    pb->get_bytes_per_pixel(),
+                    pb->get_base_ptr(),
+                    pb->get_bytes_per_row()
+                );
+                break;
+            case t::nv12:
+                {
+                    int rgb_stride = pb->get_width() * 3;
+                    size_t size = rgb_stride * pb->get_height();
+                    uint8_t* raw_ptr = new uint8_t[size];
+                    libyuv::NV12ToRGB24(
+                        pb->get_base_ptr_of_plane(0),
+                        pb->get_bytes_per_row_of_plane(0),
+                        pb->get_base_ptr_of_plane(1),
+                        pb->get_bytes_per_row_of_plane(1),
+                        raw_ptr,
+                        rgb_stride,
+                        pb->get_width(),
+                        pb->get_height()
+                    );
+                    stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
+                    delete [] raw_ptr;
+                    stbi_write_png((path + ".raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height_of_plane(1), 1, pb->get_base_ptr(), pb->get_bytes_per_row());
                 }
-            }
+                break;
+            case t::i420:
+                {
+                    int rgb_stride = pb->get_width() * 3;
+                    size_t size = rgb_stride * pb->get_height();
+                    uint8_t* raw_ptr = new uint8_t[size];
+                    libyuv::I420ToRGB24(
+                        pb->get_base_ptr_of_plane(0),
+                        pb->get_bytes_per_row_of_plane(0),
+                        pb->get_base_ptr_of_plane(1),
+                        pb->get_bytes_per_row_of_plane(1),
+                        pb->get_base_ptr_of_plane(2),
+                        pb->get_bytes_per_row_of_plane(2),
+                        raw_ptr,
+                        rgb_stride,
+                        pb->get_width(),
+                        pb->get_height()
+                    );
+                    stbi_write_png((path + ".png").c_str(), pb->get_width(), pb->get_height(), 3, raw_ptr, rgb_stride);
+                    delete [] raw_ptr;
+                    stbi_write_png((path + "raw.png").c_str(), pb->get_bytes_per_row(), pb->get_height() + pb->get_height_of_plane(1), 1, pb->get_base_ptr(), pb->get_bytes_per_row());
+                }
+                break;
         }
-    };
-    glfwSetKeyCallback(window->get_window(), key_func);
-    window->set_resize_callback([weak_window = std::weak_ptr<decltype(window)::element_type>(window)](int32_t w, int32_t h, int32_t w_glfw_buffer, int32_t h_glfw_buffer) {
-        auto window = weak_window.lock();
-        if (!window) {
-            return;
-        }
-        auto ud = static_cast<::bnb::glfw_user_data*>(glfwGetWindowUserPointer(window->get_window()));
-        if (!ud) {
-            return;
-        }
+}
 
-        // When minimizing a window on windows, glfw passes zero dimensions. Zero dimensions cannot be passed in OEP
-        if (w <= 0 || h <= 0 || w_glfw_buffer <= 0 || h_glfw_buffer <= 0) {
-            return;
+void run_async(std::function<void()> f)
+{
+    auto thread = std::thread(f);
+    thread.detach();
+}
+
+class glfw_renderer
+    : public bnb::player_api::interfaces::render_delegate
+{
+public:
+    glfw_renderer()
+    {
+        m_window = std::make_shared<bnb::example::glfw_window>("Player API Example");
+        m_gui = std::make_shared<bnb::example::graphical_user_interface>(m_window);
+        m_window->make_context_current();
+        started();
+        finished(0);
+        m_window->make_nothing_current();
+    }
+
+    ~glfw_renderer() = default;
+
+    std::shared_ptr<bnb::example::glfw_window> get_window()
+    {
+        return m_window;
+    }
+
+    std::shared_ptr<bnb::example::graphical_user_interface> get_gui()
+    {
+        return m_gui;
+    }
+
+    void activate() override
+    {
+        m_window->make_context_current();
+    }
+
+    void started() override
+    {
+        glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+    }
+
+    void finished(int64_t frame_number) override
+    {
+        if (frame_number != -1) {
+            m_gui->draw();
+            m_window->swap_buffers();
         }
-        if (auto render_t = ud->render_target(); render_t.get()) {
-            render_t->surface_changed(w_glfw_buffer, h_glfw_buffer);
+        m_window->make_nothing_current();
+    }
+
+private:
+    std::shared_ptr<bnb::example::glfw_window> m_window;
+    std::shared_ptr<bnb::example::graphical_user_interface> m_gui;
+}; // render_process
+
+int main()
+{
+    // The usage of this class is necessary in order to properly initialize and deinitialize Banuba SDK
+    bnb::utility utility(get_resources_folders(), BNB_CLIENT_TOKEN);
+
+    auto renderer = std::make_shared<glfw_renderer>();
+
+    auto render_target = bnb::player_api::opengl_render_target::create();
+    auto player = bnb::player_api::player::create(30, render_target, renderer);
+    auto input = bnb::player_api::live_input::create();
+    auto window_output = bnb::player_api::window_output::create();
+
+    auto frame_output = bnb::player_api::opengl_frame_output::create([player](const bnb::player_api::pixel_buffer_sptr& pb) {
+        std::string file_path = std::string("/Users/petrkulbaka/work/cpp_player_api/build/_/") + bnb::player_api::pixel_buffer_format_to_str(pb->get_format()).data();
+        run_async([file_path, pb]() {
+            save_pixel_buffer_to_file(file_path, pb);
+        });
+    }, bnb::player_api::pixel_buffer_format::i420, false);
+    frame_output->set_yuv_format_params(bnb::color_std::bt709, bnb::color_range::full);
+
+    player->use(input).use(window_output).use(frame_output);
+    player->load_async("effects/DebugFRX");
+
+    auto camera = bnb::create_camera_device([input](bnb::full_image_t image) {
+        auto pb = bnb::example::full_image_to_pixel_buffer(image);
+        input->push(pb);
+    }, 0);
+
+    renderer->get_gui()->add_output_control(window_output, "Screen output");
+
+    renderer->get_window()->set_glfw_events_callback([renderer, window_output, frame_output](const bnb::example::glfw_event& e) {
+        if (e.type == bnb::example::glfw_event_t::framebuffer_resize) {
+            window_output->set_frame_layout(0, 0, e.size_width, e.size_height);
+        } else if (e.type == bnb::example::glfw_event_t::key_press && e.keyboard_key == GLFW_KEY_F1) {
+            renderer->get_gui()->switch_show_hide_gui();
+        } else if (e.type == bnb::example::glfw_event_t::key_press && e.keyboard_key == GLFW_KEY_S) {
+            frame_output->once();
         }
-        if (auto oep = ud->oep(); oep.get()) {
-            oep->surface_changed(w, h);
-        }
+        renderer->get_gui()->on_glfw_event(e);
     });
-    render_t->start_auto_rendering(window->get_window());
-    window->show(oep_width, oep_height);
-    window->run_main_loop();
+
+    renderer->get_window()->show_window_and_run_events_loop();
 
     return 0;
 }

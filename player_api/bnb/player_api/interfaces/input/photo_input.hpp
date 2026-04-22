@@ -1,0 +1,19 @@
+#pragma once
+
+#include <bnb/player_api/interfaces/input.hpp>
+#include <bnb/player_api/interfaces/input/pixels_provider.hpp>
+
+namespace bnb::player_api
+{
+
+    class BNB_EXPORT photo_input
+        : public virtual interfaces::input
+        , public virtual pixels_provider
+    {
+    public:
+        static std::shared_ptr<photo_input> create();
+
+        virtual void load(const std::string& path) = 0;
+    }; // class photo_input
+
+} // namespace bnb::player_api
