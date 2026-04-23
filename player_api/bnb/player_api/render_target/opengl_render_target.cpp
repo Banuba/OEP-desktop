@@ -42,8 +42,7 @@ namespace
         {
             // This particular example relies on OpenGL, so it should be explicitly requested
             bnb::interfaces::effect_player::set_render_backend(::bnb::interfaces::render_backend_type::opengl);
-
-            bnb::utility::load_gl_functions();
+            
         }
 
         ~opengl_render_target_impl() = default;

@@ -2,6 +2,7 @@
 
 #include <bnb/player_api/opengl/opengl.hpp>
 #include <string>
+#include <stdexcept>
 
 namespace bnb::player_api
 {

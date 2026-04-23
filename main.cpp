@@ -150,6 +150,7 @@ public:
     void activate() override
     {
         m_window->make_context_current();
+        bnb::utility::load_gl_functions();
     }
 
     void started() override

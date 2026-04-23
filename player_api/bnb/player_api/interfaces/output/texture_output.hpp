@@ -1,6 +1,7 @@
 #pragma once
 
 #include <bnb/player_api/interfaces/output.hpp>
+#include <functional>
 
 namespace bnb::player_api
 {
