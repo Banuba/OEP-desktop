@@ -1,5 +1,7 @@
 #include "renderer.hpp"
 
+#include <chrono>
+
 using namespace bnb::render;
 
 /* renderer::~renderer */
